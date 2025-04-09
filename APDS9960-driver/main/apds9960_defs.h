@@ -23,16 +23,58 @@
  #define TEMPERATURE_MIN           -40.0f                     /**< chip min operating temperature */
  #define TEMPERATURE_MAX           85.0f                      /**< chip max operating temperature */
  #define DRIVER_VERSION            1000                       /**< driver version */
- /**
-  * @brief frequency to use for i2c master
-  */
- #define I2C_MASTER_FREQ_HZ        400000                      /**< i2c master clock frequency */
+
+/**
+ * @brief frequency to use for i2c master
+ */
+#define I2C_MASTER_FREQ_HZ        400000                      /**< i2c master clock frequency */
   
 
- /**
-  * @brief i2c address definition
-  */
- #define APDS9960_ADDRESS        0x39        /**< i2c address */
+/**
+ * @brief i2c address definition
+ */
+#define APDS9960_ADDRESS        0x39        /**< i2c address */
+
+
+/**
+ * @brief register address definition
+ * 
+ */
+ typedef enum
+{
+    APDS9960_REG_ENABLE    =    0x80,       /**< enable states and interrupts register */
+    APDS9960_REG_ATIME     =    0x81,      /**< adc integration time register */
+    APDS9960_REG_WTIME     =    0x83,      /**< wait time register */
+    APDS9960_REG_AILTL     =    0x84,        /**< als interrupt low threshold low byte register */
+    APDS9960_REG_AILTH     =    0x85,       /**< als interrupt low threshold high byte register */
+    APDS9960_REG_AIHTL     =    0x86,       /**< als interrupt high threshold low byte register */
+    APDS9960_REG_AIHTH     =    0x87,       /**< als interrupt high threshold high byte register */
+    APDS9960_REG_PERS      =    0x8C,       /**< interrupt persistence filters register */
+    APDS9960_REG_CONFIG1   =    0x8D,       /**< configuration register one register */
+    APDS9960_REG_CONTROL   =    0x8F,       /**< gain control register */
+    APDS9960_REG_CONFIG2   =    0x90,       /**< configuration register two register */
+    APDS9960_REG_ID        =    0x92,       /**< device id register */
+    APDS9960_REG_STATUS    =    0x93,       /**< device status register */
+    APDS9960_REG_CDATAL    =    0x94,       /**< low byte of clear channel data register */
+    APDS9960_REG_CDATAH    =    0x95,       /**< high byte of clear channel data register */
+    APDS9960_REG_RDATAL    =    0x96,       /**< low byte of red channel data register */
+    APDS9960_REG_RDATAH    =    0x97,       /**< high byte of red channel data register */
+    APDS9960_REG_GDATAL    =    0x98,       /**< low byte of green channel data register */
+    APDS9960_REG_GDATAH    =    0x99,       /**< high byte of green channel data register */
+    APDS9960_REG_BDATAL    =    0x9A,       /**< low byte of blue channel data register */
+    APDS9960_REG_BDATAH    =    0x9B,       /**< high byte of blue channel data register */
+    APDS9960_REG_PDATA     =    0x9C,       /**< low byte of proximity data register */
+    APDS9960_REG_CONFIG3   =    0x9F,       /**< configuration register three register */
+    APDS9960_REG_IFORCE    =    0xE4,       /**< force interrupt register */
+    APDS9960_REG_PICLEAR   =    0xE5,       /**< proximity interrupt clear register */
+    APDS9960_REG_CICLEAR   =    0xE6,       /**< als clear channel interrupt clear register */
+    APDS9960_REG_AICLEAR   =    0xE7        /**< all non-gesture interrupts clear register */
+
+} APDS9960_reg_t;
+
+
+
+
  
  /**
   * @brief apds9960 bool enumeration definition
@@ -170,41 +212,8 @@
   */
  #define DRIVER_APDS9960_LINK_RECEIVE_CALLBACK(HANDLE, FUC)  (HANDLE)->receive_callback = FUC
 
-/**
-  * @brief chip register definition
-  */
 
-typedef enum
-{
-    APDS9960_REG_ENABLE    =    0x80,       /**< enable states and interrupts register */
-    APDS9960_REG_ATIME     =    0x81,      /**< adc integration time register */
-    APDS9960_REG_WTIME     =    0x83,      /**< wait time register */
-    APDS9960_REG_AILTL     =    0x84,        /**< als interrupt low threshold low byte register */
-    APDS9960_REG_AILTH     =    0x85,       /**< als interrupt low threshold high byte register */
-    APDS9960_REG_AIHTL     =    0x86,       /**< als interrupt high threshold low byte register */
-    APDS9960_REG_AIHTH     =    0x87,       /**< als interrupt high threshold high byte register */
-    APDS9960_REG_PERS      =    0x8C,       /**< interrupt persistence filters register */
-    APDS9960_REG_CONFIG1   =    0x8D,       /**< configuration register one register */
-    APDS9960_REG_CONTROL   =    0x8F,       /**< gain control register */
-    APDS9960_REG_CONFIG2   =    0x90,       /**< configuration register two register */
-    APDS9960_REG_ID        =    0x92,       /**< device id register */
-    APDS9960_REG_STATUS    =    0x93,       /**< device status register */
-    APDS9960_REG_CDATAL    =    0x94,       /**< low byte of clear channel data register */
-    APDS9960_REG_CDATAH    =    0x95,       /**< high byte of clear channel data register */
-    APDS9960_REG_RDATAL    =    0x96,       /**< low byte of red channel data register */
-    APDS9960_REG_RDATAH    =    0x97,       /**< high byte of red channel data register */
-    APDS9960_REG_GDATAL    =    0x98,       /**< low byte of green channel data register */
-    APDS9960_REG_GDATAH    =    0x99,       /**< high byte of green channel data register */
-    APDS9960_REG_BDATAL    =    0x9A,       /**< low byte of blue channel data register */
-    APDS9960_REG_BDATAH    =    0x9B,       /**< high byte of blue channel data register */
-    APDS9960_REG_PDATA     =    0x9C,       /**< low byte of proximity data register */
-    APDS9960_REG_CONFIG3   =    0x9F,       /**< configuration register three register */
-    APDS9960_REG_IFORCE    =    0xE4,       /**< force interrupt register */
-    APDS9960_REG_PICLEAR   =    0xE5,       /**< proximity interrupt clear register */
-    APDS9960_REG_CICLEAR   =    0xE6,       /**< als clear channel interrupt clear register */
-    APDS9960_REG_AICLEAR   =    0xE7        /**< all non-gesture interrupts clear register */
 
-} APDS9960_reg_t;
 
 
 
