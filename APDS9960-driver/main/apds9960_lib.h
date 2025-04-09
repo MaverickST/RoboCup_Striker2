@@ -10,8 +10,8 @@
  * \copyright   Unlicensed
  */
 
- #ifndef __apds9960_H__
- #define __apds9960_H__
+ #ifndef __APDS9960_H__
+ #define __APDS9960_H__
  
  #include <stdint.h>
  #include <stdlib.h>

@@ -1,3 +1,15 @@
+/**
+ * \file        apds9960_lib.c
+ * \brief       APDS9960 library
+ * \details
+ * 
+ * 
+ * \author      Striker2
+ * \version     0.0.1
+ * \date        02/04/20245
+ * \copyright   Unlicensed
+ */
+
 #include "apds9960_lib.h"
 #include <stdlib.h>
 
