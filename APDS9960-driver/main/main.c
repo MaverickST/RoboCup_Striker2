@@ -1,69 +1,46 @@
 #include <stdio.h>
-
 #include "apds9960_lib.h"
 
-#define I2C_MASTER_SCL_GPIO 4       /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 5       /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_GPIO 7       /*!< GPIO number for I2C master clock */
+#define I2C_MASTER_SDA_GPIO 6       /*!< GPIO number for I2C master data  */
 #define I2C_MASTER_NUM 1            /*!< I2C port number for master dev */
 
+// Configuración del sensor
+#define APDS9960_GAIN 16               /*!< Ganancia (1, 4, 16, o 64) */
+#define APDS9960_INTEGRATION_TIME 350  /*!< Tiempo de integración en ms (2.78 ms a 712 ms) */
 
+/**
+ * @brief Main application entry point.
+ * 
+ * This function initializes the APDS9960 sensor, configures it with default
+ * gain and integration time, and continuously reads and prints RGBC values.
+ */
 void app_main(void)
 {
+    printf("APDS9960 RGB Color Sensor Example\n");
+    printf("Initializing...\n");
+
+    // Declarar el handle del sensor
     APDS9960_t gAPDS9960;
 
-    uint8_t res;
-    uint32_t i, times;
+    // Inicializar el sensor
+    APDS9960_Init(&gAPDS9960, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO);
 
-    times = 3;
-    res = apds9960_basic_init();
-    if (res != 0)
-    {
-        return 1;
-    }
+    // Configurar el sensor con valores predeterminados
+    APDS9960_Configure(&gAPDS9960, APDS9960_GAIN, APDS9960_INTEGRATION_TIME);
+    printf("APDS9960 sensor configured with gain %dx and integration time %d ms\n", APDS9960_GAIN, APDS9960_INTEGRATION_TIME);
 
-    /* 1000 ms */
-    apds9960_interface_delay_ms(1000);
-
-    for (i = 0; i < times; i++)
-    {
-        uint8_t proximity;
+    // Bucle principal para leer datos RGBC
+    while (1) {
         uint16_t red, green, blue, clear;
 
-        /* read rgbc */
-        res = apds9960_basic_read_rgbc((uint16_t *)&red, (uint16_t *)&green, (uint16_t *)&blue, (uint16_t *)&clear);
-        if (res != 0)
-        {
-            apds9960_interface_debug_print("apds9960: read rgbc failed.\n");
-            (void)apds9960_basic_deinit();
+        // Leer los valores RGBC del sensor
+        APDS9960_Read_Rgbc(&gAPDS9960, &red, &green, &blue, &clear);
 
-            return 1;
-        }
+        // Imprimir los valores leídos
+        printf("Red: %d, Green: %d, Blue: %d, Clear: %d\n", red, green, blue, clear);
 
-        /* read proximity */
-        res = apds9960_basic_read_proximity((uint8_t *)&proximity);
-        if (res != 0)
-        {
-            apds9960_interface_debug_print("apds9960: read proximity failed.\n");
-            (void)apds9960_basic_deinit();
-
-            return 1;
-        }
-
-        /* output */
-        apds9960_interface_debug_print("%d/%d.\n", i + 1, times);
-        apds9960_interface_debug_print("apds9960: red is 0x%04X.\n", red);
-        apds9960_interface_debug_print("apds9960: green is 0x%04X.\n", green);
-        apds9960_interface_debug_print("apds9960: blue is 0x%04X.\n", blue);
-        apds9960_interface_debug_print("apds9960: clear is 0x%04X.\n", clear);
-        apds9960_interface_debug_print("apds9960: proximity is 0x%02X.\n", proximity);
-
-        /* 1000 ms */
-        apds9960_interface_delay_ms(1000);
+        // Esperar 1 segundo antes de la siguiente lectura
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
-
-    /* deinit */
-    (void)apds9960_basic_deinit();
-
-    return 0;
 }
-
