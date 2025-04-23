@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/CMakeFiles/bootloader
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/CMakeFiles/bootloader.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/CMakeFiles/bootloader-complete.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+D:/Universidad/Carpetas_Materias/Embebidos_Avanzados/RoboCup_Striker2/APDS9960-driver/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

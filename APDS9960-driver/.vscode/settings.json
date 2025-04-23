@@ -1,0 +1,34 @@
+{
+    "C_Cpp.intelliSenseEngine": "default",
+    "idf.espIdfPathWin": "d:\\Universidad\\esp\\v5.4\\esp-idf",
+    "idf.toolsPathWin": "d:\\Universidad\\.espressif",
+    "idf.pythonInstallPath": "d:\\Universidad\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.customExtraVars": {
+        "IDF_TARGET": "esp32s3"
+    },
+    "idf.flashType": "UART",
+    "idf.portWin": "COM21",
+    "files.associations": {
+        "array": "cpp",
+        "chrono": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "iterator": "cpp",
+        "string_view": "cpp",
+        "format": "cpp",
+        "span": "cpp",
+        "future": "cpp",
+        "system_error": "cpp",
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "istream": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "random": "c"
+    }
+}
