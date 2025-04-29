@@ -59,7 +59,9 @@ bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
 esp_timer_handle_t gOneshotTimer;
-uint8_t cnt_cali; ///< Counter for the calibration process
+uint8_t cnt_cali; ///< Counter for the calibration process4
+
+vl53l1x_t gvl53l1x;
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -149,7 +151,32 @@ void app_main(void)
 
     ///< ---------------------- VL53L1X ------------------
     // KEVIN'S CODE
+
     // Initialize the VL53L1X sensor and set the parameters
+    if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, 0)) { ///< Initialize the VL53L1X sensor
+        ESP_LOGE(TAG_I2C, "No se pudo inicializar el sensor");
+        return;
+    } 
+    uint16_t offset, xtalk;
+    
+    // Place a target, 17 % gray, at 140 mm from the sensor
+    VL53L1X_calibrateOffset(&gvl53l1x,140,&offset);
+    ESP_LOGI(TAG_I2C,"Offset: %d",offset);
+
+    VL53L1X_calibrateXTalk(&gvl53l1x,140,&xtalk);
+    ESP_LOGI(TAG_I2C,"Xtalk: %d",xtalk);
+    
+    //Flag to check if the sensor is calibrated
+    gSys.is_vl53l1x_calibrated = true;
+    
+    VL53L1X_setDistanceMode(&gvl53l1x,Short);
+    VL53L1X_setMeasurementTimingBudget(&gvl53l1x,20000);
+    VL53L1X_startContinuous(&gvl53l1x,30);
+    while(1){
+        ESP_LOGI(TAG_VL53L1X, "Distance %dmm",VL53L1X_readDistance(&gvl53l1x,1));
+    }
+
+    
 
     ///< Create a task to manage the VL53L1X sensor
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 1*1024, NULL, 1, &gSys.task_handle_vl53l1x);
