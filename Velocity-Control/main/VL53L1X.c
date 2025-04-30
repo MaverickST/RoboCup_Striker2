@@ -3,7 +3,7 @@
 void setAddress(vl53l1x_t *vl53l1x, uint8_t new_addr)
 {
   new_addr = new_addr & 0x7F;
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,I2C_SLAVE__DEVICE_ADDRESS, &new_addr, 1);
+  i2c_write_reg(&vl53l1x->i2c_handle,I2C_SLAVE__DEVICE_ADDRESS, &new_addr, 1);
   vl53l1x->i2c_handle.addr = new_addr;
 }
 
@@ -19,100 +19,100 @@ bool VL53L1X_init(vl53l1x_t *vl53l1x, i2c_port_t i2c_num, uint8_t scl, uint8_t s
     uint8_t data[2];
 
     // Check model ID register and compare with values specified in datasheet
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,(IDENTIFICATION__MODEL_ID),data,2); //Check Model register 
+    i2c_read_reg(&vl53l1x->i2c_handle,(IDENTIFICATION__MODEL_ID),data,2); //Check Model register 
     if (VL53L1X_mergeData(data) != 0xEACC) { return false; }
     ESP_LOGI(TAG_VL53L1X, "IDENTIFICATION__MODEL_ID: %x",VL53L1X_mergeData(data));
 
     // VL53L1_software_reset() begin
     data[0] = 0x0;
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SOFT_RESET,data,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SOFT_RESET,data,1);
     vTaskDelay(1/portTICK_PERIOD_MS);
 
     data[0] = 0x1;
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SOFT_RESET,data,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SOFT_RESET,data,1);
     ESP_LOGI(TAG_VL53L1X, "SOFT RESERT complete");
 
     vTaskDelay(1/portTICK_PERIOD_MS);
 
     VL53L1X_startTimeout();
     // check last_status in case we still get a NACK to try to deal with it correctly
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,FIRMWARE__SYSTEM_STATUS,data,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,FIRMWARE__SYSTEM_STATUS,data,1);
     while((data[0] & 0x01) == 0){
       if(VL53L1X_checkTimeoutExpired()){
         did_time_out = true;
         return false;
       }
       ESP_LOGI(TAG_VL53L1X,"FIRMWARE STATUS are 0");
-      i2c_read_reg16bits(&vl53l1x->i2c_handle,FIRMWARE__SYSTEM_STATUS,data,1);
+      i2c_read_reg(&vl53l1x->i2c_handle,FIRMWARE__SYSTEM_STATUS,data,1);
     }
 
     // sensor uses 1V8 mode for I/O by default; switch to 2V8 mode if necessary
     if(io_2v8){
       ESP_LOGI(TAG_VL53L1X,"2V8 mode");
-      i2c_read_reg16bits(&vl53l1x->i2c_handle,PAD_I2C_HV__EXTSUP_CONFIG,data,1);
+      i2c_read_reg(&vl53l1x->i2c_handle,PAD_I2C_HV__EXTSUP_CONFIG,data,1);
       data[0] = data[0] | 0x01;
-      i2c_write_reg16bits(&vl53l1x->i2c_handle,PAD_I2C_HV__EXTSUP_CONFIG,data,1);
+      i2c_write_reg(&vl53l1x->i2c_handle,PAD_I2C_HV__EXTSUP_CONFIG,data,1);
     }
 
     // store oscillator info for later use
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,OSC_MEASURED__FAST_OSC__FREQUENCY,data,2);
+    i2c_read_reg(&vl53l1x->i2c_handle,OSC_MEASURED__FAST_OSC__FREQUENCY,data,2);
     vl53l1x->fast_osc_frq = VL53L1X_mergeData(data);
 
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RESULT__OSC_CALIBRATE_VAL,data,2);
+    i2c_read_reg(&vl53l1x->i2c_handle,RESULT__OSC_CALIBRATE_VAL,data,2);
     vl53l1x->osc_calibrate_val = VL53L1X_mergeData(data);
 
     //ESP_LOGI(TAG_VL53L1X,"FO_frq: %x,%x",vl53l1x->fast_osc_frq,vl53l1x->osc_calibrate_val);
 
     //todo Static Config
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,DSS_CONFIG__TARGET_TOTAL_RATE_MCPS,TARGET_RATE,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,DSS_CONFIG__TARGET_TOTAL_RATE_MCPS,TARGET_RATE,2);
     
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,GPIO__TIO_HV_STATUS,GPIO__TIO_HV_STATUS_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,GPIO__TIO_HV_STATUS,GPIO__TIO_HV_STATUS_VALUE,1);
     
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SIGMA_ESTIMATOR__EFFECTIVE_PULSE_WIDTH_NS,SIGMA_ESTIMATOR__EFFECTIVE_PULSE_WIDTH_NS_VALUE,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SIGMA_ESTIMATOR__EFFECTIVE_AMBIENT_WIDTH_NS,SIGMA_ESTIMATOR__EFFECTIVE_AMBIENT_WIDTH_NS_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SIGMA_ESTIMATOR__EFFECTIVE_PULSE_WIDTH_NS,SIGMA_ESTIMATOR__EFFECTIVE_PULSE_WIDTH_NS_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SIGMA_ESTIMATOR__EFFECTIVE_AMBIENT_WIDTH_NS,SIGMA_ESTIMATOR__EFFECTIVE_AMBIENT_WIDTH_NS_VALUE,1);
     
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__CROSSTALK_COMPENSATION_VALID_HEIGHT_MM,ALGO__CROSSTALK_COMPENSATION_VALID_HEIGHT_MM_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,ALGO__CROSSTALK_COMPENSATION_VALID_HEIGHT_MM,ALGO__CROSSTALK_COMPENSATION_VALID_HEIGHT_MM_VALUE,1);
     
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__RANGE_IGNORE_VALID_HEIGHT_MM,ALGO__RANGE_IGNORE_VALID_HEIGHT_MM_VALUE,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__RANGE_MIN_CLIP,ALGO__RANGE_MIN_CLIP_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,ALGO__RANGE_IGNORE_VALID_HEIGHT_MM,ALGO__RANGE_IGNORE_VALID_HEIGHT_MM_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,ALGO__RANGE_MIN_CLIP,ALGO__RANGE_MIN_CLIP_VALUE,1);
 
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__CONSISTENCY_CHECK__TOLERANCE,ALGO__CONSISTENCY_CHECK__TOLERANCE_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,ALGO__CONSISTENCY_CHECK__TOLERANCE,ALGO__CONSISTENCY_CHECK__TOLERANCE_VALUE,1);
     
     //todo General Config
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__THRESH_RATE_HIGH,SYSTEM__THRESH_RATE_HIGH_VALUE,2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__THRESH_RATE_LOW,SYSTEM__THRESH_RATE_LOW_VALUE,2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,DSS_CONFIG__APERTURE_ATTENUATION,DSS_CONFIG__APERTURE_ATTENUATION_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__THRESH_RATE_HIGH,SYSTEM__THRESH_RATE_HIGH_VALUE,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__THRESH_RATE_LOW,SYSTEM__THRESH_RATE_LOW_VALUE,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,DSS_CONFIG__APERTURE_ATTENUATION,DSS_CONFIG__APERTURE_ATTENUATION_VALUE,1);
 
     //todo Timing Config
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__SIGMA_THRESH,RANGE_CONFIG__SIGMA_THRESH_VALUE,2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS,RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS_VALUE,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__SIGMA_THRESH,RANGE_CONFIG__SIGMA_THRESH_VALUE,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS,RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS_VALUE,2);
     
-    // i2c_read_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS,data,2);
+    // i2c_read_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS,data,2);
     // ESP_LOGI(TAG_VL53L1X,"RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS: %d",VL53L1X_mergeData(data));
 
     //todo Dynamic Config
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__GROUPED_PARAMETER_HOLD_0,SYSTEM__GROUPED_PARAMETER_HOLD_0_VALUE,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__GROUPED_PARAMETER_HOLD_1,SYSTEM__GROUPED_PARAMETER_HOLD_1_VALUE,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SD_CONFIG__QUANTIFIER,SD_CONFIG__QUANTIFIER_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__GROUPED_PARAMETER_HOLD_0,SYSTEM__GROUPED_PARAMETER_HOLD_0_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__GROUPED_PARAMETER_HOLD_1,SYSTEM__GROUPED_PARAMETER_HOLD_1_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SD_CONFIG__QUANTIFIER,SD_CONFIG__QUANTIFIER_VALUE,1);
 
     ///-------------
 
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__GROUPED_PARAMETER_HOLD,SYSTEM__GROUPED_PARAMETER_HOLD_VALUE,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__SEED_CONFIG,SYSTEM__SEED_CONFIG_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__GROUPED_PARAMETER_HOLD,SYSTEM__GROUPED_PARAMETER_HOLD_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__SEED_CONFIG,SYSTEM__SEED_CONFIG_VALUE,1);
 
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__SEQUENCE_CONFIG,SYSTEM__SEQUENCE_CONFIG_VALUE,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT,DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT_VALUE,2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,DSS_CONFIG__ROI_MODE_CONTROL,DSS_CONFIG__ROI_MODE_CONTROL_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__SEQUENCE_CONFIG,SYSTEM__SEQUENCE_CONFIG_VALUE,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT,DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT_VALUE,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,DSS_CONFIG__ROI_MODE_CONTROL,DSS_CONFIG__ROI_MODE_CONTROL_VALUE,1);
 
     VL53L1X_setDistanceMode(vl53l1x,Long);
     VL53L1X_setMeasurementTimingBudget(vl53l1x,50000);
 
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,MM_CONFIG__OUTER_OFFSET_MM,data,2);
+    i2c_read_reg(&vl53l1x->i2c_handle,MM_CONFIG__OUTER_OFFSET_MM,data,2);
     uint8_t write_buff[2];
     VL53L1X_divergeData(write_buff,VL53L1X_mergeData(data)*4,2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,write_buff,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,write_buff,2);
     
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,data,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,data,1);
     ESP_LOGE(TAG_VL53L1X,"STATUS INIT: %d",data[0]);
     return 1;
 }
@@ -148,15 +148,15 @@ bool VL53L1X_setDistanceMode(vl53l1x_t* vl53l1x, distanceMode_t distance_mode){
     break;
     }
 //todo Timing Config
-i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data_range,1);
-i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_B,&data_range[1],1);
-i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VALID_PHASE_HIGH,&data_range[2],1);
+i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data_range,1);
+i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_B,&data_range[1],1);
+i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VALID_PHASE_HIGH,&data_range[2],1);
 
 //todo Dynamic Config
-i2c_write_reg16bits(&vl53l1x->i2c_handle,SD_CONFIG__WOI_SD0,data_range,1);
-i2c_write_reg16bits(&vl53l1x->i2c_handle,SD_CONFIG__WOI_SD1,&data_range[1],1);
-i2c_write_reg16bits(&vl53l1x->i2c_handle,SD_CONFIG__INITIAL_PHASE_SD0,&data_range[3],1);
-i2c_write_reg16bits(&vl53l1x->i2c_handle,SD_CONFIG__INITIAL_PHASE_SD1,&data_range[3],1);
+i2c_write_reg(&vl53l1x->i2c_handle,SD_CONFIG__WOI_SD0,data_range,1);
+i2c_write_reg(&vl53l1x->i2c_handle,SD_CONFIG__WOI_SD1,&data_range[1],1);
+i2c_write_reg(&vl53l1x->i2c_handle,SD_CONFIG__INITIAL_PHASE_SD0,&data_range[3],1);
+i2c_write_reg(&vl53l1x->i2c_handle,SD_CONFIG__INITIAL_PHASE_SD1,&data_range[3],1);
 
 vl53l1x->distance_mode = distance_mode;
 
@@ -167,10 +167,10 @@ return 1;
 uint32_t VL53L1X_getMeasurementTimingBudget(vl53l1x_t* vl53l1x){
 
     uint8_t data[2];
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data,1);
     uint32_t macro_period_us = VL53L1X_calcMacroPeriod(vl53l1x,data[0]);
 
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data,2);
+    i2c_read_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data,2);
     uint32_t range_config_timeout_us = VL53L1X_timeoutMclksToMicroseconds(VL53L1X_decodeTimeout(VL53L1X_mergeData(data)),macro_period_us);
 
     return  2 * range_config_timeout_us + TIMING_GUARD;
@@ -187,7 +187,7 @@ bool VL53L1X_setMeasurementTimingBudget(vl53l1x_t* vl53l1x,uint32_t budget_us){
     // VL53L1_calc_timeout_register_values() begin
     uint8_t data[2];
     uint32_t macro_period_us;
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_A,data,1);
 
     macro_period_us = VL53L1X_calcMacroPeriod(vl53l1x,data[0]);
 
@@ -195,24 +195,24 @@ bool VL53L1X_setMeasurementTimingBudget(vl53l1x_t* vl53l1x,uint32_t budget_us){
     if (phasecal_timeout_mclks > 0xFF) { phasecal_timeout_mclks = 0xFF; }
     uint8_t phasecal_timeout_mclks8 = (uint8_t)phasecal_timeout_mclks;
 
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,PHASECAL_CONFIG__TIMEOUT_MACROP,&phasecal_timeout_mclks8,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,PHASECAL_CONFIG__TIMEOUT_MACROP,&phasecal_timeout_mclks8,1);
 
     uint8_t write_buff[2];
 
     VL53L1X_encodeTimeout(VL53L1X_timeoutMicrosecondsToMclks(1,macro_period_us),write_buff);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,MM_CONFIG__TIMEOUT_MACROP_A,write_buff,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,MM_CONFIG__TIMEOUT_MACROP_A,write_buff,2);
 
     VL53L1X_encodeTimeout(VL53L1X_timeoutMicrosecondsToMclks(range_config_timeout_us,macro_period_us),write_buff);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__TIMEOUT_MACROP_A,write_buff,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__TIMEOUT_MACROP_A,write_buff,2);
 
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_B,&data[1],1);
+    i2c_read_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__VCSEL_PERIOD_B,&data[1],1);
     macro_period_us = VL53L1X_calcMacroPeriod(vl53l1x,data[1]);
 
     VL53L1X_encodeTimeout(VL53L1X_timeoutMicrosecondsToMclks(1,macro_period_us),write_buff);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,MM_CONFIG__TIMEOUT_MACROP_B,write_buff,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,MM_CONFIG__TIMEOUT_MACROP_B,write_buff,2);
 
     VL53L1X_encodeTimeout(VL53L1X_timeoutMicrosecondsToMclks(range_config_timeout_us,macro_period_us),write_buff);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,RANGE_CONFIG__TIMEOUT_MACROP_B,write_buff,2);
+    i2c_write_reg(&vl53l1x->i2c_handle,RANGE_CONFIG__TIMEOUT_MACROP_B,write_buff,2);
 
     return true;
 
@@ -274,40 +274,40 @@ void VL53L1X_startContinuous(vl53l1x_t * vl53l1x, uint32_t period_ms){
     uint8_t write_buff[4];
     uint32_t value = period_ms * (uint32_t)vl53l1x->osc_calibrate_val;
     VL53L1X_divergeData(write_buff,value,4);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__INTERMEASUREMENT_PERIOD,write_buff,4);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__INTERMEASUREMENT_PERIOD,write_buff,4);
     //ESP_LOGE(TAG_VL53L1X,"STATUS SYSTEM__INTERMEASUREMENT_PERIOD_Value: %lx",value);
-    //i2c_read_reg16bits(&vl53l1x->i2c_handle,SYSTEM__INTERMEASUREMENT_PERIOD,write_buff,4);
+    //i2c_read_reg(&vl53l1x->i2c_handle,SYSTEM__INTERMEASUREMENT_PERIOD,write_buff,4);
     //ESP_LOGE(TAG_VL53L1X,"STATUS SYSTEM__INTERMEASUREMENT_PERIOD: %x, %x, %x %x",write_buff[0],write_buff[1],write_buff[2],write_buff[3]);
 
     write_buff[0] = 0x01;
     write_buff[1] = 0x40;
 
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__INTERRUPT_CLEAR,write_buff,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__MODE_START,&write_buff[1],1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__INTERRUPT_CLEAR,write_buff,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__MODE_START,&write_buff[1],1);
     //uint8_t status;
-    //i2c_read_reg16bits(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,&status,1);
+    //i2c_read_reg(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,&status,1);
     //ESP_LOGE(TAG_VL53L1X,"STATUS STconti: %d",status);
 
 }
 
 void VL53L1X_stopContinuos(vl53l1x_t *vl53l1x){
   uint8_t buff[] = {0x80,0x00}; 
-  i2c_write_reg16bits(&vl53l1x->i2c_handle, SYSTEM__MODE_START,buff,1);  // mode_range__abort
+  i2c_write_reg(&vl53l1x->i2c_handle, SYSTEM__MODE_START,buff,1);  // mode_range__abort
 
   calibrated = false;
 
   // restore vhv configs
   if (saved_vhv_init != 0)
   {
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,VHV_CONFIG__INIT,&saved_vhv_init,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,VHV_CONFIG__INIT,&saved_vhv_init,1);
   }
   if (saved_vhv_timeout != 0)
   {
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND,&saved_vhv_timeout,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND,&saved_vhv_timeout,1);
   }
 
   // remove phasecal override
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,PHASECAL_CONFIG__OVERRIDE, &buff[1],1);
+  i2c_write_reg(&vl53l1x->i2c_handle,PHASECAL_CONFIG__OVERRIDE, &buff[1],1);
 
 }
 
@@ -338,14 +338,14 @@ uint16_t VL53L1X_readDistance(vl53l1x_t* vl53l1x, bool blocking)
     VL53L1X_getRangingData(vl53l1x);
 
     uint8_t data = 1;
-    i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__INTERRUPT_CLEAR,&data,1);
+    i2c_write_reg(&vl53l1x->i2c_handle,SYSTEM__INTERRUPT_CLEAR,&data,1);
 
     return vl53l1x->ranging_data.range_mm;
 }
 
 void VL53L1X_readResults(vl53l1x_t* vl53l1x){
     uint8_t read_buff[17];
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,read_buff,17);
+    i2c_read_reg(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,read_buff,17);
     
     vl53l1x->results.range_status = read_buff[0];
     vl53l1x->results.stream_count = read_buff[2];
@@ -362,7 +362,7 @@ void VL53L1X_startTimeout(){
 
 bool VL53L1X_dataReady(vl53l1x_t *vl53l1x){
     uint8_t result;
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,GPIO__TIO_HV_STATUS,&result,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,GPIO__TIO_HV_STATUS,&result,1);
     //ESP_LOGE(TAG_VL53L1X,"VL53L1X_dataReady %x",result);
     return (result & 0x01) == 0;
 }
@@ -376,22 +376,22 @@ bool VL53L1X_checkTimeoutExpired(){
 
 void VL53L1X_setupManualCalibration(vl53l1x_t *vl53l1x){
     // "save original vhv configs"
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,VHV_CONFIG__INIT,&saved_vhv_init,1);
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND,&saved_vhv_timeout,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,VHV_CONFIG__INIT,&saved_vhv_init,1);
+    i2c_read_reg(&vl53l1x->i2c_handle,VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND,&saved_vhv_timeout,1);
     
     // "disable VHV init"
     uint8_t value =  saved_vhv_init & 0x7F;
-    i2c_write_reg16bits(&vl53l1x->i2c_handle, VHV_CONFIG__INIT,&value,1);
+    i2c_write_reg(&vl53l1x->i2c_handle, VHV_CONFIG__INIT,&value,1);
     
     // "set loop bound to tuning param"
     value = (saved_vhv_timeout & 0x03) + (3 << 2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle, VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND,&value,1); // tuning parm default (LOWPOWERAUTO_VHV_LOOP_BOUND_DEFAULT)
+    i2c_write_reg(&vl53l1x->i2c_handle, VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND,&value,1); // tuning parm default (LOWPOWERAUTO_VHV_LOOP_BOUND_DEFAULT)
     
     // "override phasecal"
     value = 1;
-    i2c_write_reg16bits(&vl53l1x->i2c_handle, PHASECAL_CONFIG__OVERRIDE, &value, 1);
-    i2c_read_reg16bits(&vl53l1x->i2c_handle,PHASECAL_RESULT__VCSEL_START,&value,1);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle, CAL_CONFIG__VCSEL_START, &value, 1);
+    i2c_write_reg(&vl53l1x->i2c_handle, PHASECAL_CONFIG__OVERRIDE, &value, 1);
+    i2c_read_reg(&vl53l1x->i2c_handle,PHASECAL_RESULT__VCSEL_START,&value,1);
+    i2c_write_reg(&vl53l1x->i2c_handle, CAL_CONFIG__VCSEL_START, &value, 1);
 }
 
 void VL53L1X_updateDSS(vl53l1x_t *vl53l1x){
@@ -418,7 +418,7 @@ void VL53L1X_updateDSS(vl53l1x_t *vl53l1x){
             
             // "override DSS config"
             VL53L1X_divergeData(write_buff,requiredSpads,2);
-            i2c_write_reg16bits(&vl53l1x->i2c_handle, DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT, write_buff, 2);
+            i2c_write_reg(&vl53l1x->i2c_handle, DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT, write_buff, 2);
             // DSS_CONFIG__ROI_MODE_CONTROL should already be set to REQUESTED_EFFFECTIVE_SPADS
             
             return;
@@ -430,7 +430,7 @@ void VL53L1X_updateDSS(vl53l1x_t *vl53l1x){
 
     // "set target to mid point"
     VL53L1X_divergeData(write_buff,0x8000,2);
-    i2c_write_reg16bits(&vl53l1x->i2c_handle, DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT, write_buff, 2);
+    i2c_write_reg(&vl53l1x->i2c_handle, DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT, write_buff, 2);
 }
 
 void VL53L1X_getRangingData(vl53l1x_t *vl53l1x){
@@ -522,9 +522,9 @@ bool VL53L1X_calibrateOffset(vl53l1x_t *vl53l1x, uint16_t targetDistanceInMm, ui
   uint16_t averageDistance = 0;
   uint8_t data[]={0x0,0x0},offset[2];
   //Reset offset values 
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,data,2);
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,MM_CONFIG__INNER_OFFSET_MM,data,2);
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,MM_CONFIG__OUTER_OFFSET_MM,data,2);
+  i2c_write_reg(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,data,2);
+  i2c_write_reg(&vl53l1x->i2c_handle,MM_CONFIG__INNER_OFFSET_MM,data,2);
+  i2c_write_reg(&vl53l1x->i2c_handle,MM_CONFIG__OUTER_OFFSET_MM,data,2);
 
   VL53L1X_setDistanceMode(vl53l1x,Short);
   VL53L1X_setMeasurementTimingBudget(vl53l1x,30000);
@@ -537,7 +537,7 @@ bool VL53L1X_calibrateOffset(vl53l1x_t *vl53l1x, uint16_t targetDistanceInMm, ui
   VL53L1X_stopContinuos(vl53l1x);
   VL53L1X_divergeData(offset,*foundOffset*4,2);
 
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,offset,2);
+  i2c_write_reg(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,offset,2);
   return 1;
 }
 
@@ -573,7 +573,7 @@ bool VL53L1X_calibrateXTalk(vl53l1x_t *vl53l1x, uint16_t targetDistanceInMm, uin
   
   /* Update Xtalk value*/
   VL53L1X_divergeData(data,(uint16_t)calXtalk,2);
-  i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS,data,2);
+  i2c_write_reg(&vl53l1x->i2c_handle,ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS,data,2);
 
   return 1;
 }

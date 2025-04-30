@@ -11,14 +11,14 @@
 #include "esp_timer.h"
 // #include "nvs_flash.h"
 // #include "driver/spi_common.h"
-
+#include "platform_esp32s3.h"
 #include "types.h"
 #include "led.h"
 #include "uart_console.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
 
-
+#include "vl53l1x.h"
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
