@@ -143,6 +143,44 @@ void app_main(void)
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
     // Initialize the BNO055 sensor and set the parameters
+    // Initialize LED
+    configure_led(&led);
+    led_red(&led, MAX_BRIGHTNESS);
+
+    // Initialize BNO055 sensor
+    int8_t success = 0;
+    success = BNO055_Init(&bno055, 17, 18);
+    while (success != BNO055_SUCCESS) {
+        printf("Error: Failed to initialize BNO055 sensor\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+        success = BNO055_Init(&bno055, 17, 18);
+    }
+
+    //Calibration START ()
+    // Led orange while calibrating
+    led_set_color(&led, MAX_BRIGHTNESS, MAX_BRIGHTNESS, 0); // Orange
+
+    // Wait for the sensor to calibration routine
+    // Get calibration status
+    success = BNO055_GetCalibrationStatus(&bno055);
+    while (success != BNO055_SUCCESS && bno055.calib_stat != BNO055_CALIB_STAT_OK) {
+        printf("Error: Calibration status is not OK\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+        success = BNO055_GetCalibrationStatus(&bno055);
+    }
+    //Calibration FINISH
+    
+    //FALTA LA FUNCIÓN QUE CARGA LOS DATOS GUARDADOS DE CALIIBRACIÓN
+
+    // Change the color of the LED to green if the sensor is initialized
+    led_green(&led, MAX_BRIGHTNESS);
+
+    success = BNO055_GetCalibrationProfile(&bno055, &calib_data); // Get calibration profile
+    while (success != BNO055_SUCCESS) {
+        printf("Error: Failed to get calibration profile\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+        success = BNO055_GetCalibrationProfile(&bno055, &calib_data);
+    }
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 1*1024, NULL, 1, &gSys.task_handle_bno055);
@@ -393,6 +431,70 @@ void bno055_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         // Read the data from the BNO055 sensor
+        //uint32_t timestamp = 1000000; // Start at 1 second
+        float roll, pitch, yaw;
+        float gx, gy, gz;
+        float ax, ay, az;
+        float mx, my, mz;
+        
+
+        int8_t success = 0; // Variable to check if the sensor read was successful
+
+        while (true) {
+            // Read All data from BNO055 sensor
+            success = BNO055_ReadAll(&bno055);
+
+            // If the sensor read was not successful, turn the LED red
+            if (success != BNO055_SUCCESS)
+            {
+                printf("Error: Read All Error\n");
+            }
+            else
+            {
+                printf("Read Sucess\n");
+            }
+            
+
+            // Data from the BNO055 sensor
+            ax = bno055.ax;
+            ay = bno055.ay;
+            az = bno055.az;
+
+            gx = bno055.gx;
+            gy = bno055.gy;
+            gz = bno055.gz;
+
+            mx = bno055.mx;
+            my = bno055.my;
+            mz = bno055.mz;
+
+            // Get Euler angles
+            roll = bno055.roll;
+            pitch = bno055.pitch;
+            yaw = bno055.yaw;
+
+            // Convert to degrees
+            roll *= RAD_TO_DEG;
+            pitch *= RAD_TO_DEG;
+            yaw *= RAD_TO_DEG;
+
+            // Invert yaw direction
+            yaw = 360.0 - yaw;
+        
+
+            // Convert magnetic field au to uT (1au = 50uT)
+            mx /= 50.0;
+            my /= 50.0;
+            mz /= 50.0;
+
+            // accel in m/s^2 to g
+            ax /= 9.81;
+            ay /= 9.81;
+            az /= 9.81;
+            
+            // Increment timestamp by 1 second (1,000,000 microseconds)
+            //timestamp += 20000;
+        }
     }
     vTaskDelete(NULL);
 }
@@ -528,3 +630,4 @@ void process_cmd(const char *cmd)
         ESP_LOGI(TAG_CMD, "cmd not recognized");
     }
 }
+
