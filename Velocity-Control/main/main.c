@@ -1,15 +1,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
-#include "esp_partition.h"
-#include "esp_flash.h"
-#include "esp_timer.h"
-// #include "nvs_flash.h"
-// #include "driver/spi_common.h"
 
 #include "types.h"
 #include "led.h"
@@ -37,11 +28,6 @@
 #define LED_LSB_GPIO    15
 
 #define UART_NUM        0
-
-#define TIME_SAMPLING_US    10*1000 // 10ms
-#define TIME_SAMPLING_S		10		/* 10s sampling data */
-#define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
-#define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
 
 // --------------------------------------------------------------------------
 // ----------------------------- GLOBAL VARIABLES ---------------------------
@@ -138,6 +124,13 @@ void as5600_task(void *pvParameters);
  */
 void control_task(void *pvParameters);
 
+/**
+ * @brief Task to save the data in the NVS
+ * 
+ * @param pvParameters 
+ */
+void save_nvs_task(void *pvParameters);
+
 // --------------------------------------------------------------------------
 // --------------------------------- MAIN -----------------------------------
 // --------------------------------------------------------------------------
@@ -228,8 +221,14 @@ void init_system(void)
 
     // Get the partition table and erase the partition to store new data
     gSys.part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "angle_pos");
+    if (gSys.part == NULL) {
+        ESP_LOGI("init_system", "Partition not found");
+        return;
+    }
     ESP_ERROR_CHECK(esp_flash_erase_region(gSys.part->flash_chip, gSys.part->address, gSys.part->size));
-    char part_label[] = "Time(us)\tAngle(deg)\tDuty\n";
+    vTaskDelay(1000 / portTICK_PERIOD_MS); ///< Wait for the erase to finish
+    char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\n";
+    part_label[strlen(part_label)] = '\0'; ///< Add the null terminator to the string
     esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
     gSys.current_bytes_written += strlen(part_label);
 
@@ -257,6 +256,10 @@ void init_system(void)
 
     ///< Create the trigger task
     xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 1, &gSys.task_handle_trigger);
+
+    ///< Create the save task
+    gSys.queue = xQueueCreate(5, sizeof(uint8_t)*20); ///< Create a queue to send the data to the save task
+    xTaskCreate(save_nvs_task, "save_nvs_task", 3*1024, NULL, 6, &gSys.task_handle_save);
 
 }
 
@@ -292,7 +295,7 @@ void sys_timer_cb(void *arg)
 
         case CHECK_SENSORS:
             // Check if the sensors are calibrated
-            if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated) {
+            if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated && gSys.is_bldc_calibrated) {
                 gSys.STATE = SYS_SAMPLING; ///< Set the state to sampling
                 ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
             }
@@ -305,7 +308,7 @@ void sys_timer_cb(void *arg)
 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
             gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
-            if (gSys.cnt_sample >= NUM_SAMPLES) {
+            if (gSys.cnt_sample >= NUM_SAMPLES + 1) {
                 ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
                 ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_sample);
@@ -362,13 +365,9 @@ void sensor_calibration_cb(void *arg)
             }
 
             gSys.is_as5600_calibrated = true; ///< Set the flag to true to indicate that the AS5600 sensor is calibrated
-            gSys.is_bno055_calibrated = true;
-            gSys.is_vl53l1x_calibrated = true; 
+            gSys.is_bno055_calibrated = true; 
+            gSys.is_vl53l1x_calibrated = true;
             esp_timer_delete(gOneshotTimer); ///< Delete the timer
-
-            // BaseType_t mustYield = pdFALSE;
-            
-            // vTaskNotifyGiveFromISR(gSys.task_handle_bno055, &mustYield);
 
             break;
         default:
@@ -421,15 +420,10 @@ void trigger_task(void *pvParameters)
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        // ESP_LOGI(TAG_ADC_TASK, "Trigger task notified");
 
-        // Notify the BNO055 task to read the data from the sensor
+        // Notify the each sensor task to read the data from the sensor
         xTaskNotifyGive(gSys.task_handle_bno055);
-
-        // Notify the VL53L1X task to read the data from the sensor
         xTaskNotifyGive(gSys.task_handle_vl53l1x);
-
-        // Notify the AS5600 task to read the data from the sensor
         xTaskNotifyGive(gSys.task_handle_as5600);
     }
     vTaskDelete(NULL);
@@ -440,6 +434,7 @@ void bno055_task(void *pvParameters)
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
 
         ///< Read the data from the BNO055 sensor
 
@@ -454,8 +449,11 @@ void vl53l1x_task(void *pvParameters)
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
 
         ///< Read the distance from the VL53L1X sensor
+
+        ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
     }
     vTaskDelete(NULL);
@@ -467,7 +465,8 @@ void as5600_task(void *pvParameters)
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        ///< Read the angle from the AS5600 sensor
+        ///< Read the angle from the AS5600 sensor and save it in the buffer
+        gSys.angle = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle from the ADC
 
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 3);
@@ -484,9 +483,67 @@ void control_task(void *pvParameters)
         ulTaskNotifyTakeIndexed(3, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the AS5600 task
 
         ///< Process the data from the sensors and control the BLDC motor
+        if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///< 1s of sampling
+            bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
+            gSys.duty = 65;
+        }
+        else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///< 2s of sampling
+            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            gSys.duty = 0;
+        }
+        else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///< 4s of sampling
+            bldc_set_duty(&gMotor, -75); ///< Set the duty cycle to -7.5%
+            gSys.duty = -75;
+        }
+        else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///< 5s of sampling
+            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            gSys.duty = 0;
+        }
+        else if (gSys.cnt_sample < 7*SAMPLING_RATE_HZ) { ///< 7s of sampling
+            bldc_set_duty(&gMotor, 85); ///< Set the duty cycle to 8.5%
+            gSys.duty = 85;
+        }
+        else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///< 8s of sampling
+            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            gSys.duty = 0;
+        }
+        else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///< 10s of sampling
+            bldc_set_duty(&gMotor, -85); ///< Set the duty cycle to -8.5%
+            gSys.duty = -85;
+        }
+
+        ///< Send the sensor data to the queue
+        uint8_t length = snprintf(NULL, 0, "%d\t%d\t%d\t%d\n", (int)gSys.duty, (int)gSys.angle, (int)gSys.acceleration, (int)gSys.distance);
+        char str[length + 1];
+        snprintf(str, length + 1, "%d\t%d\t%d\t%d\n", (int)gSys.duty, (int)gSys.angle, (int)gSys.acceleration, (int)gSys.distance);
+        xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
+
     }
     vTaskDelete(NULL);
 }
+
+
+void save_nvs_task(void *pvParameters)
+{
+    uint8_t data[20]; ///< Buffer to save the data from the queue
+    while (true) {
+        ///< Wait for the data from the control task
+        xQueueReceive(gSys.queue, (void *const)data, portMAX_DELAY); ///< Receive the data from the queue
+        uint8_t length = strlen((const char *)data); ///< Get the length of the data
+
+        ///< Save the data in the NVS
+        esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
+        gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
+
+        if (gSys.cnt_sample >= NUM_SAMPLES + 1) { ///< If the number of samples is greater than the number of samples to save, stop the task
+            ESP_LOGI(TAG_CMD, "Save task finished");
+            break;
+        }
+
+    }
+    vTaskDelete(NULL);
+}
+
 
 void process_cmd(const char *cmd)
 {

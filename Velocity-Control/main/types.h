@@ -13,10 +13,21 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "esp_timer.h"
-#include "esp_partition.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
+#include "esp_partition.h"
+#include "esp_flash.h"
+#include "esp_timer.h"
+
+
+#define TIME_SAMPLING_US    10*1000 // 10ms
+#define TIME_SAMPLING_S		10		/* 10s sampling data */
+#define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
+#define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
+
 
 typedef union
 {
@@ -29,7 +40,6 @@ typedef union
 } flags_t;
 
 extern volatile flags_t gFlag;
-
 
 typedef struct
 {
@@ -61,7 +71,23 @@ typedef struct
 
     int cnt_sample; ///< Count the number of samples readed from all the sensors.
 
+    /**
+     * @brief Buffer to save the data from sensors during 5s, so there are 5*SAMPLING_RATE_HZ samples, and
+     * each sample has 4 values: duty, angle, acceleration, distance.
+     * 
+     * Each value is saved in a 5 bytes integer.
+     * 
+     */
+    int8_t buffer[1*SAMPLING_RATE_HZ][5*4]; 
+    
     uint16_t raw_angle; ///< Raw angle readed from the AS5600 sensor
+    QueueHandle_t queue; ///< Queue to send the data to the save task
+
+    ///< Values for the sensors
+    float distance; ///< Distance readed from the VL53L1X sensor
+    float angle;    ///< Angle readed from the AS5600 sensor
+    float acceleration; ///< Acceleration readed from the BNO055 sensor
+    float duty; ///< Duty cycle of the BLDC motor
 
     ///< Flags to check if the sensors are calibrated or not
     bool is_as5600_calibrated;  ///< Flag to check if the AS5600 sensor is calibrated or not
@@ -75,6 +101,7 @@ typedef struct
     TaskHandle_t task_handle_as5600;    ///< Task handle for the AS5600 sensor
     TaskHandle_t task_handle_ctrl;      ///< Task handle for the control task
     TaskHandle_t task_handle_trigger;    ///< Task handle for the trigger task
+    TaskHandle_t task_handle_save;      ///< Task handle for the save task
 
     uint16_t duty_to_save;          ///< PWM value to save in the NVS
     uint32_t current_bytes_written; ///< Number of samples readed from the ADC

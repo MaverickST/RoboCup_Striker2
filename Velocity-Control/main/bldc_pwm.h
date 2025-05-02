@@ -69,11 +69,16 @@ esp_err_t bldc_enable(bldc_pwm_motor_t *motor);
 esp_err_t bldc_disable(bldc_pwm_motor_t *motor);
 
 /**
- * @brief Set the duty which will receive the ESC. The duty is a value between 0 and 1000
+ * @brief Set the duty which will receive the ESC. The duty is a value between 0 and 1000.
+ * 
+ * From the ESC data sheet, the default throttle range of this ESC is from 1100µs to 1940µs, respecto to 50Hz (20ms).
+ * That means that the duty cycle is from 5.5% to 9.7%.
+ * For the reverse signal, the channel range of 0-50% (0-7.1% of real duty) is the default motor direction, 
+ * and the channel range of 50-100% (7.1-9.7% of real duty) will cause the motor to spin counterclockwise.
  * 
  * @param motor instance of the motor
  * @param duty range from 0 to 1000, where 0 is 0% and 1000 is 100%
  */
-esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, uint32_t duty);
+esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int32_t duty);
 
 #endif // __PWM_MOTOR_H__
