@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< HEAD
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -13,24 +12,21 @@
 // #include "nvs_flash.h"
 // #include "driver/spi_common.h"
 #include "platform_esp32s3.h"
-=======
 
->>>>>>> 20cb98114f6f88eb07a0e982b0be7dea96634a8d
 #include "types.h"
 #include "led.h"
 #include "uart_console.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
-
 #include "vl53l1x.h"
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
 
-#define I2C_MASTER_SCL_GPIO 4       /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 5       /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_GPIO 8      /*!< gpio number for I2C master clock */
+#define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
-#define I2C_MASTER_NUM 1            /*!< I2C port number for master dev */
+#define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
@@ -62,14 +58,10 @@ bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
 esp_timer_handle_t gOneshotTimer;
-<<<<<<< HEAD
 uint8_t cnt_cali; ///< Counter for the calibration process4
 
 vl53l1x_t gvl53l1x;
-=======
 
-uint8_t cnt_cali; ///< Counter for the calibration process
->>>>>>> 20cb98114f6f88eb07a0e982b0be7dea96634a8d
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -170,7 +162,7 @@ void app_main(void)
     bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, MOTOR_MCPWM_TIMER_RESOLUTION_HZ);
     bldc_enable(&gMotor);
     bldc_set_duty(&gMotor, 1); // Set duty to 0.1%, so the motor will not move
-
+    
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
     // Initialize the BNO055 sensor and set the parameters
@@ -180,12 +172,14 @@ void app_main(void)
 
     ///< ---------------------- VL53L1X ------------------
     // KEVIN'S CODE
-
+    // direction of the sensor
     // Initialize the VL53L1X sensor and set the parameters
-    if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, 0)) { ///< Initialize the VL53L1X sensor
-        ESP_LOGE(TAG_I2C, "No se pudo inicializar el sensor");
+    if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, false)) {
+        ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed");
         return;
-    } 
+    }
+
+    
     uint16_t offset, xtalk;
     
     // Place a target, 17 % gray, at 140 mm from the sensor
@@ -197,11 +191,18 @@ void app_main(void)
     
     //Flag to check if the sensor is calibrated
     gSys.is_vl53l1x_calibrated = true;
+
+    //Flags true for test
+    gSys.is_as5600_calibrated = true;
+    gSys.is_bno055_calibrated = true;
+    gSys.is_bldc_calibrated = true;
     
     VL53L1X_setDistanceMode(&gvl53l1x,Short);
     VL53L1X_setMeasurementTimingBudget(&gvl53l1x,20000);
     VL53L1X_startContinuous(&gvl53l1x,30);
     while(1){
+        vTaskDelay(pdMS_TO_TICKS(50));
+
         ESP_LOGI(TAG_VL53L1X, "Distance %dmm",VL53L1X_readDistance(&gvl53l1x,1));
     }
 
@@ -211,36 +212,37 @@ void app_main(void)
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
 
     ///< ---------------------- AS5600 -------------------
-    AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
+    // Initialize the AS5600 sensor
+    // AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
-    AS5600_config_t conf = {
-        .PM = AS5600_POWER_MODE_NOM, ///< Normal mode
-        .HYST = AS5600_HYSTERESIS_OFF, ///< Hysteresis off
-        .OUTS = AS5600_OUTPUT_STAGE_ANALOG_RR, ///< Analog output 10%-90%
-        .PWMF = AS5600_PWM_FREQUENCY_115HZ, ///< PWM frequency 115Hz
-        .SF = AS5600_SLOW_FILTER_16X, ///< Slow filter 16x
-        .FTH = AS5600_FF_THRESHOLD_SLOW_FILTER_ONLY, ///< Slow filter only
-        .WD = AS5600_WATCHDOG_ON, ///< Watchdog on
-    };
-    AS5600_SetConf(&gAs5600, conf);
+    // AS5600_config_t conf = {
+    //     .PM = AS5600_POWER_MODE_NOM, ///< Normal mode
+    //     .HYST = AS5600_HYSTERESIS_OFF, ///< Hysteresis off
+    //     .OUTS = AS5600_OUTPUT_STAGE_ANALOG_RR, ///< Analog output 10%-90%
+    //     .PWMF = AS5600_PWM_FREQUENCY_115HZ, ///< PWM frequency 115Hz
+    //     .SF = AS5600_SLOW_FILTER_16X, ///< Slow filter 16x
+    //     .FTH = AS5600_FF_THRESHOLD_SLOW_FILTER_ONLY, ///< Slow filter only
+    //     .WD = AS5600_WATCHDOG_ON, ///< Watchdog on
+    // };
+    // AS5600_SetConf(&gAs5600, conf);
 
     // Create a one-shot timer to control the sequence
-    const esp_timer_create_args_t oneshot_timer_args = {
-        .callback = &sensor_calibration_cb,
-        .arg = NULL, ////< argument specified here will be passed to timer callback function
-        .name = "as5600_cali-one-shot" ///< name is optional, but may help identify the timer when debugging
-    };
-    esp_timer_handle_t oneshot_timer;
-    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer));
-    gOneshotTimer = oneshot_timer;
-    cnt_cali = 0; ///< Initialize the counter for the calibration process
+    // const esp_timer_create_args_t oneshot_timer_args = {
+    //     .callback = &sensor_calibration_cb,
+    //     .arg = NULL, ////< argument specified here will be passed to timer callback function
+    //     .name = "as5600_cali-one-shot" ///< name is optional, but may help identify the timer when debugging
+    // };
+    // esp_timer_handle_t oneshot_timer;
+    // ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer));
+    // gOneshotTimer = oneshot_timer;
+    // cnt_cali = 0; ///< Initialize the counter for the calibration process
 
-    ESP_ERROR_CHECK(esp_timer_start_once(gOneshotTimer, 500*1000)); ///< Start the timer to calibrate the AS5600 sensor
-    ESP_LOGI("app_main", "AS5600 calibration timer started");
+    // ESP_ERROR_CHECK(esp_timer_start_once(gOneshotTimer, 500*1000)); ///< Start the timer to calibrate the AS5600 sensor
+    // ESP_LOGI("app_main", "AS5600 calibration timer started");
     
-    ///< Create a task to manage the AS5600 sensor
-    xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
+    // Create a task to manage the AS5600 sensor
+    // xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
 
     ///< ---------------------- SYSTEM -------------------
     // 'System' refers to more general variables and functions that are used to control the system, which
