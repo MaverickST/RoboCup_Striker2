@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+<<<<<<< HEAD
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -12,6 +13,9 @@
 // #include "nvs_flash.h"
 // #include "driver/spi_common.h"
 #include "platform_esp32s3.h"
+=======
+
+>>>>>>> 20cb98114f6f88eb07a0e982b0be7dea96634a8d
 #include "types.h"
 #include "led.h"
 #include "uart_console.h"
@@ -39,11 +43,6 @@
 
 #define UART_NUM        0
 
-#define TIME_SAMPLING_US    10*1000 // 10ms
-#define TIME_SAMPLING_S		10		/* 10s sampling data */
-#define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
-#define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
-
 // --------------------------------------------------------------------------
 // ----------------------------- GLOBAL VARIABLES ---------------------------
 // --------------------------------------------------------------------------
@@ -51,6 +50,10 @@
 static const char* TAG_UART_TASK = "uart_task";
 static const char* TAG_ADC_TASK = "adc_task";
 static const char* TAG_CMD = "cmd";
+static const char* TAG_BNO055_TASK = "bno055_task";
+static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
+static const char* TAG_AS5600_TASK = "as5600_task";
+static const char* TAG_CTRL_TASK = "ctrl_task";
 
 volatile flags_t gFlag;
 led_rgb_t gLed;
@@ -59,9 +62,14 @@ bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
 esp_timer_handle_t gOneshotTimer;
+<<<<<<< HEAD
 uint8_t cnt_cali; ///< Counter for the calibration process4
 
 vl53l1x_t gvl53l1x;
+=======
+
+uint8_t cnt_cali; ///< Counter for the calibration process
+>>>>>>> 20cb98114f6f88eb07a0e982b0be7dea96634a8d
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -102,6 +110,13 @@ void process_cmd(const char *cmd);
 void uart_event_task(void *pvParameters);
 
 /**
+ * @brief Task to trigger the flow of the tasks
+ * 
+ * @param pvParameters 
+ */
+void trigger_task(void *pvParameters);
+
+/**
  * @brief Task to manage the BNO055 sensor
  * 
  * @param pvParameters 
@@ -121,6 +136,20 @@ void vl53l1x_task(void *pvParameters);
  * @param pvParameters 
  */
 void as5600_task(void *pvParameters);
+
+/**
+ * @brief Task to control the BLDC motor
+ * 
+ * @param pvParameters 
+ */
+void control_task(void *pvParameters);
+
+/**
+ * @brief Task to save the data in the NVS
+ * 
+ * @param pvParameters 
+ */
+void save_nvs_task(void *pvParameters);
 
 // --------------------------------------------------------------------------
 // --------------------------------- MAIN -----------------------------------
@@ -147,7 +176,7 @@ void app_main(void)
     // Initialize the BNO055 sensor and set the parameters
 
     ///< Create a task to manage the BNO055 sensor
-    xTaskCreate(bno055_task, "bno055_task", 1*1024, NULL, 1, &gSys.task_handle_bno055);
+    xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
 
     ///< ---------------------- VL53L1X ------------------
     // KEVIN'S CODE
@@ -179,7 +208,7 @@ void app_main(void)
     
 
     ///< Create a task to manage the VL53L1X sensor
-    xTaskCreate(vl53l1x_task, "vl53l1x_task", 1*1024, NULL, 1, &gSys.task_handle_vl53l1x);
+    xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
 
     ///< ---------------------- AS5600 -------------------
     AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
@@ -211,7 +240,7 @@ void app_main(void)
     ESP_LOGI("app_main", "AS5600 calibration timer started");
     
     ///< Create a task to manage the AS5600 sensor
-    xTaskCreate(as5600_task, "as5600_task", 1*1024, NULL, 1, NULL);
+    xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
 
     ///< ---------------------- SYSTEM -------------------
     // 'System' refers to more general variables and functions that are used to control the system, which
@@ -237,8 +266,14 @@ void init_system(void)
 
     // Get the partition table and erase the partition to store new data
     gSys.part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "angle_pos");
+    if (gSys.part == NULL) {
+        ESP_LOGI("init_system", "Partition not found");
+        return;
+    }
     ESP_ERROR_CHECK(esp_flash_erase_region(gSys.part->flash_chip, gSys.part->address, gSys.part->size));
-    char part_label[] = "Time(us)\tAngle(deg)\tDuty\n";
+    vTaskDelay(1000 / portTICK_PERIOD_MS); ///< Wait for the erase to finish
+    char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\n";
+    part_label[strlen(part_label)] = '\0'; ///< Add the null terminator to the string
     esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
     gSys.current_bytes_written += strlen(part_label);
 
@@ -256,11 +291,21 @@ void init_system(void)
         .arg = NULL, ////< argument specified here will be passed to timer callback function
         .name = "sys-one-shot" ///< name is optional, but may help identify the timer when debugging
     };
-    esp_timer_handle_t oneshot_timer;
-    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer));
-    gSys.oneshot_timer = oneshot_timer;
+    esp_timer_handle_t oneshot_timer_s;
+    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer_s));
+    gSys.oneshot_timer = oneshot_timer_s;
+    ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, NONE_TO_STEPS_US));
 
-    // ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, NONE_TO_STEPS_US));
+    ///< Create the control task
+    xTaskCreate(control_task, "control_task", 3*1024, NULL, 5, &gSys.task_handle_ctrl);
+
+    ///< Create the trigger task
+    xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 1, &gSys.task_handle_trigger);
+
+    ///< Create the save task
+    gSys.queue = xQueueCreate(5, sizeof(uint8_t)*20); ///< Create a queue to send the data to the save task
+    xTaskCreate(save_nvs_task, "save_nvs_task", 3*1024, NULL, 6, &gSys.task_handle_save);
+
 }
 
 void sys_timer_cb(void *arg)
@@ -289,28 +334,27 @@ void sys_timer_cb(void *arg)
             bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
 
             ///< Use the time for the sensor sampling and control the BLDC motor
-            gSys.STATE = SYS_RUNNING;
+            gSys.STATE = CHECK_SENSORS;
             ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
             break;
 
         case CHECK_SENSORS:
             // Check if the sensors are calibrated
-            if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated) {
-                gSys.STATE = SYS_RUNNING; ///< Set the state to running
+            if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated && gSys.is_bldc_calibrated) {
+                gSys.STATE = SYS_SAMPLING; ///< Set the state to sampling
                 ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
             }
             break;
 
-        case SYS_RUNNING:
+        case SYS_SAMPLING:
             BaseType_t mustYield = pdFALSE;
             
-            vTaskNotifyGiveFromISR(gSys.task_handle_bno055, &mustYield);
-            vTaskNotifyGiveFromISR(gSys.task_handle_vl53l1x, &mustYield);
-            vTaskNotifyGiveFromISR(gSys.task_handle_as5600, &mustYield);
+            vTaskNotifyGiveFromISR(gSys.task_handle_trigger, &mustYield);
 
-            portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
+            // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
             gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
-            if (gSys.cnt_sample >= NUM_SAMPLES) {
+            if (gSys.cnt_sample >= NUM_SAMPLES + 1) {
+                ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
                 ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_sample);
             }
@@ -359,14 +403,17 @@ void sensor_calibration_cb(void *arg)
             printf("angle-> %0.2f\n", angle);
 
             // Read n times the angle.
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 1; i++) {
                 vTaskDelay(1000 / portTICK_PERIOD_MS); ///< Wait 1s
                 angle = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle from the ADC
                 printf("angle-> %0.2f\n", angle);
             }
 
             gSys.is_as5600_calibrated = true; ///< Set the flag to true to indicate that the AS5600 sensor is calibrated
+            gSys.is_bno055_calibrated = true; 
+            gSys.is_vl53l1x_calibrated = true;
             esp_timer_delete(gOneshotTimer); ///< Delete the timer
+
             break;
         default:
             printf("AS5600 calibration finished");
@@ -413,13 +460,31 @@ void uart_event_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
+void trigger_task(void *pvParameters)
+{
+    while (true) {
+        ///< Wait for the notification from the timer
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        // Notify the each sensor task to read the data from the sensor
+        xTaskNotifyGive(gSys.task_handle_bno055);
+        xTaskNotifyGive(gSys.task_handle_vl53l1x);
+        xTaskNotifyGive(gSys.task_handle_as5600);
+    }
+    vTaskDelete(NULL);
+}
+
 void bno055_task(void *pvParameters)
 {
     while (true) {
-        // Wait for the notification from the timer
+        ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
 
-        // Read the data from the BNO055 sensor
+        ///< Read the data from the BNO055 sensor
+
+        ///< Notify the control task to process the data
+        xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
     }
     vTaskDelete(NULL);
 }
@@ -427,10 +492,14 @@ void bno055_task(void *pvParameters)
 void vl53l1x_task(void *pvParameters)
 {
     while (true) {
-        // Wait for the notification from the timer
+        ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
 
-        // Read the distance from the VL53L1X sensor
+        ///< Read the distance from the VL53L1X sensor
+
+        ///< Notify the control task to process the data
+        xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
     }
     vTaskDelete(NULL);
 }
@@ -438,13 +507,88 @@ void vl53l1x_task(void *pvParameters)
 void as5600_task(void *pvParameters)
 {
     while (true) {
-        // Wait for the notification from the timer
+        ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        // Read the angle from the AS5600 sensor
+        ///< Read the angle from the AS5600 sensor and save it in the buffer
+        gSys.angle = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle from the ADC
+
+        ///< Notify the control task to process the data
+        xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 3);
     }
     vTaskDelete(NULL);
 }
+
+void control_task(void *pvParameters)
+{
+    while (true) {
+        ///< Wait for the notification from all task sensors. configTASK_NOTIFICATION_ARRAY_ENTRIES
+        ulTaskNotifyTakeIndexed(1, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the BNO055 task
+        ulTaskNotifyTakeIndexed(2, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the VL53L1X task
+        ulTaskNotifyTakeIndexed(3, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the AS5600 task
+
+        ///< Process the data from the sensors and control the BLDC motor
+        if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///< 1s of sampling
+            bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
+            gSys.duty = 65;
+        }
+        else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///< 2s of sampling
+            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            gSys.duty = 0;
+        }
+        else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///< 4s of sampling
+            bldc_set_duty(&gMotor, -75); ///< Set the duty cycle to -7.5%
+            gSys.duty = -75;
+        }
+        else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///< 5s of sampling
+            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            gSys.duty = 0;
+        }
+        else if (gSys.cnt_sample < 7*SAMPLING_RATE_HZ) { ///< 7s of sampling
+            bldc_set_duty(&gMotor, 85); ///< Set the duty cycle to 8.5%
+            gSys.duty = 85;
+        }
+        else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///< 8s of sampling
+            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            gSys.duty = 0;
+        }
+        else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///< 10s of sampling
+            bldc_set_duty(&gMotor, -85); ///< Set the duty cycle to -8.5%
+            gSys.duty = -85;
+        }
+
+        ///< Send the sensor data to the queue
+        uint8_t length = snprintf(NULL, 0, "%d\t%d\t%d\t%d\n", (int)gSys.duty, (int)gSys.angle, (int)gSys.acceleration, (int)gSys.distance);
+        char str[length + 1];
+        snprintf(str, length + 1, "%d\t%d\t%d\t%d\n", (int)gSys.duty, (int)gSys.angle, (int)gSys.acceleration, (int)gSys.distance);
+        xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
+
+    }
+    vTaskDelete(NULL);
+}
+
+
+void save_nvs_task(void *pvParameters)
+{
+    uint8_t data[20]; ///< Buffer to save the data from the queue
+    while (true) {
+        ///< Wait for the data from the control task
+        xQueueReceive(gSys.queue, (void *const)data, portMAX_DELAY); ///< Receive the data from the queue
+        uint8_t length = strlen((const char *)data); ///< Get the length of the data
+
+        ///< Save the data in the NVS
+        esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
+        gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
+
+        if (gSys.cnt_sample >= NUM_SAMPLES + 1) { ///< If the number of samples is greater than the number of samples to save, stop the task
+            ESP_LOGI(TAG_CMD, "Save task finished");
+            break;
+        }
+
+    }
+    vTaskDelete(NULL);
+}
+
 
 void process_cmd(const char *cmd)
 {
