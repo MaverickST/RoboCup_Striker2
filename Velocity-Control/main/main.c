@@ -172,6 +172,44 @@ void app_main(void)
     BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
     BNO055_SetOperationMode(&bno055, IMU);
 
+    /* // Read the data from the BNO055 sensor
+    float roll, pitch, yaw;
+    float gx, gy, gz;
+    float ax, ay, az;
+
+    while (true) {
+        // Read All data from BNO055 sensor
+        BNO055_ReadAll(&bno055);
+
+        // Data from the BNO055 sensor
+
+        //acceleration m/s^2 in x, y, z axis
+        ax = bno055.ax;
+        ay = bno055.ay;
+        az = bno055.az;
+
+        //degree per second in x, y, z axis
+        gx = bno055.gx;
+        gy = bno055.gy;
+        gz = bno055.gz;
+
+        // Get Euler angles (like an airplane)
+        roll = bno055.roll;     // Do a barrel roll
+        pitch = bno055.pitch;   // up, down
+        yaw = bno055.yaw;       // rigth, left
+
+        // Convert to degrees
+        roll *= RAD_TO_DEG;
+        pitch *= RAD_TO_DEG;
+        yaw *= RAD_TO_DEG;
+        // Invert yaw direction
+        yaw = 360.0 - yaw;
+
+        long unsigned int timestamp = 0;
+        printf("I,%" PRIu32 "\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\r\n", timestamp, gx, gy, gz, ax, ay, az);
+        vTaskDelay(pdMS_TO_TICKS(500));
+    } */
+
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 1*1024, NULL, 1, &gSys.task_handle_bno055);
 
@@ -416,45 +454,41 @@ void uart_event_task(void *pvParameters)
 
 void bno055_task(void *pvParameters)
 {
+    float roll, pitch, yaw;
+    float gx, gy, gz;
+    float ax, ay, az;
+
     while (true) {
         // Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        // Read the data from the BNO055 sensor
-        float roll, pitch, yaw;
-        float gx, gy, gz;
-        float ax, ay, az;
+        // Read All data from BNO055 sensor
+        BNO055_ReadAll(&bno055);
 
-        int8_t success = 0; // Variable to check if the sensor read was successful
+        // Data from the BNO055 sensor
 
-        while (true) {
-            // Read All data from BNO055 sensor
-            success = BNO055_ReadAll(&bno055);
+        //acceleration m/s^2 in x, y, z axis
+        ax = bno055.ax;
+        ay = bno055.ay;
+        az = bno055.az;
 
-            // Data from the BNO055 sensor
+        //degree per second in x, y, z axis
+        gx = bno055.gx;
+        gy = bno055.gy;
+        gz = bno055.gz;
 
-            //acceleration m/s^2 in x, y, z axis
-            ax = bno055.ax;
-            ay = bno055.ay;
-            az = bno055.az;
+        // Get Euler angles (like an airplane)
+        roll = bno055.roll;     // Do a barrel roll
+        pitch = bno055.pitch;   // up, down
+        yaw = bno055.yaw;       // rigth, left
 
-            //degree per second in x, y, z axis
-            gx = bno055.gx;
-            gy = bno055.gy;
-            gz = bno055.gz;
-
-            // Get Euler angles (like an airplane)
-            roll = bno055.roll;     // Do a barrel roll
-            pitch = bno055.pitch;   // up, down
-            yaw = bno055.yaw;       // rigth, left
-
-            // Convert to degrees
-            roll *= RAD_TO_DEG;
-            pitch *= RAD_TO_DEG;
-            yaw *= RAD_TO_DEG;
-            // Invert yaw direction
-            yaw = 360.0 - yaw;
-        }
+        // Convert to degrees
+        roll *= RAD_TO_DEG;
+        pitch *= RAD_TO_DEG;
+        yaw *= RAD_TO_DEG;
+        // Invert yaw direction
+        yaw = 360.0 - yaw;
+        
     }
     vTaskDelete(NULL);
 }
