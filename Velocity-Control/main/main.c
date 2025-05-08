@@ -15,8 +15,10 @@
 #include "types.h"
 #include "led.h"
 #include "uart_console.h"
+#include "platform_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
+#include "bno055.h"
 
 
 // -------------------------------------------------------------------------- 
@@ -44,6 +46,9 @@
 #define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
 
+#define RAD_TO_DEG 57.2957795 // Conversion factor from radians to degrees
+#define MAX_BRIGHTNESS 5 // Max brightness of the LED
+
 // --------------------------------------------------------------------------
 // ----------------------------- GLOBAL VARIABLES ---------------------------
 // --------------------------------------------------------------------------
@@ -60,6 +65,9 @@ AS5600_t gAs5600;
 system_t gSys;
 esp_timer_handle_t gOneshotTimer;
 uint8_t cnt_cali; ///< Counter for the calibration process
+
+BNO055_t bno055; // BNO055 sensor structure
+BNO055_CalibProfile_t calib_data; // Calibration data structure
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -143,9 +151,6 @@ void app_main(void)
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
     // Initialize the BNO055 sensor and set the parameters
-    // Initialize LED
-    configure_led(&led);
-    led_red(&led, MAX_BRIGHTNESS);
 
     // Initialize BNO055 sensor
     int8_t success = 0;
@@ -155,32 +160,17 @@ void app_main(void)
         vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
         success = BNO055_Init(&bno055, 17, 18);
     }
-
-    //Calibration START ()
-    // Led orange while calibrating
-    led_set_color(&led, MAX_BRIGHTNESS, MAX_BRIGHTNESS, 0); // Orange
-
-    // Wait for the sensor to calibration routine
-    // Get calibration status
-    success = BNO055_GetCalibrationStatus(&bno055);
-    while (success != BNO055_SUCCESS && bno055.calib_stat != BNO055_CALIB_STAT_OK) {
-        printf("Error: Calibration status is not OK\n");
-        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-        success = BNO055_GetCalibrationStatus(&bno055);
-    }
-    //Calibration FINISH
     
-    //FALTA LA FUNCIÓN QUE CARGA LOS DATOS GUARDADOS DE CALIIBRACIÓN
-
-    // Change the color of the LED to green if the sensor is initialized
-    led_green(&led, MAX_BRIGHTNESS);
-
-    success = BNO055_GetCalibrationProfile(&bno055, &calib_data); // Get calibration profile
-    while (success != BNO055_SUCCESS) {
-        printf("Error: Failed to get calibration profile\n");
-        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-        success = BNO055_GetCalibrationProfile(&bno055, &calib_data);
-    }
+    //Load Calibration Data
+    BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    uint8_t calib_offsets[22] = {
+        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xE8, 0x03, 0xAD, 0x01   
+    };
+    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    BNO055_SetOperationMode(&bno055, IMU);
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 1*1024, NULL, 1, &gSys.task_handle_bno055);
@@ -431,12 +421,9 @@ void bno055_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         // Read the data from the BNO055 sensor
-        //uint32_t timestamp = 1000000; // Start at 1 second
         float roll, pitch, yaw;
         float gx, gy, gz;
         float ax, ay, az;
-        float mx, my, mz;
-        
 
         int8_t success = 0; // Variable to check if the sensor read was successful
 
@@ -444,56 +431,29 @@ void bno055_task(void *pvParameters)
             // Read All data from BNO055 sensor
             success = BNO055_ReadAll(&bno055);
 
-            // If the sensor read was not successful, turn the LED red
-            if (success != BNO055_SUCCESS)
-            {
-                printf("Error: Read All Error\n");
-            }
-            else
-            {
-                printf("Read Sucess\n");
-            }
-            
-
             // Data from the BNO055 sensor
+
+            //acceleration m/s^2 in x, y, z axis
             ax = bno055.ax;
             ay = bno055.ay;
             az = bno055.az;
 
+            //degree per second in x, y, z axis
             gx = bno055.gx;
             gy = bno055.gy;
             gz = bno055.gz;
 
-            mx = bno055.mx;
-            my = bno055.my;
-            mz = bno055.mz;
-
-            // Get Euler angles
-            roll = bno055.roll;
-            pitch = bno055.pitch;
-            yaw = bno055.yaw;
+            // Get Euler angles (like an airplane)
+            roll = bno055.roll;     // Do a barrel roll
+            pitch = bno055.pitch;   // up, down
+            yaw = bno055.yaw;       // rigth, left
 
             // Convert to degrees
             roll *= RAD_TO_DEG;
             pitch *= RAD_TO_DEG;
             yaw *= RAD_TO_DEG;
-
             // Invert yaw direction
             yaw = 360.0 - yaw;
-        
-
-            // Convert magnetic field au to uT (1au = 50uT)
-            mx /= 50.0;
-            my /= 50.0;
-            mz /= 50.0;
-
-            // accel in m/s^2 to g
-            ax /= 9.81;
-            ay /= 9.81;
-            az /= 9.81;
-            
-            // Increment timestamp by 1 second (1,000,000 microseconds)
-            //timestamp += 20000;
         }
     }
     vTaskDelete(NULL);
