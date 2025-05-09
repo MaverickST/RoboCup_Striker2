@@ -89,8 +89,15 @@ esp_err_t bldc_disable(bldc_pwm_motor_t *motor)
     return ESP_OK;
 }
 
-esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, uint32_t duty)
+esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int32_t duty)
 {
+    uint32_t nw_cmp_rev = 0;
+    if (duty < 0) { ///< Read the description of the function to understand the duty cycle
+        duty = -duty;
+        nw_cmp_rev = 90*motor->max_cmp/1000;
+    }else {
+        nw_cmp_rev = 60*motor->max_cmp/1000;
+    }
     if (duty > 1000) {
         // ESP_LOGE(BLDC_TAG, "duty %d is greater than 1000", duty);
         return ESP_FAIL;
@@ -102,6 +109,6 @@ esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, uint32_t duty)
         return ESP_FAIL;
     }
     ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp, nw_cmp), BLDC_TAG, "set compare value failed");
-    ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp_rev, nw_cmp), BLDC_TAG, "set compare value failed");
+    ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp_rev, nw_cmp_rev), BLDC_TAG, "set compare value failed");
     return ESP_OK;
 }
