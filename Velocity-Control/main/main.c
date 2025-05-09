@@ -5,8 +5,10 @@
 #include "types.h"
 #include "led.h"
 #include "uart_console.h"
+#include "platform_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
+#include "bno055.h"
 
 
 // -------------------------------------------------------------------------- 
@@ -29,6 +31,14 @@
 
 #define UART_NUM        0
 
+#define TIME_SAMPLING_US    10*1000 // 10ms
+#define TIME_SAMPLING_S		10		/* 10s sampling data */
+#define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
+#define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
+
+#define RAD_TO_DEG 57.2957795 // Conversion factor from radians to degrees
+#define MAX_BRIGHTNESS 5 // Max brightness of the LED
+
 // --------------------------------------------------------------------------
 // ----------------------------- GLOBAL VARIABLES ---------------------------
 // --------------------------------------------------------------------------
@@ -50,6 +60,9 @@ system_t gSys;
 esp_timer_handle_t gOneshotTimer;
 
 uint8_t cnt_cali; ///< Counter for the calibration process
+
+BNO055_t bno055; // BNO055 sensor structure
+BNO055_CalibProfile_t calib_data; // Calibration data structure
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -154,6 +167,64 @@ void app_main(void)
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
     // Initialize the BNO055 sensor and set the parameters
+
+    // Initialize BNO055 sensor
+    int8_t success = 0;
+    success = BNO055_Init(&bno055, 17, 18);
+    while (success != BNO055_SUCCESS) {
+        printf("Error: Failed to initialize BNO055 sensor\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+        success = BNO055_Init(&bno055, 17, 18);
+    }
+    
+    //Load Calibration Data
+    BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    uint8_t calib_offsets[22] = {
+        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xE8, 0x03, 0xAD, 0x01   
+    };
+    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    BNO055_SetOperationMode(&bno055, IMU);
+
+    /* // Read the data from the BNO055 sensor
+    float roll, pitch, yaw;
+    float gx, gy, gz;
+    float ax, ay, az;
+
+    while (true) {
+        // Read All data from BNO055 sensor
+        BNO055_ReadAll(&bno055);
+
+        // Data from the BNO055 sensor
+
+        //acceleration m/s^2 in x, y, z axis
+        ax = bno055.ax;
+        ay = bno055.ay;
+        az = bno055.az;
+
+        //degree per second in x, y, z axis
+        gx = bno055.gx;
+        gy = bno055.gy;
+        gz = bno055.gz;
+
+        // Get Euler angles (like an airplane)
+        roll = bno055.roll;     // Do a barrel roll
+        pitch = bno055.pitch;   // up, down
+        yaw = bno055.yaw;       // rigth, left
+
+        // Convert to degrees
+        roll *= RAD_TO_DEG;
+        pitch *= RAD_TO_DEG;
+        yaw *= RAD_TO_DEG;
+        // Invert yaw direction
+        yaw = 360.0 - yaw;
+
+        long unsigned int timestamp = 0;
+        printf("I,%" PRIu32 "\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\r\n", timestamp, gx, gy, gz, ax, ay, az);
+        vTaskDelay(pdMS_TO_TICKS(500));
+    } */
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
@@ -431,13 +502,42 @@ void trigger_task(void *pvParameters)
 
 void bno055_task(void *pvParameters)
 {
+    float roll, pitch, yaw;
+    float gx, gy, gz;
+    float ax, ay, az;
+
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
+      
+        // Read All data from BNO055 sensor
+        BNO055_ReadAll(&bno055);
 
-        ///< Read the data from the BNO055 sensor
+        // Data from the BNO055 sensor
 
+        //acceleration m/s^2 in x, y, z axis
+        ax = bno055.ax;
+        ay = bno055.ay;
+        az = bno055.az;
+
+        //degree per second in x, y, z axis
+        gx = bno055.gx;
+        gy = bno055.gy;
+        gz = bno055.gz;
+
+        // Get Euler angles (like an airplane)
+        roll = bno055.roll;     // Do a barrel roll
+        pitch = bno055.pitch;   // up, down
+        yaw = bno055.yaw;       // rigth, left
+
+        // Convert to degrees
+        roll *= RAD_TO_DEG;
+        pitch *= RAD_TO_DEG;
+        yaw *= RAD_TO_DEG;
+        // Invert yaw direction
+        yaw = 360.0 - yaw;
+    
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
     }
@@ -654,3 +754,4 @@ void process_cmd(const char *cmd)
         ESP_LOGI(TAG_CMD, "cmd not recognized");
     }
 }
+
