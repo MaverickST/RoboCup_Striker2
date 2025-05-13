@@ -25,6 +25,8 @@
 #define MOTOR_MCPWM_DUTY_TICK_MAX       (MOTOR_MCPWM_TIMER_RESOLUTION_HZ / MOTOR_MCPWM_FREQ_HZ) // maximum value we can set for the duty cycle, in ticks
 #define MOTOR_MCPWM_GPIO                3
 #define MOTOR_REVERSE_GPIO              8
+#define MOTOR_PWM_BOTTOM_DUTY           50
+#define MOTOR_PWM_TOP_DUTY              120
 
 #define LED_TIME_US     2*1000*1000
 #define LED_LSB_GPIO    15
@@ -57,9 +59,6 @@ uart_console_t gUc;
 bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
-esp_timer_handle_t gOneshotTimer;
-
-uint8_t cnt_cali; ///< Counter for the calibration process
 
 BNO055_t bno055; // BNO055 sensor structure
 BNO055_CalibProfile_t calib_data; // Calibration data structure
@@ -160,9 +159,10 @@ void app_main(void)
     xTaskCreate(uart_event_task, "uart_event_task", 3*1024, NULL, 1, NULL);
 
     ///< ---------------------- BLDC ---------------------
-    bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, MOTOR_MCPWM_TIMER_RESOLUTION_HZ);
+    bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, 
+                MOTOR_MCPWM_TIMER_RESOLUTION_HZ, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY);
     bldc_enable(&gMotor);
-    bldc_set_duty(&gMotor, 1); // Set duty to 0.1%, so the motor will not move
+    bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); // Set duty to the top position for the ESC
 
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
@@ -187,44 +187,6 @@ void app_main(void)
     };
     BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
     BNO055_SetOperationMode(&bno055, IMU);
-
-    /* // Read the data from the BNO055 sensor
-    float roll, pitch, yaw;
-    float gx, gy, gz;
-    float ax, ay, az;
-
-    while (true) {
-        // Read All data from BNO055 sensor
-        BNO055_ReadAll(&bno055);
-
-        // Data from the BNO055 sensor
-
-        //acceleration m/s^2 in x, y, z axis
-        ax = bno055.ax;
-        ay = bno055.ay;
-        az = bno055.az;
-
-        //degree per second in x, y, z axis
-        gx = bno055.gx;
-        gy = bno055.gy;
-        gz = bno055.gz;
-
-        // Get Euler angles (like an airplane)
-        roll = bno055.roll;     // Do a barrel roll
-        pitch = bno055.pitch;   // up, down
-        yaw = bno055.yaw;       // rigth, left
-
-        // Convert to degrees
-        roll *= RAD_TO_DEG;
-        pitch *= RAD_TO_DEG;
-        yaw *= RAD_TO_DEG;
-        // Invert yaw direction
-        yaw = 360.0 - yaw;
-
-        long unsigned int timestamp = 0;
-        printf("I,%" PRIu32 "\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\r\n", timestamp, gx, gy, gz, ax, ay, az);
-        vTaskDelay(pdMS_TO_TICKS(500));
-    } */
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
@@ -259,10 +221,10 @@ void app_main(void)
     };
     esp_timer_handle_t oneshot_timer;
     ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer));
-    gOneshotTimer = oneshot_timer;
-    cnt_cali = 0; ///< Initialize the counter for the calibration process
+    gSys.oneshot_timer2 = oneshot_timer;
+    gSys.cnt_cali = 0; ///< Initialize the counter for the calibration process
 
-    ESP_ERROR_CHECK(esp_timer_start_once(gOneshotTimer, 500*1000)); ///< Start the timer to calibrate the AS5600 sensor
+    // ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer2, 500*1000)); ///< Start the timer to calibrate the AS5600 sensor
     ESP_LOGI("app_main", "AS5600 calibration timer started");
     
     ///< Create a task to manage the AS5600 sensor
@@ -287,7 +249,7 @@ void init_system(void)
     gSys.is_bno055_calibrated = false; ///< Initialize the BNO055 sensor calibration flag
     gSys.is_vl53l1x_calibrated = false; ///< Initialize the VL53L1X sensor calibration flag
     gSys.is_bldc_calibrated = false; ///< Initialize the BLDC motor calibration flag
-    gSys.STATE = NONE; ///< Initialize the state machine
+    gSys.STATE = INIT_BLDC_STEP_1; ///< Initialize the state machine: initialize the BLDC motor
     gSys.current_bytes_written = 0; ///< Initialize the number of samples readed from the ADC
 
     // Get the partition table and erase the partition to store new data
@@ -338,29 +300,13 @@ void sys_timer_cb(void *arg)
 {
     switch(gSys.STATE)
     {
-        case NONE:
+        case INIT_BLDC_STEP_1:
             ESP_LOGI("sys_timer_cb", "INIT_PWM_BLDC_STEP_1");
-            bldc_set_duty(&gMotor, 55); ///< Set the duty cycle to 6%
-            gSys.STATE = INIT_PWM_BLDC_STEP_1;
-            ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, STEP1_TO_STEP2_US));
-            break;
-
-        case INIT_PWM_BLDC_STEP_1: // Step 1: Start the timer to go to step 2 and set duty >5.7%
-            ESP_LOGI("sys_timer_cb", "INIT_PWM_BLDC_STEP_2");
-            bldc_set_duty(&gMotor, 50); ///< Set the duty cycle to 5%
-            gSys.STATE = INIT_PWM_BLDC_STEP_2;
-            ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, STEPS_TO_SEQ_US));
-            break;
-
-        case INIT_PWM_BLDC_STEP_2: 
-            ESP_LOGI("sys_timer_cb", "SEQ_BLDC_1");
-            // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer));
-            gSys.STATE = SEQ_BLDC_1;
-            gSys.is_bldc_calibrated = true; ///< Set the flag to true to indicate that the BLDC motor is calibrated
-            bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
+            bldc_set_duty(&gMotor, 0); ///< Set the duty to the top position for the ESC
 
             ///< Use the time for the sensor sampling and control the BLDC motor
             gSys.STATE = CHECK_SENSORS;
+            gSys.is_bldc_calibrated = true; ///< Set the flag to true to indicate that the BLDC motor is calibrated
             ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
             break;
 
@@ -379,9 +325,10 @@ void sys_timer_cb(void *arg)
 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
             gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
-            if (gSys.cnt_sample >= NUM_SAMPLES + 1) {
+            if (gSys.cnt_sample >= NUM_SAMPLES) {
                 ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
+                bldc_set_duty(&gMotor, 0); ///< Stop the motor
                 ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_sample);
             }
 
@@ -395,12 +342,12 @@ void sys_timer_cb(void *arg)
 
 void sensor_calibration_cb(void *arg)
 {
-    switch (cnt_cali) {
+    switch (gSys.cnt_cali) {
         case 0:
             printf("AS5600 calibration step 1. \nAs step 4 in page 22 of the datasheet, move the magnet (or wheel) to the MAX position (5 seconds to move it).\n");
 
-            cnt_cali++;
-            esp_timer_start_once(gOneshotTimer, 5*1000*1000); ///< Start the timer to calibrate the AS5600 sensor (5s)
+            gSys.cnt_cali++;
+            esp_timer_start_once(gSys.oneshot_timer2, 5*1000*1000); ///< Start the timer to calibrate the AS5600 sensor (5s)
             break;
         case 1:
             printf("AS5600 calibration step 2. Setting the max position....\n");
@@ -411,8 +358,8 @@ void sensor_calibration_cb(void *arg)
             AS5600_SetStopPosition(&gAs5600, gSys.raw_angle); ///< Set the stop position to the raw angle readed from the AS5600 sensor
             printf("Max position setted. Wait at least 1ms. \n");
 
-            cnt_cali++;
-            esp_timer_start_once(gOneshotTimer, 500*1000); ///< Start the timer to calibrate the AS5600 sensor (500ms)
+            gSys.cnt_cali++;
+            esp_timer_start_once(gSys.oneshot_timer2, 500*1000); ///< Start the timer to calibrate the AS5600 sensor (500ms)
             break;
         case 2:
             printf("AS5600 calibration step 3. \nUse burn commands to permanently write the start and stop positions....\n");
@@ -436,9 +383,7 @@ void sensor_calibration_cb(void *arg)
             }
 
             gSys.is_as5600_calibrated = true; ///< Set the flag to true to indicate that the AS5600 sensor is calibrated
-            gSys.is_bno055_calibrated = true; 
-            gSys.is_vl53l1x_calibrated = true;
-            esp_timer_delete(gOneshotTimer); ///< Delete the timer
+            esp_timer_delete(gSys.oneshot_timer2); ///< Delete the timer
 
             break;
         default:
@@ -511,31 +456,31 @@ void bno055_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
       
-        // Read All data from BNO055 sensor
+        ///< Read All data from BNO055 sensor
         BNO055_ReadAll(&bno055);
 
-        // Data from the BNO055 sensor
+        ///< Data from the BNO055 sensor
 
-        //acceleration m/s^2 in x, y, z axis
+        ///< acceleration m/s^2 in x, y, z axis
         ax = bno055.ax;
         ay = bno055.ay;
         az = bno055.az;
 
-        //degree per second in x, y, z axis
+        ///< degree per second in x, y, z axis
         gx = bno055.gx;
         gy = bno055.gy;
         gz = bno055.gz;
 
-        // Get Euler angles (like an airplane)
+        ///< Get Euler angles (like an airplane)
         roll = bno055.roll;     // Do a barrel roll
         pitch = bno055.pitch;   // up, down
         yaw = bno055.yaw;       // rigth, left
 
-        // Convert to degrees
+        ///< Convert to degrees
         roll *= RAD_TO_DEG;
         pitch *= RAD_TO_DEG;
         yaw *= RAD_TO_DEG;
-        // Invert yaw direction
+        ///< Invert yaw direction
         yaw = 360.0 - yaw;
     
         ///< Notify the control task to process the data
@@ -584,32 +529,28 @@ void control_task(void *pvParameters)
 
         ///< Process the data from the sensors and control the BLDC motor
         if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///< 1s of sampling
-            bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
+            bldc_set_duty_motor(&gMotor, 65);
             gSys.duty = 65;
         }
         else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///< 2s of sampling
-            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            bldc_set_duty_motor(&gMotor, 0);
             gSys.duty = 0;
         }
         else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///< 4s of sampling
-            bldc_set_duty(&gMotor, -75); ///< Set the duty cycle to -7.5%
+            bldc_set_duty_motor(&gMotor, -75);
             gSys.duty = -75;
         }
         else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///< 5s of sampling
-            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            bldc_set_duty_motor(&gMotor, 0);
             gSys.duty = 0;
         }
         else if (gSys.cnt_sample < 7*SAMPLING_RATE_HZ) { ///< 7s of sampling
-            bldc_set_duty(&gMotor, 85); ///< Set the duty cycle to 8.5%
+            bldc_set_duty_motor(&gMotor, 85); ///< Set the duty cycle to 8.5%
             gSys.duty = 85;
         }
         else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///< 8s of sampling
-            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+            bldc_set_duty_motor(&gMotor, 0); ///< Set the duty cycle to 0%
             gSys.duty = 0;
-        }
-        else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///< 10s of sampling
-            bldc_set_duty(&gMotor, -85); ///< Set the duty cycle to -8.5%
-            gSys.duty = -85;
         }
 
         ///< Send the sensor data to the queue
@@ -635,7 +576,7 @@ void save_nvs_task(void *pvParameters)
         esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
         gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
 
-        if (gSys.cnt_sample >= NUM_SAMPLES + 1) { ///< If the number of samples is greater than the number of samples to save, stop the task
+        if (gSys.cnt_sample >= NUM_SAMPLES) { ///< If the number of samples is greater than the number of samples to save, stop the task
             ESP_LOGI(TAG_CMD, "Save task finished");
             break;
         }
