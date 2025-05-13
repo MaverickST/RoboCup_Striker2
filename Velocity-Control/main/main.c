@@ -95,6 +95,16 @@ void sensor_calibration_cb(void *arg);
 void process_cmd(const char *cmd);
 
 /**
+ * @brief Parse the setpoint command received from the UART console.
+ * 
+ * @param command 
+ * @param dir 
+ * @param dist 
+ * @param vel 
+ */
+void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel);
+
+/**
  * @brief Task to handle the UART events
  * 
  * @param pvParameters 
@@ -169,24 +179,24 @@ void app_main(void)
     // Initialize the BNO055 sensor and set the parameters
 
     // Initialize BNO055 sensor
-    int8_t success = 0;
-    success = BNO055_Init(&bno055, 17, 18);
-    while (success != BNO055_SUCCESS) {
-        printf("Error: Failed to initialize BNO055 sensor\n");
-        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-        success = BNO055_Init(&bno055, 17, 18);
-    }
+    // int8_t success = 0;
+    // success = BNO055_Init(&bno055, 17, 18);
+    // while (success != BNO055_SUCCESS) {
+    //     printf("Error: Failed to initialize BNO055 sensor\n");
+    //     vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+    //     success = BNO055_Init(&bno055, 17, 18);
+    // }
     
-    //Load Calibration Data
-    BNO055_SetOperationMode(&bno055, CONFIGMODE);
-    uint8_t calib_offsets[22] = {
-        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
-        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
-        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xE8, 0x03, 0xAD, 0x01   
-    };
-    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
-    BNO055_SetOperationMode(&bno055, IMU);
+    // //Load Calibration Data
+    // BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    // uint8_t calib_offsets[22] = {
+    //     0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+    //     0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+    //     0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+    //     0xE8, 0x03, 0xAD, 0x01   
+    // };
+    // BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    // BNO055_SetOperationMode(&bno055, IMU);
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
@@ -456,32 +466,32 @@ void bno055_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
       
-        ///< Read All data from BNO055 sensor
-        BNO055_ReadAll(&bno055);
+        // ///< Read All data from BNO055 sensor
+        // BNO055_ReadAll(&bno055);
 
-        ///< Data from the BNO055 sensor
+        // ///< Data from the BNO055 sensor
 
-        ///< acceleration m/s^2 in x, y, z axis
-        ax = bno055.ax;
-        ay = bno055.ay;
-        az = bno055.az;
+        // ///< acceleration m/s^2 in x, y, z axis
+        // ax = bno055.ax;
+        // ay = bno055.ay;
+        // az = bno055.az;
 
-        ///< degree per second in x, y, z axis
-        gx = bno055.gx;
-        gy = bno055.gy;
-        gz = bno055.gz;
+        // ///< degree per second in x, y, z axis
+        // gx = bno055.gx;
+        // gy = bno055.gy;
+        // gz = bno055.gz;
 
-        ///< Get Euler angles (like an airplane)
-        roll = bno055.roll;     // Do a barrel roll
-        pitch = bno055.pitch;   // up, down
-        yaw = bno055.yaw;       // rigth, left
+        // ///< Get Euler angles (like an airplane)
+        // roll = bno055.roll;     // Do a barrel roll
+        // pitch = bno055.pitch;   // up, down
+        // yaw = bno055.yaw;       // rigth, left
 
-        ///< Convert to degrees
-        roll *= RAD_TO_DEG;
-        pitch *= RAD_TO_DEG;
-        yaw *= RAD_TO_DEG;
-        ///< Invert yaw direction
-        yaw = 360.0 - yaw;
+        // ///< Convert to degrees
+        // roll *= RAD_TO_DEG;
+        // pitch *= RAD_TO_DEG;
+        // yaw *= RAD_TO_DEG;
+        // ///< Invert yaw direction
+        // yaw = 360.0 - yaw;
     
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
@@ -691,8 +701,52 @@ void process_cmd(const char *cmd)
             ESP_LOGI(TAG_CMD, "color not recognized");
         }
     }
+    ///< Command to set the setpoint of the motor
+    else if (strcmp(cmd, "set") == 0) {
+        if (len_uc_data < 8) { ///< 4 for the command "set " and 4 for the setpoint
+            ESP_LOGI(TAG_CMD, "Invalid SET cmd");
+            return;
+        }
+        char str_value[len_uc_data - 4]; ///< 4 is the length of the command "set "
+        strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
+        str_value[len_uc_data - 4] = '\0'; ///< Add the null terminator
+
+        bool dir = false; ///< Direction of the motor
+        int dist = 0; ///< Distance to move
+        int vel = 0; ///< Velocity to move
+
+        parse_command_setpoint((const uint8_t *)str_value, &dir, &dist, &vel); ///< Parse the command to get the direction, distance and velocity
+        ESP_LOGI(TAG_CMD, "dir-> %d, dist-> %d, vel-> %d", dir, dist, vel);
+    }
     else {
         ESP_LOGI(TAG_CMD, "cmd not recognized");
     }
 }
 
+
+void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel) {
+    // The first character indicates the direction
+    if (command[0] == 'D') {
+        *dir = true;  // right
+    } else if (command[0] == 'I') {
+        *dir = false; // left
+    } else {
+        printf("Invalid command: unknown direction\n");
+        return;
+    }
+
+    // Find the position of the '_'
+    const char *underscore = strchr((const char *)command, '_');
+    if (!underscore) {
+        printf("Invalid command: '_' not found\n");
+        return;
+    }
+
+    // Extract distance: from command[1] up to the character before '_'
+    char distance_str[16] = {0};
+    strncpy(distance_str, (const char *)&command[1], underscore - (const char *)&command[1]);
+    *dist = atoi(distance_str);
+
+    // Extract speed: from the character after '_'
+    *vel = atoi(underscore + 1);
+}

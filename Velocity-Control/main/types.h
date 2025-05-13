@@ -86,6 +86,11 @@ typedef struct
     bool is_vl53l1x_calibrated; ///< Flag to check if the VL53L1X sensor is calibrated or not
     bool is_bldc_calibrated;    ///< Flag to check if the BLDC motor is calibrated or not
 
+    ///< Variables for the control of the BLDC motor
+    bool direction; ///< Direction of the BLDC motor
+    float setpoint_distance; ///< Setpoint distance for the BLDC motor
+    float setpoint_velocity; ///< Setpoint velocity for the BLDC motor
+
     ///< Task handles for the tasks
     TaskHandle_t task_handle_bno055;    ///< Task handle for the BNO055 sensor
     TaskHandle_t task_handle_vl53l1x;   ///< Task handle for the VL53L1X sensor
