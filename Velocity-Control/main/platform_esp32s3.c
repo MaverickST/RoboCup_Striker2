@@ -41,7 +41,7 @@ bool i2c_init(i2c_t *i2c, i2c_port_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda
 
     return true;
 err:
-    return ret == ESP_OK;
+    return false;//ret == ESP_OK;
 }
 
 void i2c_deinit(i2c_t *i2c)

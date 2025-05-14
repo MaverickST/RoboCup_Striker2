@@ -21,6 +21,7 @@
 #define I2C_MASTER_SCL_GPIO 8     /*!< gpio number for I2C master clock */
 #define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
+
 #define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
@@ -174,16 +175,16 @@ void app_main(void)
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
     ///< ---------------------- BNO055 ------------------
-    ///< Initialize BNO055 sensor
+    // Initialize BNO055 sensor
     int8_t success = 0;
-    success = BNO055_Init(&bno055, 17, 18);
+    success = BNO055_Init(&bno055, 18, 17, 0);
     while (success != BNO055_SUCCESS) {
         printf("Error: Failed to initialize BNO055 sensor\n");
         vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-        success = BNO055_Init(&bno055, 17, 18);
+        success = BNO055_Init(&bno055, 18, 17, 0);
     }
     
-    ////< Load Calibration Data
+    //Load Calibration Data
     BNO055_SetOperationMode(&bno055, CONFIGMODE);
     uint8_t calib_offsets[22] = {
         0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 

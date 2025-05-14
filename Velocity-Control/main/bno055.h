@@ -23,6 +23,8 @@
 // Constants for BNO055 include
 #include "bno055_defs.h"
 
+#define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
+#define BNO055_SENSOR_ADDR  0x29        /*!< slave address for BNO055 sensor */
 
 /**
  * @brief Enumerated type for the operation mode of the BNO055 sensor
@@ -94,6 +96,7 @@ typedef struct {
  */
 typedef struct {
     uart_t uart_config; ///> UART configuration structure
+    i2c_t i2c_handle;   ///< I2C handle for the BNO055 sensor
     BNO055_OperationMode operation_mode; ///> Operation mode of the BNO055 sensor
     BNO055_PowerMode power_mode; ///> Power mode of the BNO055 sensor
     BNO055_UnitSettings_t unit_settings; ///> Unit settings of the BNO055 sensor
@@ -137,12 +140,11 @@ typedef struct {
 /**
  * @brief Initialize BNO055 sensor
  * 
- * This function initializes the BNO055 sensor with the specified UART configuration.
+ * This function initializes the BNO055 sensor with the specified I2c (or uart) configuration.
  * 
  * @param bno055 Pointer to the BNO055 sensor structure
- * @param uart_config Pointer to the UART configuration structure
  */
-int8_t BNO055_Init(BNO055_t *bno055, uint8_t gpio_tx, uint8_t gpio_rx);
+int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, i2c_port_t i2c_num);
 
 /**
  * @brief Get the calibration status of the BNO055 sensor
@@ -243,6 +245,16 @@ void BNO055_GetMagnetometer(BNO055_t *bno055, float *mx , float *my , float *mz)
  * @param data Pointer to the data to write
  * @param len Length of the data to write in bytes
  */
+ int8_t BN055_Write_Uart(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len);
+
+/**
+ * @brief Fuctión to send data to the BNO055 sensor for I2C communication
+ * 
+ * @param bno055
+ * @param reg Address of the register to write in HEX
+ * @param data Pointer to the data to write
+ * @param len Length of the data to write in bytes
+ */
 int8_t BN055_Write(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len);
 
 /**
@@ -255,7 +267,18 @@ int8_t BN055_Write(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len);
  * @param timeout_ms Timeout in milliseconds
  * @return int8_t
  */
-int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len, uint8_t timeout_ms);
+int8_t BNO055_Read_Uart(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len, uint8_t timeout_ms);
+
+/**
+ * @brief Function to read data from the BNO055 sensor for I2C communication
+ * 
+ * @param bno055
+ * @param reg Address of the register to read in HEX
+ * @param data Pointer to the data to read
+ * @param len Length of the data to read in bytes
+ * @return int8_t
+ */
+ int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len);
 
 /**
  * @brief Check the ACK value of the BNO055 sensor
@@ -266,7 +289,7 @@ int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len, ui
 int8_t BNO055_CheckAck(uint8_t *data);
 
 /**
- * @brief Read all data from the BNO055 sensor
+ * @brief Read all data from the BNO055 sensor with I2C (or uart)
  * 
  * @param bno055
  * @return int8_t 
