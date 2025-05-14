@@ -124,15 +124,19 @@ void BNO055_ConvertData_Mag(BNO055_t *bno055, uint8_t *data, float *x, float *y,
     }
 }
 
-int8_t BNO055_Init(BNO055_t *bno055, uint8_t gpio_tx, uint8_t gpio_rx)
+int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, i2c_port_t i2c_num)
 {
     int8_t success = BNO055_SUCCESS;
 
     printf("Initializing BNO055 sensor...\n");
 
     // Initialize the UART
-    uart_init(&bno055->uart_config, 115200, 1024, gpio_tx, gpio_rx, UART_PIN_NO_USE, UART_PIN_NO_USE);
-
+    //uart_init(&bno055->uart_config, 115200, 1024, sda, scl, UART_PIN_NO_USE, UART_PIN_NO_USE);
+    //  I2C master configuration 
+    if (!i2c_init(&bno055->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, BNO055_SENSOR_ADDR)) {
+        printf("Error: I2C initialization failed");
+        return BNO055_ERROR;
+    }
 
     // Set operation mode to CONFIGMODE
     bno055->operation_mode = INIT;
@@ -141,17 +145,17 @@ int8_t BNO055_Init(BNO055_t *bno055, uint8_t gpio_tx, uint8_t gpio_rx)
     // Write the default page as zero
     uint8_t data = BNO055_PAGE_ZERO;
     success += BN055_Write(bno055, BNO055_PAGE_ID_ADDR, &data, BNO055_GEN_READ_WRITE_LENGTH);
-
+    
     // Set Unit to m/s^2, rad/s, rad, celcius, Windows orientation
     success += BNO055_SetUnit(bno055, BNO055_ACCEL_UNIT_MSQ, BNO055_GYRO_UNIT_DPS, BNO055_EULER_UNIT_RAD, BNO055_TEMP_UNIT_CELSIUS, BNO055_ANDROID_ORIENTATION);
-
+    
     // Set Power mode to normal
     bno055->power_mode = LOWPOWER;
     success += BNO055_SetPowerMode(bno055, NORMAL);
-
+    
     // Set operation mode to NDOF
     success += BNO055_SetOperationMode(bno055, NDOF);
-
+    
     success += BNO055_GetInfo(bno055);
     
 
@@ -189,7 +193,8 @@ int8_t BNO055_GetCalibrationStatus(BNO055_t *bno055)
 
     // Read the calibration status from the BNO055 sensor
     uint8_t calib_status = 0;
-    int8_t success = BNO055_Read(bno055, BNO055_CALIB_STAT_ADDR, &calib_status, 1, 10);
+    //int8_t success = BNO055_Read_Uart(bno055, BNO055_CALIB_STAT_ADDR, &calib_status, 1, 10);
+    int8_t success = BNO055_Read(bno055, BNO055_CALIB_STAT_ADDR, &calib_status, 1);
 
     // Print the calibration status
     printf("Calibration Status: %02X\n", calib_status);
@@ -226,7 +231,8 @@ int8_t BNO055_GetInfo(BNO055_t *bno055)
     // // Get information from the BNO055 sensor
     uint8_t data_read[8] = {0};
     int8_t success = 0;
-    success = BNO055_Read(bno055, BNO055_CHIP_ID_ADDR, data_read, 8, 16);
+    //success = BNO055_Read_Uart(bno055, BNO055_CHIP_ID_ADDR, data_read, 8, 16);
+    success = BNO055_Read(bno055, BNO055_CHIP_ID_ADDR, data_read, 8);
 
     printf("Data read: ");
     for (uint8_t i = 0; i < 8; i++) {
@@ -275,7 +281,8 @@ void BNO055_GetEulerAngles(BNO055_t *bno055, float *yaw, float *pitch, float *ro
     int8_t success = 0;
     // Read the Euler angles from the BNO055 sensor
     uint8_t data[6] = {0};
-    success = BNO055_Read(bno055, BNO055_EULER_H_LSB_ADDR, data, 6, 5);
+    //success = BNO055_Read_Uart(bno055, BNO055_EULER_H_LSB_ADDR, data, 6, 5);
+    success = BNO055_Read(bno055, BNO055_EULER_H_LSB_ADDR, data, 6);
 
     // Convert the data to float
     // Convert the data to radians (1 radian = 900 LSB)
@@ -303,9 +310,22 @@ int8_t BN055_Write(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len)
         return -1; // Error: Null pointer
     }
 
-    if (len + 4 > 128) { // Check for buffer overflow
-        printf("Error: Data length exceeds buffer size\n");
-        return -2; // Error: Buffer overflow
+    printf("Write operation\n");
+    // The structure for write data is as follows:
+    // | Start Byte | Opertation | Register | Length | Data 1 | Data 2 | ... | Data N |
+
+    i2c_write_reg(&bno055->i2c_handle, reg, data, len);
+
+    return BNO055_SUCCESS;
+
+
+}
+
+/* int8_t BN055_Write_Uart(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len)
+{
+    if (bno055 == NULL || data == NULL) {
+        printf("Error: Null pointer provided\n");
+        return -1; // Error: Null pointer
     }
 
     printf("Write operation\n");
@@ -352,14 +372,14 @@ int8_t BN055_Write(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len)
         return BNO055_SUCCESS;
     } else {
         printf("Write operation failed\n");
-    }
+    } 
 
     return BNO055_ERROR;
 
 
-}
+} */
 
-int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len, uint8_t timeout_ms)
+/* int8_t BNO055_Read_Uart(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len, uint8_t timeout_ms)
 {
     if (bno055 == NULL || data == NULL) {
         printf("Error: Null pointer provided\n");
@@ -460,6 +480,18 @@ int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len, ui
     }
     
     return BNO055_SUCCESS;
+} */
+
+int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len)
+{
+    if (bno055 == NULL || data == NULL) {
+        printf("Error: Null pointer provided\n");
+        return -1; // Error: Null pointer
+    }
+    
+    i2c_read_reg(&bno055->i2c_handle, reg, data, len);
+    
+    return BNO055_SUCCESS;
 }
 
 int8_t BNO055_CheckAck(uint8_t *data)
@@ -485,7 +517,8 @@ int8_t BNO055_CheckAck(uint8_t *data)
 int8_t BNO055_ReadAll(BNO055_t *bno055)
 {
     uint8_t data[24]; // 24 bytes of data (6 bytes for each value, Accelerometer, Magnetometer, Gyroscope, Euler angles)
-    int8_t log = BNO055_Read(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 24, 5);
+    //int8_t log = BNO055_Read_Uart(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 24, 5);
+    int8_t log = BNO055_Read(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 24);
 
     // Check if the read operation was successful
     if (log != BNO055_SUCCESS) {
@@ -550,7 +583,8 @@ int8_t BNO055_SetOperationMode(BNO055_t *bno055, BNO055_OperationMode mode)
 void BNO055_GetAcceleration(BNO055_t *bno055, float *x, float *y, float *z)
 {
     uint8_t data[6];
-    BNO055_Read(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 6, 5);
+    //BNO055_Read_Uart(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 6, 5);
+    BNO055_Read(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 6);
 
     // Convert the data to float
     BNO055_ConvertData_Accel(bno055, data, x, y, z);
@@ -559,7 +593,8 @@ void BNO055_GetAcceleration(BNO055_t *bno055, float *x, float *y, float *z)
 void BNO055_GetGyro(BNO055_t *bno055, float *gx, float *gy, float *gz)
 {
     uint8_t data[6];
-    BNO055_Read(bno055, BNO055_GYRO_DATA_X_LSB_ADDR, data, 6, 5);
+    //BNO055_Read_Uart(bno055, BNO055_GYRO_DATA_X_LSB_ADDR, data, 6, 5);
+    BNO055_Read(bno055, BNO055_GYRO_DATA_X_LSB_ADDR, data, 6);
 
     // Convert the data to float
     BNO055_ConvertData_Gyro(bno055, data, gx, gy, gz);
@@ -642,7 +677,8 @@ int8_t BNO055_GetCalibrationProfile(BNO055_t *bno055, BNO055_CalibProfile_t *cal
 
     // Read sensor offsets
     uint8_t calib_offsets[22] = {0};
-    success = BNO055_Read(bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22, 12);
+    //success = BNO055_Read_Uart(bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22, 12);
+    success = BNO055_Read(bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
     if (success != BNO055_SUCCESS) {
         printf("Error: Failed to read calibration offsets\n");
         // Switch back to the previous operation mode

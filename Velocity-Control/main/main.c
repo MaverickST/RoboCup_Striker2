@@ -18,7 +18,6 @@
 #define I2C_MASTER_SCL_GPIO 4       /*!< gpio number for I2C master clock */
 #define I2C_MASTER_SDA_GPIO 5       /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
-#define I2C_MASTER_NUM 1            /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
@@ -170,11 +169,11 @@ void app_main(void)
 
     // Initialize BNO055 sensor
     int8_t success = 0;
-    success = BNO055_Init(&bno055, 17, 18);
+    success = BNO055_Init(&bno055, 18, 17, 0);
     while (success != BNO055_SUCCESS) {
         printf("Error: Failed to initialize BNO055 sensor\n");
         vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-        success = BNO055_Init(&bno055, 17, 18);
+        success = BNO055_Init(&bno055, 18, 17, 0);
     }
     
     //Load Calibration Data
@@ -187,11 +186,13 @@ void app_main(void)
     };
     BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
     BNO055_SetOperationMode(&bno055, IMU);
+    gSys.is_bno055_calibrated = true;
 
-    /* // Read the data from the BNO055 sensor
-    float roll, pitch, yaw;
+    // Read the data from the BNO055 sensor
+    /* float roll, pitch, yaw;
     float gx, gy, gz;
     float ax, ay, az;
+    long unsigned int timestamp = 0;
 
     while (true) {
         // Read All data from BNO055 sensor
@@ -221,9 +222,11 @@ void app_main(void)
         // Invert yaw direction
         yaw = 360.0 - yaw;
 
-        long unsigned int timestamp = 0;
-        printf("I,%" PRIu32 "\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\r\n", timestamp, gx, gy, gz, ax, ay, az);
-        vTaskDelay(pdMS_TO_TICKS(500));
+        //timestamp += 10;
+        //if(timestamp == 3000){
+        //printf("I,%" PRIu32 "\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\r\n", timestamp, gx, gy, gz, ax, ay, az);
+        //timestamp = 0;} 
+        vTaskDelay(pdMS_TO_TICKS(10));
     } */
 
     ///< Create a task to manage the BNO055 sensor
@@ -237,7 +240,7 @@ void app_main(void)
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
 
     ///< ---------------------- AS5600 -------------------
-    AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
+    AS5600_Init(&gAs5600, 0, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
     AS5600_config_t conf = {
