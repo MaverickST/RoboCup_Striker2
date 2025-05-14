@@ -29,6 +29,7 @@
 #define I2C_MASTER_SCL_GPIO 8     /*!< gpio number for I2C master clock */
 #define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
+
 #define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
@@ -196,24 +197,66 @@ void app_main(void)
     // Initialize the BNO055 sensor and set the parameters
 
     // Initialize BNO055 sensor
-    // int8_t success = 0;
-    // success = BNO055_Init(&bno055, 17, 18);
-    // while (success != BNO055_SUCCESS) {
-    //     printf("Error: Failed to initialize BNO055 sensor\n");
-    //     vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-    //     success = BNO055_Init(&bno055, 17, 18);
-    // }
+    int8_t success = 0;
+    success = BNO055_Init(&bno055, 18, 17, 0);
+    while (success != BNO055_SUCCESS) {
+        printf("Error: Failed to initialize BNO055 sensor\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+        success = BNO055_Init(&bno055, 18, 17, 0);
+    }
     
-    // //Load Calibration Data
-    // BNO055_SetOperationMode(&bno055, CONFIGMODE);
-    // uint8_t calib_offsets[22] = {
-    //     0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
-    //     0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
-    //     0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-    //     0xE8, 0x03, 0xAD, 0x01   
-    // };
-    // BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
-    // BNO055_SetOperationMode(&bno055, IMU);
+    //Load Calibration Data
+    BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    uint8_t calib_offsets[22] = {
+        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xE8, 0x03, 0xAD, 0x01   
+    };
+    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    BNO055_SetOperationMode(&bno055, IMU);
+    gSys.is_bno055_calibrated = true;
+
+    // Read the data from the BNO055 sensor
+    /* float roll, pitch, yaw;
+    float gx, gy, gz;
+    float ax, ay, az;
+    long unsigned int timestamp = 0;
+
+    while (true) {
+        // Read All data from BNO055 sensor
+        BNO055_ReadAll(&bno055);
+
+        // Data from the BNO055 sensor
+
+        //acceleration m/s^2 in x, y, z axis
+        ax = bno055.ax;
+        ay = bno055.ay;
+        az = bno055.az;
+
+        //degree per second in x, y, z axis
+        gx = bno055.gx;
+        gy = bno055.gy;
+        gz = bno055.gz;
+
+        // Get Euler angles (like an airplane)
+        roll = bno055.roll;     // Do a barrel roll
+        pitch = bno055.pitch;   // up, down
+        yaw = bno055.yaw;       // rigth, left
+
+        // Convert to degrees
+        roll *= RAD_TO_DEG;
+        pitch *= RAD_TO_DEG;
+        yaw *= RAD_TO_DEG;
+        // Invert yaw direction
+        yaw = 360.0 - yaw;
+
+        //timestamp += 10;
+        //if(timestamp == 3000){
+        //printf("I,%" PRIu32 "\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\n%.4f\r\n", timestamp, gx, gy, gz, ax, ay, az);
+        //timestamp = 0;} 
+        vTaskDelay(pdMS_TO_TICKS(10));
+    } */
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
