@@ -55,7 +55,7 @@ typedef struct
 
     enum
     {
-        NONE_TO_STEPS_US   = 5*1000*1000, ///< The time between the initial state and the first step is 100ms
+        NONE_TO_STEPS_US   = 3*1000*1000, ///< The time between the initial state and the first step is 100ms
         STEP1_TO_STEP2_US  = 3*1000*1000, ///< The time between step 1 and step 2 is 1s
         STEPS_TO_SEQ_US    = 5*1000*1000, ///< The time between the first two steps and the sequence is 5s
     } TIME;
