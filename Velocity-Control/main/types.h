@@ -11,13 +11,12 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "sdkconfig.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h"
 #include "freertos/semphr.h"
+#include "freertos/queue.h"
 #include "esp_partition.h"
 #include "esp_flash.h"
 #include "esp_timer.h"
@@ -27,6 +26,7 @@
 #define TIME_SAMPLING_S		10		/* 10s sampling data */
 #define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
+#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
 
 
 typedef union
@@ -49,7 +49,8 @@ typedef struct
         // To initialize the motor, it is necessary to send two PWM signals to the BLDC motor (ESC)
         INIT_BLDC_STEP_1, ///< The first PWM value
 
-        SYS_SAMPLING, ///< The system is running
+        SYS_SAMPLING_EXP, ///< The system is running the experiment for the indentification of the BLDC motor
+        SYS_SAMPLING_CONTROL, ///< The system is sampling the data for a control command.
         CHECK_SENSORS, ///< Check if the sensors are calibrated
     } STATE;
 
@@ -61,6 +62,7 @@ typedef struct
     } TIME;
 
     int cnt_sample; ///< Count the number of samples readed from all the sensors.
+    int cnt_smp_control; ///< Count the number of samples readed from all the sensors for the control command.
 
     /**
      * @brief Buffer to save the data from sensors during 5s, so there are 5*SAMPLING_RATE_HZ samples, and
@@ -87,9 +89,9 @@ typedef struct
     bool is_bldc_calibrated;    ///< Flag to check if the BLDC motor is calibrated or not
 
     ///< Variables for the control of the BLDC motor
-    bool direction; ///< Direction of the BLDC motor
-    float setpoint_distance; ///< Setpoint distance for the BLDC motor
-    float setpoint_velocity; ///< Setpoint velocity for the BLDC motor
+    bool setpoint_dir; ///< Direction of the BLDC motor
+    float setpoint_dist; ///< Setpoint distance for the BLDC motor
+    float setpoint_vel; ///< Setpoint velocity for the BLDC motor
 
     ///< Task handles for the tasks
     TaskHandle_t task_handle_bno055;    ///< Task handle for the BNO055 sensor
@@ -99,15 +101,12 @@ typedef struct
     TaskHandle_t task_handle_trigger;    ///< Task handle for the trigger task
     TaskHandle_t task_handle_save;      ///< Task handle for the save task
 
-    uint16_t duty_to_save;          ///< PWM value to save in the NVS
     uint32_t current_bytes_written; ///< Number of samples readed from the ADC
     esp_timer_handle_t oneshot_timer;    ///< Timer to control the sequence
     esp_timer_handle_t oneshot_timer2;    ///< Timer to control the sequence
     int8_t cnt_cali; ///< Counter for the calibration process
     const esp_partition_t *part;   ///< Pointer to the partition table
 
-    uint32_t start_adc_time;
-    uint32_t done_adc_time;
 }system_t;
 
 /**

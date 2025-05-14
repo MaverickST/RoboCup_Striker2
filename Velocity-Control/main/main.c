@@ -1,17 +1,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "sdkconfig.h"
-#include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
-#include "esp_partition.h"
-#include "esp_flash.h"
-#include "esp_timer.h"
-// #include "nvs_flash.h"
-// #include "driver/spi_common.h"
-#include "platform_esp32s3.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <math.h>
 
 #include "types.h"
 #include "led.h"
@@ -71,9 +63,6 @@ bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
 
-esp_timer_handle_t gOneshotTimer;
-uint8_t cnt_cali; ///< Counter for the calibration process4
-
 vl53l1x_t gvl53l1x;
 
 BNO055_t bno055; // BNO055 sensor structure
@@ -96,13 +85,6 @@ void init_system(void);
  * @param arg 
  */
 void sys_timer_cb(void *arg);
-
-/**
- * @brief Callback for the AS5600 sensor calibration
- * 
- * @param arg 
- */
-void sensor_calibration_cb(void *arg);
 
 /**
  * @brief Proccess the command received from the UART console
@@ -192,84 +174,40 @@ void app_main(void)
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
     ///< ---------------------- BNO055 ------------------
-    // BENJAMIN'S CODE
-    // Initialize the BNO055 sensor and set the parameters
-
-    // Initialize BNO055 sensor
-    // int8_t success = 0;
-    // success = BNO055_Init(&bno055, 17, 18);
-    // while (success != BNO055_SUCCESS) {
-    //     printf("Error: Failed to initialize BNO055 sensor\n");
-    //     vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-    //     success = BNO055_Init(&bno055, 17, 18);
-    // }
+    ///< Initialize BNO055 sensor
+    int8_t success = 0;
+    success = BNO055_Init(&bno055, 17, 18);
+    while (success != BNO055_SUCCESS) {
+        printf("Error: Failed to initialize BNO055 sensor\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+        success = BNO055_Init(&bno055, 17, 18);
+    }
     
-    // //Load Calibration Data
-    // BNO055_SetOperationMode(&bno055, CONFIGMODE);
-    // uint8_t calib_offsets[22] = {
-    //     0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
-    //     0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
-    //     0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-    //     0xE8, 0x03, 0xAD, 0x01   
-    // };
-    // BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
-    // BNO055_SetOperationMode(&bno055, IMU);
+    ////< Load Calibration Data
+    BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    uint8_t calib_offsets[22] = {
+        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xE8, 0x03, 0xAD, 0x01   
+    };
+    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    BNO055_SetOperationMode(&bno055, IMU);
+    gSys.is_bno055_calibrated= true;
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
 
     ///< ---------------------- VL53L1X ------------------
-    // KEVIN'S CODE
-    // direction of the sensor
-    // Initialize the VL53L1X sensor and set the parameters
+    ///< Initialize the VL53L1X sensor and set the parameters
     if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, false)) {
         ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed");
         return;
     }
 
-    
-
     //Flag to check if the sensor is calibrated
     gSys.is_vl53l1x_calibrated = true;
-
-    //Flags true for test
-    gSys.is_as5600_calibrated = true;
-    gSys.is_bno055_calibrated = true;
-    gSys.is_bldc_calibrated = true;
-      
     VL53L1X_startContinuous(&gvl53l1x,10);
-    // uint16_t distance_mm ;
-    // while(1){
-
-    //     // Check if data is ready using VL53L1X_dataReady
-    //     if (VL53L1X_dataReady(&gvl53l1x)) {
-    //         // If data is ready, read it non-blockingly
-    //         distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
-            
-    //         // VL53L1X_readDistance (when non-blocking and data is ready) should give a valid distance.
-    //         // It might still return 0 or an error code if something went wrong during the read itself,
-    //         // though the primary purpose of dataReady is to avoid reading when no new data is present.
-    //         // The exact return value for "no error" vs "error" in non-blocking mode depends on the
-    //         // VL53L1X_readDistance implementation. Assuming it returns measured distance or 0 on error/no data.
-    //         if (distance_mm > 0) { // A simple check, adjust if your sensor can legitimately read 0 mm.
-    //             // print the distance
-    //             ESP_LOGI(TAG_VL53L1X, "Distance: %d mm", distance_mm);
-    //             // Save the distance to the system structure
-                
-    //             } else {
-    //             // This might occur if readDistance itself failed after dataReady was true,
-    //             // or if 0 is a legitimate but problematic reading.
-    //             }
-    //     } else {
-    //         // Optional: Log if data is not ready, though this might be frequent
-    //         // ESP_LOGD(TAG_VL53L1X_MainTest, "Data not ready");
-    //     }
-        
-    //     // Delay to maintain the approximate 10ms loop frequency
-    //     vTaskDelay(pdMS_TO_TICKS(10)); 
-    
-    // }
-    
 
     ///< Create a task to manage the VL53L1X sensor
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
@@ -297,7 +235,7 @@ void app_main(void)
     gSys.is_as5600_calibrated = true;
     
     // Create a task to manage the AS5600 sensor
-    // xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
+    xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
 
     ///< ---------------------- SYSTEM -------------------
     // 'System' refers to more general variables and functions that are used to control the system, which
@@ -356,7 +294,7 @@ void init_system(void)
     xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 1, &gSys.task_handle_trigger);
 
     ///< Create the save task
-    gSys.queue = xQueueCreate(5, sizeof(uint8_t)*20); ///< Create a queue to send the data to the save task
+    gSys.queue = xQueueCreate(5, sizeof(uint8_t)*25); ///< Create a queue to send the data to the save task
     xTaskCreate(save_nvs_task, "save_nvs_task", 3*1024, NULL, 6, &gSys.task_handle_save);
 
 }
@@ -379,25 +317,39 @@ void sys_timer_cb(void *arg)
         case CHECK_SENSORS:
             // Check if the sensors are calibrated
             if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated && gSys.is_bldc_calibrated) {
-                gSys.STATE = SYS_SAMPLING; ///< Set the state to sampling
+                gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
                 ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
             }
             break;
 
-        case SYS_SAMPLING:
+        case SYS_SAMPLING_EXP:
             BaseType_t mustYield = pdFALSE;
-            
             vTaskNotifyGiveFromISR(gSys.task_handle_trigger, &mustYield);
 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
             gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
             if (gSys.cnt_sample >= NUM_SAMPLES) {
                 ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
-                ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
+                // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
                 bldc_set_duty(&gMotor, 0); ///< Stop the motor
                 ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_sample);
+                gSys.STATE = NONE;
             }
 
+            break;
+
+        case SYS_SAMPLING_CONTROL:
+            mustYield = pdFALSE;
+            vTaskNotifyGiveFromISR(gSys.task_handle_trigger, &mustYield);
+            // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
+
+            gSys.cnt_smp_control++; ///< Increment the number of samples readed from all the sensors
+            if (gSys.cnt_smp_control >= NUM_SAMPLES_CONTROL) {
+                ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
+                // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
+                bldc_set_duty(&gMotor, 0); ///< Stop the motor
+                ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_smp_control);
+            }
             break;
 
         default:
@@ -470,32 +422,17 @@ void bno055_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
       
-        // ///< Read All data from BNO055 sensor
-        // BNO055_ReadAll(&bno055);
+        ///< Read All data from BNO055 sensor
+        BNO055_ReadAll(&bno055);
 
-        // ///< Data from the BNO055 sensor
+        ///< Data from the BNO055 sensor
+        ///< acceleration m/s^2 in x, y, z axis
+        ax = bno055.ax;
+        ay = bno055.ay;
+        az = bno055.az;
 
-        // ///< acceleration m/s^2 in x, y, z axis
-        // ax = bno055.ax;
-        // ay = bno055.ay;
-        // az = bno055.az;
-
-        // ///< degree per second in x, y, z axis
-        // gx = bno055.gx;
-        // gy = bno055.gy;
-        // gz = bno055.gz;
-
-        // ///< Get Euler angles (like an airplane)
-        // roll = bno055.roll;     // Do a barrel roll
-        // pitch = bno055.pitch;   // up, down
-        // yaw = bno055.yaw;       // rigth, left
-
-        // ///< Convert to degrees
-        // roll *= RAD_TO_DEG;
-        // pitch *= RAD_TO_DEG;
-        // yaw *= RAD_TO_DEG;
-        // ///< Invert yaw direction
-        // yaw = 360.0 - yaw;
+        ///< From ax and ay we can calculate the accelation in the plane
+        gSys.acceleration = sqrt(ax*ax + ay*ay + az*az);
     
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
@@ -614,7 +551,7 @@ void control_task(void *pvParameters)
 
 void save_nvs_task(void *pvParameters)
 {
-    uint8_t data[20]; ///< Buffer to save the data from the queue
+    uint8_t data[25]; ///< Buffer to save the data from the queue
     while (true) {
         ///< Wait for the data from the control task
         xQueueReceive(gSys.queue, (void *const)data, portMAX_DELAY); ///< Receive the data from the queue
@@ -739,8 +676,12 @@ void process_cmd(const char *cmd)
             ESP_LOGI(TAG_CMD, "color not recognized");
         }
     }
-    ///< Command to set the setpoint of the motor
+    ///< Control ommand to set the setpoint of the motor
     else if (strcmp(cmd, "set") == 0) {
+        if (gSys.STATE != NONE) { ///< If the system is not in the NONE state, that means the system is busy
+            ESP_LOGI(TAG_CMD, "System is busy");
+            return;
+        }
         if (len_uc_data < 8) { ///< 4 for the command "set " and 4 for the setpoint
             ESP_LOGI(TAG_CMD, "Invalid SET cmd");
             return;
@@ -750,11 +691,21 @@ void process_cmd(const char *cmd)
         str_value[len_uc_data - 4] = '\0'; ///< Add the null terminator
 
         bool dir = false; ///< Direction of the motor
-        int dist = 0; ///< Distance to move
-        int vel = 0; ///< Velocity to move
+        int dist = 0; ///< Distance to move (cm)
+        int vel = 0; ///< Velocity to move (cm/s)
 
         parse_command_setpoint((const uint8_t *)str_value, &dir, &dist, &vel); ///< Parse the command to get the direction, distance and velocity
         ESP_LOGI(TAG_CMD, "dir-> %d, dist-> %d, vel-> %d", dir, dist, vel);
+
+        gSys.setpoint_dir = dir; ///< Set the direction of the motor
+        gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
+        gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+
+        ///< Init the control experiment
+        gSys.STATE = SYS_SAMPLING_CONTROL; ///< Set the state to control the BLDC motor
+        gSys.duty = 0; ///< Set the duty to 0
+        gSys.cnt_smp_control = 0; ///< Set the number of samples to 0
+        ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
     }
     else {
         ESP_LOGI(TAG_CMD, "cmd not recognized");
@@ -763,7 +714,7 @@ void process_cmd(const char *cmd)
 
 
 void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel) {
-    // The first character indicates the direction
+    ///< The first character indicates the direction
     if (command[0] == 'D') {
         *dir = true;  // right
     } else if (command[0] == 'I') {
@@ -773,18 +724,18 @@ void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *v
         return;
     }
 
-    // Find the position of the '_'
+    ///< Find the position of the '_'
     const char *underscore = strchr((const char *)command, '_');
     if (!underscore) {
         printf("Invalid command: '_' not found\n");
         return;
     }
 
-    // Extract distance: from command[1] up to the character before '_'
+    ///< Extract distance: from command[1] up to the character before '_'
     char distance_str[16] = {0};
     strncpy(distance_str, (const char *)&command[1], underscore - (const char *)&command[1]);
     *dist = atoi(distance_str);
 
-    // Extract speed: from the character after '_'
+    ///< Extract speed: from the character after '_'
     *vel = atoi(underscore + 1);
 }
