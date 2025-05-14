@@ -87,7 +87,7 @@ esp_err_t bldc_disable(bldc_pwm_motor_t *motor);
  * @param motor instance of the motor
  * @param duty range from 0 to 1000, where 0 is 0% and 1000 is 100%
  */
-esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, uint16_t duty);
+esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int duty);
 
 /**
  * @brief Set the duty which will receive the ESC. The duty is a value between 0 and 100.

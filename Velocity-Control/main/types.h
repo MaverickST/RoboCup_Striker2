@@ -55,7 +55,7 @@ typedef struct
 
     enum
     {
-        NONE_TO_STEPS_US   = 5*1000*1000, ///< The time between the initial state and the first step is 100ms
+        NONE_TO_STEPS_US   = 3*1000*1000, ///< The time between the initial state and the first step is 100ms
         STEP1_TO_STEP2_US  = 3*1000*1000, ///< The time between step 1 and step 2 is 1s
         STEPS_TO_SEQ_US    = 5*1000*1000, ///< The time between the first two steps and the sequence is 5s
     } TIME;
@@ -85,6 +85,11 @@ typedef struct
     bool is_bno055_calibrated;  ///< Flag to check if the BNO055 sensor is calibrated or not
     bool is_vl53l1x_calibrated; ///< Flag to check if the VL53L1X sensor is calibrated or not
     bool is_bldc_calibrated;    ///< Flag to check if the BLDC motor is calibrated or not
+
+    ///< Variables for the control of the BLDC motor
+    bool direction; ///< Direction of the BLDC motor
+    float setpoint_distance; ///< Setpoint distance for the BLDC motor
+    float setpoint_velocity; ///< Setpoint velocity for the BLDC motor
 
     ///< Task handles for the tasks
     TaskHandle_t task_handle_bno055;    ///< Task handle for the BNO055 sensor

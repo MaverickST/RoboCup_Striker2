@@ -92,7 +92,7 @@ esp_err_t bldc_disable(bldc_pwm_motor_t *motor)
     return ESP_OK;
 }
 
-esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, uint16_t duty)
+esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int duty)
 {
     if (duty > 1000) {
         // ESP_LOGE(BLDC_TAG, "duty %d is greater than 1000", duty);
@@ -125,10 +125,10 @@ esp_err_t bldc_set_duty_motor(bldc_pwm_motor_t *motor, float duty)
     }
 
     ///< Maps the duty value to the range of 0 to 1000 considering the bottom and top duty cycle
-    uint16_t mapped_duty = MAP(duty, 0, 100, motor->pwm_bottom_duty, motor->pwm_top_duty);
-    uint16_t mapped_duty_rev = MAP(reverse, 0, 100, motor->pwm_top_duty, motor->pwm_bottom_duty);
-    uint32_t cmp_value = motor->max_cmp * mapped_duty / 1000; ///< Maps the duty value to the range of 0 to max_cmp
-    uint32_t cmp_value_rev = motor->max_cmp * mapped_duty_rev / 1000; ///< Maps the duty value to the range of 0 to max_cmp
+    int mapped_duty = MAP(duty, 0, 100, motor->pwm_bottom_duty, motor->pwm_top_duty);
+    int mapped_duty_rev = MAP(reverse, 0, 100, motor->pwm_bottom_duty, motor->pwm_top_duty);
+    uint32_t cmp_value =  mapped_duty * motor->max_cmp / 1000; ///< Maps the duty value to the range of 0 to max_cmp
+    uint32_t cmp_value_rev =  mapped_duty_rev * motor->max_cmp / 1000; ///< Maps the duty value to the range of 0 to max_cmp
 
     ///< Set the compare value for the forward and reverse signals
     ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp, cmp_value), BLDC_TAG, "set compare value failed");
