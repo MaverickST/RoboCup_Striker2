@@ -1,6 +1,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "sdkconfig.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "esp_partition.h"
+#include "esp_flash.h"
+#include "esp_timer.h"
+// #include "nvs_flash.h"
+// #include "driver/spi_common.h"
+#include "platform_esp32s3.h"
 
 #include "types.h"
 #include "led.h"
@@ -8,22 +19,26 @@
 #include "platform_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
+#include "vl53l1x.h"
 #include "bno055.h"
-
 
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
 
-#define I2C_MASTER_SCL_GPIO 4       /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 5       /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_GPIO 8     /*!< gpio number for I2C master clock */
+#define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
+
+#define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
 #define MOTOR_MCPWM_DUTY_TICK_MAX       (MOTOR_MCPWM_TIMER_RESOLUTION_HZ / MOTOR_MCPWM_FREQ_HZ) // maximum value we can set for the duty cycle, in ticks
 #define MOTOR_MCPWM_GPIO                3
 #define MOTOR_REVERSE_GPIO              8
+#define MOTOR_PWM_BOTTOM_DUTY           50
+#define MOTOR_PWM_TOP_DUTY              120
 
 #define LED_TIME_US     2*1000*1000
 #define LED_LSB_GPIO    15
@@ -56,12 +71,15 @@ uart_console_t gUc;
 bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
-esp_timer_handle_t gOneshotTimer;
 
-uint8_t cnt_cali; ///< Counter for the calibration process
+esp_timer_handle_t gOneshotTimer;
+uint8_t cnt_cali; ///< Counter for the calibration process4
+
+vl53l1x_t gvl53l1x;
 
 BNO055_t bno055; // BNO055 sensor structure
 BNO055_CalibProfile_t calib_data; // Calibration data structure
+
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -93,6 +111,16 @@ void sensor_calibration_cb(void *arg);
  * @param cmd 
  */
 void process_cmd(const char *cmd);
+
+/**
+ * @brief Parse the setpoint command received from the UART console.
+ * 
+ * @param command 
+ * @param dir 
+ * @param dist 
+ * @param vel 
+ */
+void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel);
 
 /**
  * @brief Task to handle the UART events
@@ -159,9 +187,10 @@ void app_main(void)
     xTaskCreate(uart_event_task, "uart_event_task", 3*1024, NULL, 1, NULL);
 
     ///< ---------------------- BLDC ---------------------
-    bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, MOTOR_MCPWM_TIMER_RESOLUTION_HZ);
+    bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, 
+                MOTOR_MCPWM_TIMER_RESOLUTION_HZ, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY);
     bldc_enable(&gMotor);
-    bldc_set_duty(&gMotor, 1); // Set duty to 0.1%, so the motor will not move
+    bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
@@ -234,13 +263,63 @@ void app_main(void)
 
     ///< ---------------------- VL53L1X ------------------
     // KEVIN'S CODE
+    // direction of the sensor
     // Initialize the VL53L1X sensor and set the parameters
+    if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, false)) {
+        ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed");
+        return;
+    }
+
+    
+
+    //Flag to check if the sensor is calibrated
+    gSys.is_vl53l1x_calibrated = true;
+
+    //Flags true for test
+    gSys.is_as5600_calibrated = true;
+    gSys.is_bno055_calibrated = true;
+    gSys.is_bldc_calibrated = true;
+      
+    VL53L1X_startContinuous(&gvl53l1x,10);
+    // uint16_t distance_mm ;
+    // while(1){
+
+    //     // Check if data is ready using VL53L1X_dataReady
+    //     if (VL53L1X_dataReady(&gvl53l1x)) {
+    //         // If data is ready, read it non-blockingly
+    //         distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
+            
+    //         // VL53L1X_readDistance (when non-blocking and data is ready) should give a valid distance.
+    //         // It might still return 0 or an error code if something went wrong during the read itself,
+    //         // though the primary purpose of dataReady is to avoid reading when no new data is present.
+    //         // The exact return value for "no error" vs "error" in non-blocking mode depends on the
+    //         // VL53L1X_readDistance implementation. Assuming it returns measured distance or 0 on error/no data.
+    //         if (distance_mm > 0) { // A simple check, adjust if your sensor can legitimately read 0 mm.
+    //             // print the distance
+    //             ESP_LOGI(TAG_VL53L1X, "Distance: %d mm", distance_mm);
+    //             // Save the distance to the system structure
+                
+    //             } else {
+    //             // This might occur if readDistance itself failed after dataReady was true,
+    //             // or if 0 is a legitimate but problematic reading.
+    //             }
+    //     } else {
+    //         // Optional: Log if data is not ready, though this might be frequent
+    //         // ESP_LOGD(TAG_VL53L1X_MainTest, "Data not ready");
+    //     }
+        
+    //     // Delay to maintain the approximate 10ms loop frequency
+    //     vTaskDelay(pdMS_TO_TICKS(10)); 
+    
+    // }
+    
 
     ///< Create a task to manage the VL53L1X sensor
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
 
     ///< ---------------------- AS5600 -------------------
-    AS5600_Init(&gAs5600, 0, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
+    // Initialize the AS5600 sensor
+    // AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
     AS5600_config_t conf = {
@@ -253,23 +332,15 @@ void app_main(void)
         .WD = AS5600_WATCHDOG_ON, ///< Watchdog on
     };
     AS5600_SetConf(&gAs5600, conf);
+    AS5600_InitADC(&gAs5600);
 
-    // Create a one-shot timer to control the sequence
-    const esp_timer_create_args_t oneshot_timer_args = {
-        .callback = &sensor_calibration_cb,
-        .arg = NULL, ////< argument specified here will be passed to timer callback function
-        .name = "as5600_cali-one-shot" ///< name is optional, but may help identify the timer when debugging
-    };
-    esp_timer_handle_t oneshot_timer;
-    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer));
-    gOneshotTimer = oneshot_timer;
-    cnt_cali = 0; ///< Initialize the counter for the calibration process
-
-    ESP_ERROR_CHECK(esp_timer_start_once(gOneshotTimer, 500*1000)); ///< Start the timer to calibrate the AS5600 sensor
-    ESP_LOGI("app_main", "AS5600 calibration timer started");
+    ///< Sensor calibration
+    AS5600_SetStartPosition(&gAs5600, 0x0000);
+    AS5600_SetStopPosition(&gAs5600, 0x0FFF);
+    gSys.is_as5600_calibrated = true;
     
-    ///< Create a task to manage the AS5600 sensor
-    xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
+    // Create a task to manage the AS5600 sensor
+    // xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
 
     ///< ---------------------- SYSTEM -------------------
     // 'System' refers to more general variables and functions that are used to control the system, which
@@ -286,11 +357,7 @@ void init_system(void)
 {
     ///< Initialize the system variables
     gSys.cnt_sample = 0; ///< Initialize the number of samples readed from all the sensors
-    gSys.is_as5600_calibrated = false; ///< Initialize the AS5600 sensor calibration flag
-    gSys.is_bno055_calibrated = false; ///< Initialize the BNO055 sensor calibration flag
-    gSys.is_vl53l1x_calibrated = false; ///< Initialize the VL53L1X sensor calibration flag
-    gSys.is_bldc_calibrated = false; ///< Initialize the BLDC motor calibration flag
-    gSys.STATE = NONE; ///< Initialize the state machine
+    gSys.STATE = INIT_BLDC_STEP_1; ///< Initialize the state machine: initialize the BLDC motor
     gSys.current_bytes_written = 0; ///< Initialize the number of samples readed from the ADC
 
     // Get the partition table and erase the partition to store new data
@@ -341,29 +408,14 @@ void sys_timer_cb(void *arg)
 {
     switch(gSys.STATE)
     {
-        case NONE:
+        case INIT_BLDC_STEP_1:
             ESP_LOGI("sys_timer_cb", "INIT_PWM_BLDC_STEP_1");
-            bldc_set_duty(&gMotor, 55); ///< Set the duty cycle to 6%
-            gSys.STATE = INIT_PWM_BLDC_STEP_1;
-            ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, STEP1_TO_STEP2_US));
-            break;
-
-        case INIT_PWM_BLDC_STEP_1: // Step 1: Start the timer to go to step 2 and set duty >5.7%
-            ESP_LOGI("sys_timer_cb", "INIT_PWM_BLDC_STEP_2");
-            bldc_set_duty(&gMotor, 50); ///< Set the duty cycle to 5%
-            gSys.STATE = INIT_PWM_BLDC_STEP_2;
-            ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, STEPS_TO_SEQ_US));
-            break;
-
-        case INIT_PWM_BLDC_STEP_2: 
-            ESP_LOGI("sys_timer_cb", "SEQ_BLDC_1");
-            // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer));
-            gSys.STATE = SEQ_BLDC_1;
-            gSys.is_bldc_calibrated = true; ///< Set the flag to true to indicate that the BLDC motor is calibrated
-            bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
+            bldc_set_duty(&gMotor, 0); ///< Set the duty to the top position for the ESC
 
             ///< Use the time for the sensor sampling and control the BLDC motor
             gSys.STATE = CHECK_SENSORS;
+            gSys.is_bldc_calibrated = true; ///< Set the flag to true to indicate that the BLDC motor is calibrated
+
             ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
             break;
 
@@ -382,9 +434,10 @@ void sys_timer_cb(void *arg)
 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
             gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
-            if (gSys.cnt_sample >= NUM_SAMPLES + 1) {
+            if (gSys.cnt_sample >= NUM_SAMPLES) {
                 ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
+                bldc_set_duty(&gMotor, 0); ///< Stop the motor
                 ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_sample);
             }
 
@@ -392,60 +445,6 @@ void sys_timer_cb(void *arg)
 
         default:
             ESP_LOGI("sys_timer_cb", "default");
-            break;
-    }
-}
-
-void sensor_calibration_cb(void *arg)
-{
-    switch (cnt_cali) {
-        case 0:
-            printf("AS5600 calibration step 1. \nAs step 4 in page 22 of the datasheet, move the magnet (or wheel) to the MAX position (5 seconds to move it).\n");
-
-            cnt_cali++;
-            esp_timer_start_once(gOneshotTimer, 5*1000*1000); ///< Start the timer to calibrate the AS5600 sensor (5s)
-            break;
-        case 1:
-            printf("AS5600 calibration step 2. Setting the max position....\n");
-
-            gSys.raw_angle = 0;
-            AS5600_GetRawAngle(&gAs5600, &gSys.raw_angle); ///< Get the raw angle from the AS5600 sensor
-            printf("Raw angle readed (max position): 0x%04X\n", gSys.raw_angle);
-            AS5600_SetStopPosition(&gAs5600, gSys.raw_angle); ///< Set the stop position to the raw angle readed from the AS5600 sensor
-            printf("Max position setted. Wait at least 1ms. \n");
-
-            cnt_cali++;
-            esp_timer_start_once(gOneshotTimer, 500*1000); ///< Start the timer to calibrate the AS5600 sensor (500ms)
-            break;
-        case 2:
-            printf("AS5600 calibration step 3. \nUse burn commands to permanently write the start and stop positions....\n");
-
-            ///< BURN COMMANDS HERE (warning: this will burn the configuration to the EEPROM of the AS5600 sensor, wait at least 1ms before using the I2C AS5600 again)
-
-            AS5600_InitADC(&gAs5600); ///< Initialize the ADC driver
-
-            /**
-             * @brief If the readed voltage is always 0, this indicates an error occurred during calibration.
-             * 
-             */
-            float angle = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle from the ADC
-            printf("angle-> %0.2f\n", angle);
-
-            // Read n times the angle.
-            for (int i = 0; i < 1; i++) {
-                vTaskDelay(1000 / portTICK_PERIOD_MS); ///< Wait 1s
-                angle = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle from the ADC
-                printf("angle-> %0.2f\n", angle);
-            }
-
-            gSys.is_as5600_calibrated = true; ///< Set the flag to true to indicate that the AS5600 sensor is calibrated
-            gSys.is_bno055_calibrated = true; 
-            gSys.is_vl53l1x_calibrated = true;
-            esp_timer_delete(gOneshotTimer); ///< Delete the timer
-
-            break;
-        default:
-            printf("AS5600 calibration finished");
             break;
     }
 }
@@ -514,32 +513,32 @@ void bno055_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
       
-        // Read All data from BNO055 sensor
-        BNO055_ReadAll(&bno055);
+        // ///< Read All data from BNO055 sensor
+        // BNO055_ReadAll(&bno055);
 
-        // Data from the BNO055 sensor
+        // ///< Data from the BNO055 sensor
 
-        //acceleration m/s^2 in x, y, z axis
-        ax = bno055.ax;
-        ay = bno055.ay;
-        az = bno055.az;
+        // ///< acceleration m/s^2 in x, y, z axis
+        // ax = bno055.ax;
+        // ay = bno055.ay;
+        // az = bno055.az;
 
-        //degree per second in x, y, z axis
-        gx = bno055.gx;
-        gy = bno055.gy;
-        gz = bno055.gz;
+        // ///< degree per second in x, y, z axis
+        // gx = bno055.gx;
+        // gy = bno055.gy;
+        // gz = bno055.gz;
 
-        // Get Euler angles (like an airplane)
-        roll = bno055.roll;     // Do a barrel roll
-        pitch = bno055.pitch;   // up, down
-        yaw = bno055.yaw;       // rigth, left
+        // ///< Get Euler angles (like an airplane)
+        // roll = bno055.roll;     // Do a barrel roll
+        // pitch = bno055.pitch;   // up, down
+        // yaw = bno055.yaw;       // rigth, left
 
-        // Convert to degrees
-        roll *= RAD_TO_DEG;
-        pitch *= RAD_TO_DEG;
-        yaw *= RAD_TO_DEG;
-        // Invert yaw direction
-        yaw = 360.0 - yaw;
+        // ///< Convert to degrees
+        // roll *= RAD_TO_DEG;
+        // pitch *= RAD_TO_DEG;
+        // yaw *= RAD_TO_DEG;
+        // ///< Invert yaw direction
+        // yaw = 360.0 - yaw;
     
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
@@ -549,13 +548,18 @@ void bno055_task(void *pvParameters)
 
 void vl53l1x_task(void *pvParameters)
 {
+    uint16_t distance_mm = 0; ///< Variable to store the distance readed from the VL53L1X sensor
     while (true) {
+        
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
-
+        
         ///< Read the distance from the VL53L1X sensor
-
+        if (VL53L1X_dataReady(&gvl53l1x)) {
+            // If data is ready, read it non-blockingly
+            distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
+        }  
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
     }
@@ -586,33 +590,58 @@ void control_task(void *pvParameters)
         ulTaskNotifyTakeIndexed(3, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the AS5600 task
 
         ///< Process the data from the sensors and control the BLDC motor
-        if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///< 1s of sampling
-            bldc_set_duty(&gMotor, 65); ///< Set the duty cycle to 6.5%
-            gSys.duty = 65;
-        }
-        else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///< 2s of sampling
-            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+        if (gSys.cnt_sample < 0.5*SAMPLING_RATE_HZ) { ///<
             gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
         }
-        else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///< 4s of sampling
-            bldc_set_duty(&gMotor, -75); ///< Set the duty cycle to -7.5%
-            gSys.duty = -75;
+        else if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 7;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
         }
-        else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///< 5s of sampling
-            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+        else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 15;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 2.5*SAMPLING_RATE_HZ) { ///<
             gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
         }
-        else if (gSys.cnt_sample < 7*SAMPLING_RATE_HZ) { ///< 7s of sampling
-            bldc_set_duty(&gMotor, 85); ///< Set the duty cycle to 8.5%
-            gSys.duty = 85;
+        else if (gSys.cnt_sample < 3*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -7;
+            bldc_set_duty_motor(&gMotor, gSys.duty); 
         }
-        else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///< 8s of sampling
-            bldc_set_duty(&gMotor, 0); ///< Set the duty cycle to 0%
+        else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -15;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///<
             gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
         }
-        else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///< 10s of sampling
-            bldc_set_duty(&gMotor, -85); ///< Set the duty cycle to -8.5%
-            gSys.duty = -85;
+
+        else if (gSys.cnt_sample < 5.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 7;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 6.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 25;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 7.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -7;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 9*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -25;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
         }
 
         ///< Send the sensor data to the queue
@@ -638,7 +667,7 @@ void save_nvs_task(void *pvParameters)
         esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
         gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
 
-        if (gSys.cnt_sample >= NUM_SAMPLES + 1) { ///< If the number of samples is greater than the number of samples to save, stop the task
+        if (gSys.cnt_sample >= NUM_SAMPLES) { ///< If the number of samples is greater than the number of samples to save, stop the task
             ESP_LOGI(TAG_CMD, "Save task finished");
             break;
         }
@@ -661,7 +690,7 @@ void process_cmd(const char *cmd)
         char str_value[len_uc_data - 4]; ///< 4 is the length of the command "pwm "
         strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
 
-        uint16_t value = atoi(str_value);
+        int value = atoi(str_value);
         ESP_LOGI(TAG_CMD, "value-> %d", value);
         if (value != 0) { ///< If value=0, that means data is not a number
             bldc_set_duty(&gMotor, value);
@@ -753,8 +782,52 @@ void process_cmd(const char *cmd)
             ESP_LOGI(TAG_CMD, "color not recognized");
         }
     }
+    ///< Command to set the setpoint of the motor
+    else if (strcmp(cmd, "set") == 0) {
+        if (len_uc_data < 8) { ///< 4 for the command "set " and 4 for the setpoint
+            ESP_LOGI(TAG_CMD, "Invalid SET cmd");
+            return;
+        }
+        char str_value[len_uc_data - 4]; ///< 4 is the length of the command "set "
+        strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
+        str_value[len_uc_data - 4] = '\0'; ///< Add the null terminator
+
+        bool dir = false; ///< Direction of the motor
+        int dist = 0; ///< Distance to move
+        int vel = 0; ///< Velocity to move
+
+        parse_command_setpoint((const uint8_t *)str_value, &dir, &dist, &vel); ///< Parse the command to get the direction, distance and velocity
+        ESP_LOGI(TAG_CMD, "dir-> %d, dist-> %d, vel-> %d", dir, dist, vel);
+    }
     else {
         ESP_LOGI(TAG_CMD, "cmd not recognized");
     }
 }
 
+
+void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel) {
+    // The first character indicates the direction
+    if (command[0] == 'D') {
+        *dir = true;  // right
+    } else if (command[0] == 'I') {
+        *dir = false; // left
+    } else {
+        printf("Invalid command: unknown direction\n");
+        return;
+    }
+
+    // Find the position of the '_'
+    const char *underscore = strchr((const char *)command, '_');
+    if (!underscore) {
+        printf("Invalid command: '_' not found\n");
+        return;
+    }
+
+    // Extract distance: from command[1] up to the character before '_'
+    char distance_str[16] = {0};
+    strncpy(distance_str, (const char *)&command[1], underscore - (const char *)&command[1]);
+    *dist = atoi(distance_str);
+
+    // Extract speed: from the character after '_'
+    *vel = atoi(underscore + 1);
+}
