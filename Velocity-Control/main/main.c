@@ -1,6 +1,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "sdkconfig.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "esp_partition.h"
+#include "esp_flash.h"
+#include "esp_timer.h"
+// #include "nvs_flash.h"
+// #include "driver/spi_common.h"
+#include "platform_esp32s3.h"
 
 #include "types.h"
 #include "led.h"
@@ -8,17 +19,17 @@
 #include "platform_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
+#include "vl53l1x.h"
 #include "bno055.h"
-
 
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
 
-#define I2C_MASTER_SCL_GPIO 4       /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 5       /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_GPIO 8     /*!< gpio number for I2C master clock */
+#define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
-#define I2C_MASTER_NUM 1            /*!< I2C port number for master dev */
+#define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
@@ -60,8 +71,14 @@ bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
 
+esp_timer_handle_t gOneshotTimer;
+uint8_t cnt_cali; ///< Counter for the calibration process4
+
+vl53l1x_t gvl53l1x;
+
 BNO055_t bno055; // BNO055 sensor structure
 BNO055_CalibProfile_t calib_data; // Calibration data structure
+
 
 // --------------------------------------------------------------------------
 // ----------------------------- PROTOTYPES ---------------------------------
@@ -172,7 +189,7 @@ void app_main(void)
     bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, 
                 MOTOR_MCPWM_TIMER_RESOLUTION_HZ, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY);
     bldc_enable(&gMotor);
-    bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); // Set duty to the top position for the ESC
+    bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
     ///< ---------------------- BNO055 ------------------
     // BENJAMIN'S CODE
@@ -203,13 +220,63 @@ void app_main(void)
 
     ///< ---------------------- VL53L1X ------------------
     // KEVIN'S CODE
+    // direction of the sensor
     // Initialize the VL53L1X sensor and set the parameters
+    if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, false)) {
+        ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed");
+        return;
+    }
+
+    
+
+    //Flag to check if the sensor is calibrated
+    gSys.is_vl53l1x_calibrated = true;
+
+    //Flags true for test
+    gSys.is_as5600_calibrated = true;
+    gSys.is_bno055_calibrated = true;
+    gSys.is_bldc_calibrated = true;
+      
+    VL53L1X_startContinuous(&gvl53l1x,10);
+    // uint16_t distance_mm ;
+    // while(1){
+
+    //     // Check if data is ready using VL53L1X_dataReady
+    //     if (VL53L1X_dataReady(&gvl53l1x)) {
+    //         // If data is ready, read it non-blockingly
+    //         distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
+            
+    //         // VL53L1X_readDistance (when non-blocking and data is ready) should give a valid distance.
+    //         // It might still return 0 or an error code if something went wrong during the read itself,
+    //         // though the primary purpose of dataReady is to avoid reading when no new data is present.
+    //         // The exact return value for "no error" vs "error" in non-blocking mode depends on the
+    //         // VL53L1X_readDistance implementation. Assuming it returns measured distance or 0 on error/no data.
+    //         if (distance_mm > 0) { // A simple check, adjust if your sensor can legitimately read 0 mm.
+    //             // print the distance
+    //             ESP_LOGI(TAG_VL53L1X, "Distance: %d mm", distance_mm);
+    //             // Save the distance to the system structure
+                
+    //             } else {
+    //             // This might occur if readDistance itself failed after dataReady was true,
+    //             // or if 0 is a legitimate but problematic reading.
+    //             }
+    //     } else {
+    //         // Optional: Log if data is not ready, though this might be frequent
+    //         // ESP_LOGD(TAG_VL53L1X_MainTest, "Data not ready");
+    //     }
+        
+    //     // Delay to maintain the approximate 10ms loop frequency
+    //     vTaskDelay(pdMS_TO_TICKS(10)); 
+    
+    // }
+    
 
     ///< Create a task to manage the VL53L1X sensor
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
 
     ///< ---------------------- AS5600 -------------------
-    AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
+    // Initialize the AS5600 sensor
+    // AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
     AS5600_config_t conf = {
@@ -229,8 +296,8 @@ void app_main(void)
     AS5600_SetStopPosition(&gAs5600, 0x0FFF);
     gSys.is_as5600_calibrated = true;
     
-    ///< Create a task to manage the AS5600 sensor
-    xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
+    // Create a task to manage the AS5600 sensor
+    // xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
 
     ///< ---------------------- SYSTEM -------------------
     // 'System' refers to more general variables and functions that are used to control the system, which
@@ -438,13 +505,18 @@ void bno055_task(void *pvParameters)
 
 void vl53l1x_task(void *pvParameters)
 {
+    uint16_t distance_mm = 0; ///< Variable to store the distance readed from the VL53L1X sensor
     while (true) {
+        
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
-
+        
         ///< Read the distance from the VL53L1X sensor
-
+        if (VL53L1X_dataReady(&gvl53l1x)) {
+            // If data is ready, read it non-blockingly
+            distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
+        }  
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
     }
