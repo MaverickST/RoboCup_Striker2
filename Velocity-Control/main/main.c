@@ -18,11 +18,18 @@
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
 
-#define I2C_MASTER_SCL_GPIO 8     /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
-#define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
+#define AS5600_I2C_MASTER_SCL_GPIO 4    /*!< gpio number for I2C master clock */
+#define AS5600_I2C_MASTER_SDA_GPIO 5    /*!< gpio number for I2C master data  */
+#define AS5600_OUT_GPIO 6               /*!< gpio number for OUT signal */
+#define AS5600_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
 
-#define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
+#define BNO055_I2C_MASTER_SCL_GPIO 11    /*!< gpio number for I2C master clock */
+#define BNO055_I2C_MASTER_SDA_GPIO 13    /*!< gpio number for I2C master data  */
+#define BNO055_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
+
+#define VL53L1X_I2C_MASTER_SCL_GPIO 15    /*!< gpio number for I2C master clock */
+#define VL53L1X_I2C_MASTER_SDA_GPIO 16    /*!< gpio number for I2C master data  */
+#define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
@@ -175,38 +182,38 @@ void app_main(void)
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
     ///< ---------------------- BNO055 ------------------
-    // Initialize BNO055 sensor
-    int8_t success = 0;
-    success = BNO055_Init(&bno055, 18, 17, 0);
-    while (success != BNO055_SUCCESS) {
-        printf("Error: Failed to initialize BNO055 sensor\n");
-        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-        success = BNO055_Init(&bno055, 18, 17, 0);
-    }
+    // // Initialize BNO055 sensor
+    // int8_t success = 0;
+    // success = BNO055_Init(&bno055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM);
+    // while (success != BNO055_SUCCESS) {
+    //     printf("Error: Failed to initialize BNO055 sensor\n");
+    //     vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
+    //     success = BNO055_Init(&bno055, 5, 4, 0);
+    // }
     
-    //Load Calibration Data
-    BNO055_SetOperationMode(&bno055, CONFIGMODE);
-    uint8_t calib_offsets[22] = {
-        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
-        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
-        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-        0xE8, 0x03, 0xAD, 0x01   
-    };
-    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
-    BNO055_SetOperationMode(&bno055, IMU);
-    gSys.is_bno055_calibrated= true;
+    // //Load Calibration Data
+    // BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    // uint8_t calib_offsets[22] = {
+    //     0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+    //     0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+    //     0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+    //     0xE8, 0x03, 0xAD, 0x01   
+    // };
+    // BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    // BNO055_SetOperationMode(&bno055, IMU);
+    // gSys.is_bno055_calibrated= true;
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
 
     ///< ---------------------- VL53L1X ------------------
     ///< Initialize the VL53L1X sensor and set the parameters
-    if (!VL53L1X_init(&gvl53l1x, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, false)) {
+    if (!VL53L1X_init(&gvl53l1x, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
         ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed");
         return;
     }
 
-    //Flag to check if the sensor is calibrated
+    ///< Flag to check if the sensor is calibrated
     gSys.is_vl53l1x_calibrated = true;
     VL53L1X_startContinuous(&gvl53l1x,10);
 
@@ -215,7 +222,7 @@ void app_main(void)
 
     ///< ---------------------- AS5600 -------------------
     // Initialize the AS5600 sensor
-    // AS5600_Init(&gAs5600, I2C_MASTER_NUM, I2C_MASTER_SCL_GPIO, I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
+    AS5600_Init(&gAs5600, AS5600_I2C_MASTER_NUM, AS5600_I2C_MASTER_SCL_GPIO, AS5600_I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
     AS5600_config_t conf = {
@@ -414,9 +421,7 @@ void trigger_task(void *pvParameters)
 
 void bno055_task(void *pvParameters)
 {
-    float roll, pitch, yaw;
-    float gx, gy, gz;
-    float ax, ay, az;
+    float ax, ay;
 
     while (true) {
         ///< Wait for the notification from the timer
@@ -430,10 +435,9 @@ void bno055_task(void *pvParameters)
         ///< acceleration m/s^2 in x, y, z axis
         ax = bno055.ax;
         ay = bno055.ay;
-        az = bno055.az;
 
         ///< From ax and ay we can calculate the accelation in the plane
-        gSys.acceleration = sqrt(ax*ax + ay*ay + az*az);
+        gSys.acceleration = sqrt(ax*ax + ay*ay);
     
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
@@ -455,6 +459,7 @@ void vl53l1x_task(void *pvParameters)
             // If data is ready, read it non-blockingly
             distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
         }  
+
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
     }
@@ -540,9 +545,9 @@ void control_task(void *pvParameters)
         }
 
         ///< Send the sensor data to the queue
-        uint8_t length = snprintf(NULL, 0, "%d\t%d\t%d\t%d\n", (int)gSys.duty, (int)gSys.angle, (int)gSys.acceleration, (int)gSys.distance);
+        uint8_t length = snprintf(NULL, 0, "%d\t%.2f\t%.3f\t%.3f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.distance);
         char str[length + 1];
-        snprintf(str, length + 1, "%d\t%d\t%d\t%d\n", (int)gSys.duty, (int)gSys.angle, (int)gSys.acceleration, (int)gSys.distance);
+        snprintf(str, length + 1, "%d\t%.2f\t%.3f\t%.3f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.distance);
         xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
 
     }
@@ -559,7 +564,7 @@ void save_nvs_task(void *pvParameters)
         uint8_t length = strlen((const char *)data); ///< Get the length of the data
 
         ///< Save the data in the NVS
-        esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
+        // esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
         gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
 
         if (gSys.cnt_sample >= NUM_SAMPLES) { ///< If the number of samples is greater than the number of samples to save, stop the task
@@ -585,10 +590,10 @@ void process_cmd(const char *cmd)
         char str_value[len_uc_data - 4]; ///< 4 is the length of the command "pwm "
         strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
 
-        int value = atoi(str_value);
-        ESP_LOGI(TAG_CMD, "value-> %d", value);
+        float value = atof(str_value);
+        ESP_LOGI(TAG_CMD, "value-> %.2f", value);
         if (value != 0) { ///< If value=0, that means data is not a number
-            bldc_set_duty(&gMotor, value);
+            bldc_set_duty_motor(&gMotor, value);
         }
     }
     ///< Command to read the angle from the AS5600 sensor
