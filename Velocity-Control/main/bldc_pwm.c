@@ -12,7 +12,8 @@
 
 static const char *BLDC_TAG = "bdc_motor_mcpwm";
 
-esp_err_t bldc_init(bldc_pwm_motor_t *motor, uint8_t pwm_gpio_num, uint8_t rev_gpio_num, uint32_t pwm_freq_hz, uint32_t group_id, uint32_t resolution_hz)
+esp_err_t bldc_init(bldc_pwm_motor_t *motor, uint8_t pwm_gpio_num, uint8_t rev_gpio_num, uint32_t pwm_freq_hz, 
+    uint32_t group_id, uint32_t resolution_hz, uint16_t pwm_bottom_duty, uint16_t pwm_top_duty)
 {
     motor->rev_gpio_num = rev_gpio_num;
     motor->pwm_gpio_num = pwm_gpio_num;
@@ -20,6 +21,8 @@ esp_err_t bldc_init(bldc_pwm_motor_t *motor, uint8_t pwm_gpio_num, uint8_t rev_g
     motor->group_id = group_id;
     motor->resolution_hz = resolution_hz;
     motor->max_cmp = resolution_hz / pwm_freq_hz;
+    motor->pwm_bottom_duty = pwm_bottom_duty;
+    motor->pwm_top_duty = pwm_top_duty;
     
     // mcpwm timer
     mcpwm_timer_config_t timer_config = {
@@ -89,15 +92,8 @@ esp_err_t bldc_disable(bldc_pwm_motor_t *motor)
     return ESP_OK;
 }
 
-esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int32_t duty)
+esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int duty)
 {
-    uint32_t nw_cmp_rev = 0;
-    if (duty < 0) { ///< Read the description of the function to understand the duty cycle
-        duty = -duty;
-        nw_cmp_rev = 90*motor->max_cmp/1000;
-    }else {
-        nw_cmp_rev = 60*motor->max_cmp/1000;
-    }
     if (duty > 1000) {
         // ESP_LOGE(BLDC_TAG, "duty %d is greater than 1000", duty);
         return ESP_FAIL;
@@ -109,6 +105,34 @@ esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int32_t duty)
         return ESP_FAIL;
     }
     ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp, nw_cmp), BLDC_TAG, "set compare value failed");
-    ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp_rev, nw_cmp_rev), BLDC_TAG, "set compare value failed");
+    ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp_rev, nw_cmp), BLDC_TAG, "set compare value failed");
+
+    return ESP_OK;
+}
+
+esp_err_t bldc_set_duty_motor(bldc_pwm_motor_t *motor, float duty)
+{
+    ///< Checks if the duty is in the range of -100 to 100
+    if (duty > 100 || duty < -100) {
+        return ESP_FAIL;
+    }
+
+    ///< Checks if reverse is needed
+    float reverse = 30; ///< 40% means not reverse
+    if (duty < 0) {
+        reverse = 70; ///< 70% means reverse
+        duty = -duty; ///< Set the duty to positive value
+    }
+
+    ///< Maps the duty value to the range of 0 to 1000 considering the bottom and top duty cycle
+    int mapped_duty = MAP(duty, 0, 100, motor->pwm_bottom_duty, motor->pwm_top_duty);
+    int mapped_duty_rev = MAP(reverse, 0, 100, motor->pwm_bottom_duty, motor->pwm_top_duty);
+    uint32_t cmp_value =  mapped_duty * motor->max_cmp / 1000; ///< Maps the duty value to the range of 0 to max_cmp
+    uint32_t cmp_value_rev =  mapped_duty_rev * motor->max_cmp / 1000; ///< Maps the duty value to the range of 0 to max_cmp
+
+    ///< Set the compare value for the forward and reverse signals
+    ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp, cmp_value), BLDC_TAG, "set compare value failed");
+    ESP_RETURN_ON_ERROR(mcpwm_comparator_set_compare_value(motor->cmp_rev, cmp_value_rev), BLDC_TAG, "set compare value failed");
+
     return ESP_OK;
 }
