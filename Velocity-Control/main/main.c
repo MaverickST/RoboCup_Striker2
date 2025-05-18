@@ -23,8 +23,8 @@
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
 
-#define I2C_MASTER_SCL_GPIO 8     /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 18       /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_GPIO 18     /*!< gpio number for I2C master clock */
+#define I2C_MASTER_SDA_GPIO 8      /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
 #define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
 
@@ -190,7 +190,7 @@ void app_main(void)
     gSys.is_bldc_calibrated = true;
       
     VL53L1X_startContinuous(&gvl53l1x,10);
-    // uint16_t distance_mm ;
+    uint16_t distance_mm ;
     // while(1){
 
     //     // Check if data is ready using VL53L1X_dataReady
@@ -274,10 +274,10 @@ void init_system(void)
 {
     ///< Initialize the system variables
     gSys.cnt_sample = 0; ///< Initialize the number of samples readed from all the sensors
-    gSys.is_as5600_calibrated = false; ///< Initialize the AS5600 sensor calibration flag
-    gSys.is_bno055_calibrated = false; ///< Initialize the BNO055 sensor calibration flag
-    gSys.is_vl53l1x_calibrated = false; ///< Initialize the VL53L1X sensor calibration flag
-    gSys.is_bldc_calibrated = false; ///< Initialize the BLDC motor calibration flag
+    gSys.is_as5600_calibrated = true; ///< Initialize the AS5600 sensor calibration flag
+    gSys.is_bno055_calibrated = true; ///< Initialize the BNO055 sensor calibration flag
+    gSys.is_vl53l1x_calibrated = true; ///< Initialize the VL53L1X sensor calibration flag
+    gSys.is_bldc_calibrated = true; ///< Initialize the BLDC motor calibration flag
     gSys.STATE = NONE; ///< Initialize the state machine
     gSys.current_bytes_written = 0; ///< Initialize the number of samples readed from the ADC
 
@@ -484,9 +484,9 @@ void trigger_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         // Notify the each sensor task to read the data from the sensor
-        xTaskNotifyGive(gSys.task_handle_bno055);
+        // xTaskNotifyGive(gSys.task_handle_bno055);
         xTaskNotifyGive(gSys.task_handle_vl53l1x);
-        xTaskNotifyGive(gSys.task_handle_as5600);
+        // xTaskNotifyGive(gSys.task_handle_as5600);
     }
     vTaskDelete(NULL);
 }
@@ -513,7 +513,7 @@ void vl53l1x_task(void *pvParameters)
         
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
+        //gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
         
         ///< Read the distance from the VL53L1X sensor
         if (VL53L1X_dataReady(&gvl53l1x)) {
