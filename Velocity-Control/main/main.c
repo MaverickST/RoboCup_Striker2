@@ -13,6 +13,7 @@
 #include "as5600_lib.h"
 #include "vl53l1x.h"
 #include "bno055.h"
+#include "control_senfusion.h"
 
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
@@ -70,6 +71,7 @@ uart_console_t gUc;
 bldc_pwm_motor_t gMotor;
 AS5600_t gAs5600;
 system_t gSys;
+ctrl_senfusion_t gCtrl;
 
 vl53l1x_t gvl53l1x;
 
@@ -166,6 +168,9 @@ void save_nvs_task(void *pvParameters);
 
 void app_main(void)
 {
+    ///< ---------------- CNTROL + SENFUSION ----------------
+    ctrl_senfusion_init(&gCtrl, 0.01); // 10ms sampling time
+
     ///< ---------------------- LED ----------------------
     led_init(&gLed, LED_LSB_GPIO, LED_TIME_US, true);
     led_set_blink(&gLed, true, 3);
@@ -188,7 +193,7 @@ void app_main(void)
     // while (success != BNO055_SUCCESS) {
     //     printf("Error: Failed to initialize BNO055 sensor\n");
     //     vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-    //     success = BNO055_Init(&bno055, 5, 4, 0);
+    //     success = BNO055_Init(&bno055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM);
     // }
     
     // //Load Calibration Data
@@ -273,16 +278,16 @@ void init_system(void)
     vTaskDelay(1000 / portTICK_PERIOD_MS); ///< Wait for the erase to finish
     char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\n";
     part_label[strlen(part_label)] = '\0'; ///< Add the null terminator to the string
-    esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
-    gSys.current_bytes_written += strlen(part_label);
+    // esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
+    // gSys.current_bytes_written += strlen(part_label);
 
-    // Print the result of the operation
-    if (rest == ESP_OK) {
-        ESP_LOGI("init_system", "Text written successfully");
-    }
-    else {
-        ESP_LOGI("init_system", "Error writing text");
-    }
+    // // Print the result of the operation
+    // if (rest == ESP_OK) {
+    //     ESP_LOGI("init_system", "Text written successfully");
+    // }
+    // else {
+    //     ESP_LOGI("init_system", "Error writing text");
+    // }
 
     // Create a one-shot timer to control the sequence
     const esp_timer_create_args_t oneshot_timer_args = {
@@ -356,7 +361,8 @@ void sys_timer_cb(void *arg)
                 ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
                 bldc_set_duty(&gMotor, 0); ///< Stop the motor
-                ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_smp_control);
+                ESP_LOGI("sys_timer_cb", "Control: Samples readed from all the sensors: %d", gSys.cnt_smp_control);
+                gSys.STATE = NONE;
             }
             break;
 
@@ -548,7 +554,14 @@ void control_task(void *pvParameters)
         uint8_t length = snprintf(NULL, 0, "%d\t%.2f\t%.3f\t%.3f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.distance);
         char str[length + 1];
         snprintf(str, length + 1, "%d\t%.2f\t%.3f\t%.3f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.distance);
-        xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
+        // xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
+
+        ///< Use Sensor Fusion to get the states of the system: position(m), velocity(m/s)
+        ctrl_senfusion_predict(&gCtrl, gSys.duty);
+        ctrl_senfusion_update(&gCtrl, gSys.angle, gSys.distance, gSys.acceleration, gSys.cnt_sample);
+        float pos = ctrl_senfusion_get_pos(&gCtrl);
+        float vel = ctrl_senfusion_get_vel(&gCtrl);
+        ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s", pos, vel);
 
     }
     vTaskDelete(NULL);
@@ -564,7 +577,7 @@ void save_nvs_task(void *pvParameters)
         uint8_t length = strlen((const char *)data); ///< Get the length of the data
 
         ///< Save the data in the NVS
-        // esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
+        esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
         gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
 
         if (gSys.cnt_sample >= NUM_SAMPLES) { ///< If the number of samples is greater than the number of samples to save, stop the task
@@ -682,7 +695,17 @@ void process_cmd(const char *cmd)
             ESP_LOGI(TAG_CMD, "color not recognized");
         }
     }
-    ///< Control ommand to set the setpoint of the motor
+
+    /**
+     * @brief Control ommand to set the setpoint of the motor
+     * 
+     * The command is "set [dir]_[dist]_[vel]" like "set D_100_50" where:
+     * D = right, I = left
+     * dist = distance in cm, vel = velocity in cm/s
+     * 
+     * You have 5s to move away of the motor, and the experiment will last 10s
+     * 
+     */
     else if (strcmp(cmd, "set") == 0) {
         if (gSys.STATE != NONE) { ///< If the system is not in the NONE state, that means the system is busy
             ESP_LOGI(TAG_CMD, "System is busy");
@@ -700,7 +723,8 @@ void process_cmd(const char *cmd)
         int dist = 0; ///< Distance to move (cm)
         int vel = 0; ///< Velocity to move (cm/s)
 
-        parse_command_setpoint((const uint8_t *)str_value, &dir, &dist, &vel); ///< Parse the command to get the direction, distance and velocity
+        ///< Parse the command to get the direction, distance and velocity
+        parse_command_setpoint((const uint8_t *)str_value, &dir, &dist, &vel);
         ESP_LOGI(TAG_CMD, "dir-> %d, dist-> %d, vel-> %d", dir, dist, vel);
 
         gSys.setpoint_dir = dir; ///< Set the direction of the motor
@@ -708,6 +732,7 @@ void process_cmd(const char *cmd)
         gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
 
         ///< Init the control experiment
+        vTaskDelay(5000 / portTICK_PERIOD_MS); ///< wait 5 seconds to start the experiment
         gSys.STATE = SYS_SAMPLING_CONTROL; ///< Set the state to control the BLDC motor
         gSys.duty = 0; ///< Set the duty to 0
         gSys.cnt_smp_control = 0; ///< Set the number of samples to 0
