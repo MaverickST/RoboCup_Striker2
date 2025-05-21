@@ -412,4 +412,3 @@ uint16_t VL53L1X_mergeData(uint8_t *data);
 void VL53L1X_divergeData(uint8_t *buff, uint32_t value, uint8_t len);
 
 #endif
-

@@ -21,7 +21,7 @@ bool VL53L1X_init(vl53l1x_t *vl53l1x, i2c_port_t i2c_num, uint8_t scl, uint8_t s
     // Check model ID register and compare with values specified in datasheet
     i2c_read_reg16bits(&vl53l1x->i2c_handle,(IDENTIFICATION__MODEL_ID),data,2); //Check Model register 
     if (VL53L1X_mergeData(data) != 0xEACC) { return false; }
-    ESP_LOGI(TAG_VL53L1X, "IDENTIFICATION__MODEL_ID: %x",VL53L1X_mergeData(data));
+    //ESP_LOGI(TAG_VL53L1X, "IDENTIFICATION__MODEL_ID: %x",VL53L1X_mergeData(data));
 
     // VL53L1_software_reset() begin
     data[0] = 0x0;
@@ -30,7 +30,7 @@ bool VL53L1X_init(vl53l1x_t *vl53l1x, i2c_port_t i2c_num, uint8_t scl, uint8_t s
 
     data[0] = 0x1;
     i2c_write_reg16bits(&vl53l1x->i2c_handle,SOFT_RESET,data,1);
-    ESP_LOGI(TAG_VL53L1X, "SOFT RESERT complete");
+    //ESP_LOGI(TAG_VL53L1X, "SOFT RESERT complete");
 
     vTaskDelay(1/portTICK_PERIOD_MS);
 
@@ -42,13 +42,13 @@ bool VL53L1X_init(vl53l1x_t *vl53l1x, i2c_port_t i2c_num, uint8_t scl, uint8_t s
         did_time_out = true;
         return false;
       }
-      ESP_LOGI(TAG_VL53L1X,"FIRMWARE STATUS are 0");
+      //ESP_LOGI(TAG_VL53L1X,"FIRMWARE STATUS are 0");
       i2c_read_reg16bits(&vl53l1x->i2c_handle,FIRMWARE__SYSTEM_STATUS,data,1);
     }
 
     // sensor uses 1V8 mode for I/O by default; switch to 2V8 mode if necessary
     if(io_2v8){
-      ESP_LOGI(TAG_VL53L1X,"2V8 mode");
+      //ESP_LOGI(TAG_VL53L1X,"2V8 mode");
       i2c_read_reg16bits(&vl53l1x->i2c_handle,PAD_I2C_HV__EXTSUP_CONFIG,data,1);
       data[0] = data[0] | 0x01;
       i2c_write_reg16bits(&vl53l1x->i2c_handle,PAD_I2C_HV__EXTSUP_CONFIG,data,1);
@@ -103,17 +103,35 @@ bool VL53L1X_init(vl53l1x_t *vl53l1x, i2c_port_t i2c_num, uint8_t scl, uint8_t s
     i2c_write_reg16bits(&vl53l1x->i2c_handle,SYSTEM__SEQUENCE_CONFIG,SYSTEM__SEQUENCE_CONFIG_VALUE,1);
     i2c_write_reg16bits(&vl53l1x->i2c_handle,DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT,DSS_CONFIG__MANUAL_EFFECTIVE_SPADS_SELECT_VALUE,2);
     i2c_write_reg16bits(&vl53l1x->i2c_handle,DSS_CONFIG__ROI_MODE_CONTROL,DSS_CONFIG__ROI_MODE_CONTROL_VALUE,1);
+    // Set the default distance mode
+    VL53L1X_setDistanceMode(vl53l1x,Short);
+    VL53L1X_setMeasurementTimingBudget(vl53l1x,10000);
 
-    VL53L1X_setDistanceMode(vl53l1x,Long);
-    VL53L1X_setMeasurementTimingBudget(vl53l1x,50000);
 
+    // Calibration
+    //-------------------------------------
+    uint8_t cal_offset_data[2];
+    uint16_t pre_cal_offset_val = 27 * 4; //Value calibrated by the sensor
+    //uint16_t pre_cal_offset_val = 0x0A00; // Value calibrated by the sensor
+    VL53L1X_divergeData(cal_offset_data, pre_cal_offset_val, 2);
+    i2c_write_reg16bits(&vl53l1x->i2c_handle, ALGO__PART_TO_PART_RANGE_OFFSET_MM, cal_offset_data, 2);
+
+    // Apply pre-calibrated XTalk. User values: xtalk = 0
+    uint8_t cal_xtalk_data[2];
+    uint16_t pre_cal_xtalk_val = 0; // Value calibrated by the sensor
+    //uint16_t pre_cal_xtalk_val = 0x0A00; // Value calibrated by the sensor
+    VL53L1X_divergeData(cal_xtalk_data, pre_cal_xtalk_val, 2);
+    i2c_write_reg16bits(&vl53l1x->i2c_handle, ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS, cal_xtalk_data, 2);
+
+    //--------------------------------------
+    
     i2c_read_reg16bits(&vl53l1x->i2c_handle,MM_CONFIG__OUTER_OFFSET_MM,data,2);
     uint8_t write_buff[2];
     VL53L1X_divergeData(write_buff,VL53L1X_mergeData(data)*4,2);
     i2c_write_reg16bits(&vl53l1x->i2c_handle,ALGO__PART_TO_PART_RANGE_OFFSET_MM,write_buff,2);
     
     i2c_read_reg16bits(&vl53l1x->i2c_handle,RESULT__RANGE_STATUS,data,1);
-    ESP_LOGE(TAG_VL53L1X,"STATUS INIT: %d",data[0]);
+    //ESP_LOGE(TAG_VL53L1X,"STATUS INIT: %d",data[0]);
     return 1;
 }
 
