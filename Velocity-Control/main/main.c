@@ -5,14 +5,14 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "types.h"
-#include "led.h"
-#include "uart_console.h"
-#include "platform_esp32s3.h"
-#include "bldc_pwm.h"
-#include "as5600_lib.h"
-#include "vl53l1x.h"
-#include "bno055.h"
+#include "../include/types.h"
+#include "../components/drivers/led/led.h"
+#include "../components/drivers/uart_console/uart_console.h"
+#include "../components/platform/platform_esp32s3.h"
+#include "../components/drivers/bldc_pwm/bldc_pwm.h"
+#include "../components/drivers/as5600/as5600_lib.h"
+#include "../components/drivers/vl53l1x/VL53L1X.h"
+#include "../components/drivers/bno055/bno055.h"
 
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
