@@ -18,12 +18,6 @@
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
 
-<<<<<<< HEAD
-#define I2C_MASTER_SCL_GPIO 18     /*!< gpio number for I2C master clock */
-#define I2C_MASTER_SDA_GPIO 8      /*!< gpio number for I2C master data  */
-#define AS5600_OUT_GPIO 6           /*!< gpio number for OUT signal */
-#define I2C_MASTER_NUM 0           /*!< I2C port number for master dev */
-=======
 #define AS5600_I2C_MASTER_SCL_GPIO 4    /*!< gpio number for I2C master clock */
 #define AS5600_I2C_MASTER_SDA_GPIO 5    /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6               /*!< gpio number for OUT signal */
@@ -36,7 +30,6 @@
 #define VL53L1X_I2C_MASTER_SCL_GPIO 15    /*!< gpio number for I2C master clock */
 #define VL53L1X_I2C_MASTER_SDA_GPIO 16    /*!< gpio number for I2C master data  */
 #define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
->>>>>>> main
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
@@ -223,41 +216,6 @@ void app_main(void)
     ///< Flag to check if the sensor is calibrated
     gSys.is_vl53l1x_calibrated = true;
     VL53L1X_startContinuous(&gvl53l1x,10);
-<<<<<<< HEAD
-    uint16_t distance_mm ;
-    // while(1){
-
-    //     // Check if data is ready using VL53L1X_dataReady
-    //     if (VL53L1X_dataReady(&gvl53l1x)) {
-    //         // If data is ready, read it non-blockingly
-    //         distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
-            
-    //         // VL53L1X_readDistance (when non-blocking and data is ready) should give a valid distance.
-    //         // It might still return 0 or an error code if something went wrong during the read itself,
-    //         // though the primary purpose of dataReady is to avoid reading when no new data is present.
-    //         // The exact return value for "no error" vs "error" in non-blocking mode depends on the
-    //         // VL53L1X_readDistance implementation. Assuming it returns measured distance or 0 on error/no data.
-    //         if (distance_mm > 0) { // A simple check, adjust if your sensor can legitimately read 0 mm.
-    //             // print the distance
-    //             ESP_LOGI(TAG_VL53L1X, "Distance: %d mm", distance_mm);
-    //             // Save the distance to the system structure
-                
-    //             } else {
-    //             // This might occur if readDistance itself failed after dataReady was true,
-    //             // or if 0 is a legitimate but problematic reading.
-    //             }
-    //     } else {
-    //         // Optional: Log if data is not ready, though this might be frequent
-    //         // ESP_LOGD(TAG_VL53L1X_MainTest, "Data not ready");
-    //     }
-        
-    //     // Delay to maintain the approximate 10ms loop frequency
-    //     vTaskDelay(pdMS_TO_TICKS(10)); 
-    
-    // }
-    
-=======
->>>>>>> main
 
     ///< Create a task to manage the VL53L1X sensor
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
@@ -302,15 +260,7 @@ void init_system(void)
 {
     ///< Initialize the system variables
     gSys.cnt_sample = 0; ///< Initialize the number of samples readed from all the sensors
-<<<<<<< HEAD
-    gSys.is_as5600_calibrated = true; ///< Initialize the AS5600 sensor calibration flag
-    gSys.is_bno055_calibrated = true; ///< Initialize the BNO055 sensor calibration flag
-    gSys.is_vl53l1x_calibrated = true; ///< Initialize the VL53L1X sensor calibration flag
-    gSys.is_bldc_calibrated = true; ///< Initialize the BLDC motor calibration flag
-    gSys.STATE = NONE; ///< Initialize the state machine
-=======
     gSys.STATE = INIT_BLDC_STEP_1; ///< Initialize the state machine: initialize the BLDC motor
->>>>>>> main
     gSys.current_bytes_written = 0; ///< Initialize the number of samples readed from the ADC
 
     // Get the partition table and erase the partition to store new data
