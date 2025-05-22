@@ -59,14 +59,60 @@ typedef struct
  * @return true if the I2C is initialized correctly
  * @return false if the I2C initialization failed
  */
-bool i2c_init(i2c_t *i2c, i2c_port_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda, uint32_t clk_speed_hz, uint16_t addr);
+bool i2c_init(i2c_t *i2c, uint8_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda, uint32_t clk_speed_hz, uint16_t addr);
+
+/**
+ * @brief Initialize a new I2C bus. 
+ * 
+ * After calling this function you can add a new device to the bus using the i2c_init_new_device function.
+ * 
+ * @param i2c 
+ * @param i2c_num 
+ * @param gpio_scl 
+ * @param gpio_sda 
+ * @return true 
+ * @return false 
+ */
+bool i2c_init_new_bus(i2c_t *i2c, uint8_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda);
+
+/**
+ * @brief Add a new device to the I2C bus. 
+ * 
+ * The i2c bus must be initialized before calling this function, and the i2c struct must 
+ * contain the bus handle. You can use the i2c_get_bus_handle function to get the bus handle.
+ * 
+ * To use this function, you can one of two ways:
+ * 
+ * 1. Call the i2c_init_new_bus function to initialize the bus and then call this function to add a new device.
+ * 
+ * 2. Call the i2c_get_bus_handle function to get the bus handle and then call this function to add a new device.
+ * 
+ * @param i2c 
+ * @param addr 
+ * @param clk_speed_hz 
+ * @return true 
+ * @return false 
+ */
+bool i2c_init_new_device(i2c_t *i2c, uint8_t i2c_num ,uint8_t addr, uint32_t clk_speed_hz);
+
+/**
+ * @brief Get the I2C bus handle. The I2C bus must exist before calling this function.
+ * 
+ * @param i2c_num 
+ * @param ret_bus_handle 
+ * @return true if the I2C bus handle is obtained correctly
+ * @return false if the I2C bus handle is not obtained correctly
+ */
+bool i2c_get_bus_handle(uint8_t i2c_num, i2c_master_bus_handle_t *ret_bus_handle);
 
 /**
  * @brief Deinitialize the I2C master driver
  * 
  * @param i2c 
+ * @return true if the I2C is deinitialized correctly
+ * @return false if the I2C deinitialization failed
  */
-void i2c_deinit(i2c_t *i2c);
+bool i2c_deinit(i2c_t *i2c);
 
 /**
  * @brief Given a register address, read the data from the register.
@@ -75,8 +121,10 @@ void i2c_deinit(i2c_t *i2c);
  * @param reg 
  * @param data 
  * @param len 
+ * @return true  if the read operation was successful
+ * @return false  if the read operation failed
  */
-void i2c_read_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len);
+bool i2c_read_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len);
 
 /**
  * @brief Given a register address, write the data to the register.
@@ -85,8 +133,10 @@ void i2c_read_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len);
  * @param reg 
  * @param data 
  * @param len 
+ * @return true if the write operation was successful
+ * @return false if the write operation failed
  */
-void i2c_write_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len);
+bool i2c_write_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len);
 
 /**
  * @brief Write data to the I2C bus
