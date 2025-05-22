@@ -19,6 +19,23 @@
 #include <stdio.h>
 #include <math.h>
 
+#define MIN(a,b) ((a)<(b)?(a):(b)) ///< Macro to get the minimum value
+#define MAX(a,b) ((a)>(b)?(a):(b)) ///< Macro to get the maximum value
+
+typedef struct {
+    float Kp; // PID Kp value
+    float Ki; // PID Ki value
+    float Kd; // PID Kd value
+    float previous_err1; // e(k-1)
+    float previous_err2; // e(k-2)
+    float integral_err;  // Sum of error
+    float last_output;  // PID output in last control period
+    float max_output;   // PID maximum output limitation
+    float min_output;   // PID minimum output limitation
+    float max_integral; // PID maximum integral value limitation
+    float min_integral; // PID minimum integral value limitation
+} pid_block_t; ///< PID controller block
+
 typedef struct
 {
     float x_pred[2][1]; ///< Predicted state vector
@@ -58,6 +75,12 @@ typedef struct
     float H[3][2]; ///< Measurement matrix
     float H_T[2][3]; ///< Transpose of the measurement matrix
 
+    /**
+     * @brief PID controller parameters
+     * 
+     */
+    pid_block_t pid; ///< PID controller block
+
 } ctrl_senfusion_t;
 
 
@@ -66,7 +89,7 @@ typedef struct
  * 
  * @param ctrl_senfusion Pointer to the control and sensor fusion structure
  */
-void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, float dt);
+void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, float dt);
 
 /**
  * @brief Predict the next state of the system
@@ -104,6 +127,15 @@ static inline float ctrl_senfusion_get_vel(ctrl_senfusion_t *ctrl_senfusion)
 {
     return ctrl_senfusion->x[1][0]; ///< Get the velocity from the sensor fusion
 }
+
+/**
+ * @brief Calculate the PID control value
+ * 
+ * @param ctrl_senfusion Pointer to the control and sensor fusion structure
+ * @param error Error value
+ * @return float PID control value
+ */
+float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error);
 
 ///<-------------------------------------------------------------
 ///<--------------- LINEAR ALGEBRA FUNCTIONS --------------------
