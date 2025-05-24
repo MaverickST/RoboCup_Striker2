@@ -1,14 +1,17 @@
 #include "as5600_lib.h"
 
-void AS5600_Init(AS5600_t *as5600, i2c_port_t i2c_num, uint8_t scl, uint8_t sda, uint8_t out)
+void AS5600_Init(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda, uint8_t out)
 {
     as5600->out = out; // Set the GPIO pin connected to the OUT pin of the AS5600 sensor
 
-    //  I2C master configuration 
-    if (!i2c_init(&as5600->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, AS5600_SENSOR_ADDR)) {
-        printf("I2C initialization failed");
-        return;
-    }
+    // //  I2C master configuration 
+    // if (!i2c_init(&as5600->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, AS5600_SENSOR_ADDR)) {
+    //     printf("AS5600: I2C initialization failed\n");
+    //     return;
+    // }
+
+    // i2c_init_new_bus(&as5600->i2c_handle, i2c_num, scl, sda);
+    // i2c_init_new_device(&as5600->i2c_handle, i2c_num, AS5600_SENSOR_ADDR, I2C_MASTER_FREQ_HZ);
 
 }
 
@@ -17,6 +20,11 @@ void AS5600_Deinit(AS5600_t *as5600)
     i2c_deinit(&as5600->i2c_handle);
     adc_deinit(&as5600->adc_handle);
     gpio_deinit(&as5600->gpio_handle);
+}
+
+void AS5600_DeinitI2C(AS5600_t *as5600)
+{
+    i2c_deinit(&as5600->i2c_handle);
 }
 
 float AS5600_ADC_GetAngle(AS5600_t *as5600)

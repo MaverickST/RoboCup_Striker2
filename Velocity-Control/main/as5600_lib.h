@@ -58,13 +58,20 @@ typedef struct
  * 
  * @param i2c_num I2C port number
  */
-void AS5600_Init(AS5600_t *as5600, i2c_port_t i2c_num, uint8_t scl, uint8_t sda, uint8_t out);
+void AS5600_Init(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda, uint8_t out);
 
 /**
- * @brief Deinitialize the I2C master driver
+ * @brief Deinitialize all the drivers used by the AS5600 sensor
  * 
  */
 void AS5600_Deinit(AS5600_t *as5600);
+
+/**
+ * @brief Initialize the I2C driver
+ * 
+ * @param as5600 
+ */
+void AS5600_DeinitI2C(AS5600_t *as5600);
 
 /**
  * @brief Get angle in degrees from the AS5600 sensor by ADC.

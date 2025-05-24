@@ -133,6 +133,8 @@ typedef struct {
     float mx; ///> Magnetometer X value
     float my; ///> Magnetometer Y value
     float mz; ///> Magnetometer Z value
+
+    gpio_t rst_pin; ///> Reset pin
     
 } BNO055_t;
 
@@ -144,7 +146,14 @@ typedef struct {
  * 
  * @param bno055 Pointer to the BNO055 sensor structure
  */
-int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, i2c_port_t i2c_num);
+int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, uint8_t i2c_num, uint8_t rst_gpio);
+
+/**
+ * @brief Reset the BNO055 sensor
+ * 
+ * @param bno055 
+ */
+void BNO055_Reset(BNO055_t *bno055);
 
 /**
  * @brief Get the calibration status of the BNO055 sensor

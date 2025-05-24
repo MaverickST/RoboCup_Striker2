@@ -124,8 +124,12 @@ void BNO055_ConvertData_Mag(BNO055_t *bno055, uint8_t *data, float *x, float *y,
     }
 }
 
-int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, i2c_port_t i2c_num)
+int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, uint8_t i2c_num, uint8_t rst_gpio)
 {
+    // gpio_init_basic(&bno055->rst_pin, rst_gpio, 2, false, false);
+    // BNO055_Reset(bno055);
+    // gpio_set_high(&bno055->rst_pin);
+
     int8_t success = BNO055_SUCCESS;
 
     printf("Initializing BNO055 sensor...\n");
@@ -182,6 +186,20 @@ int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, i2c_port_t i2c_nu
     }
 
     return BNO055_ERROR; 
+}
+
+void BNO055_Reset(BNO055_t *bno055)
+{
+    if (bno055 == NULL) {
+        printf("Error: Null pointer provided\n");
+        return; // Error: Null pointer
+    }
+
+    // Reset the BNO055 sensor
+    gpio_set_low(&bno055->rst_pin);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    gpio_set_high(&bno055->rst_pin);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 int8_t BNO055_GetCalibrationStatus(BNO055_t *bno055)
@@ -489,7 +507,10 @@ int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len)
         return -1; // Error: Null pointer
     }
     
-    i2c_read_reg(&bno055->i2c_handle, reg, data, len);
+    if(!i2c_read_reg(&bno055->i2c_handle, reg, data, len)){
+        printf("Error: i2c failed to read data (BNO055 sensor)\n");
+        return BNO055_ERROR;
+    }
     
     return BNO055_SUCCESS;
 }
