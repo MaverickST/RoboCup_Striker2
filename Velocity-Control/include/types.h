@@ -11,6 +11,13 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <math.h>
+
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -21,18 +28,68 @@
 #include "esp_flash.h"
 #include "esp_timer.h"
 
-typedef union
-{
-    uint8_t B;
-    struct
-    {
-        uint8_t uc_data : 1; ///< Data received from the UART console
-        uint8_t         : 7; ///< Reserved    
-    };
-} flags_t;
+#include "uart_console.h"
+#include "functions.h"
+#include "tasks.h"
+#include "led.h"
+#include "platform_esp32s3.h"
+#include "bldc_pwm.h"
+#include "as5600_lib.h"
+#include "VL53L1X.h"
+#include "bno055.h"
+#include "control_senfusion.h"
 
-extern volatile flags_t gFlag;
+// -------------------------------------------------------------------------- 
+// ----------------------------- DEFINITIONS --------------------------------
+// --------------------------------------------------------------------------
 
+#define AS5600_I2C_MASTER_SCL_GPIO 4    /*!< gpio number for I2C master clock */
+#define AS5600_I2C_MASTER_SDA_GPIO 5    /*!< gpio number for I2C master data  */
+#define AS5600_OUT_GPIO 6               /*!< gpio number for OUT signal */
+#define AS5600_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
+
+#define BNO055_I2C_MASTER_SCL_GPIO 11    /*!< gpio number for I2C master clock */
+#define BNO055_I2C_MASTER_SDA_GPIO 12    /*!< gpio number for I2C master data  */
+#define BNO055_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
+#define BNO055_RST_GPIO 13           /*!< gpio number for I2C reset */
+
+#define VL53L1X_I2C_MASTER_SCL_GPIO 38    /*!< gpio number for I2C master clock */
+#define VL53L1X_I2C_MASTER_SDA_GPIO 39    /*!< gpio number for I2C master data  */
+#define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
+#define VL53L1X_RST_GPIO 41              /*!< gpio number for I2C reset */
+
+#define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
+#define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
+#define MOTOR_MCPWM_DUTY_TICK_MAX       (MOTOR_MCPWM_TIMER_RESOLUTION_HZ / MOTOR_MCPWM_FREQ_HZ) // maximum value we can set for the duty cycle, in ticks
+#define MOTOR_MCPWM_GPIO                3
+#define MOTOR_REVERSE_GPIO              8
+#define MOTOR_PWM_BOTTOM_DUTY           50
+#define MOTOR_PWM_TOP_DUTY              120
+
+#define LED_TIME_US     2*1000*1000
+#define LED_LSB_GPIO    15
+
+#define UART_NUM        0
+
+#define TIME_SAMPLING_S		10		/* 10s sampling data */
+#define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
+#define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
+#define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
+#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
+
+#define RAD_TO_DEG      57.2957795 // Conversion factor from radians to degrees
+#define DEG2RAD         (3.14159265358979323846f / 180.0f)
+#define RADIUS_M        0.03
+#define MAX_BRIGHTNESS  5 // Max brightness of the LED
+
+// --------------------------------------------------------------------------
+
+/**
+ * @brief System structure.
+ * 
+ * It will be used to store the data from the sensors and the state of the system.
+ * 
+ */
 typedef struct
 {
     enum 
@@ -106,6 +163,29 @@ typedef struct
 
 }system_t;
 
+
+// --------------------------------------------------------------------------
+// ----------------------------- GLOBAL VARIABLES ---------------------------
+// --------------------------------------------------------------------------
+
+static const char* TAG_UART_TASK = "uart_task";
+static const char* TAG_CMD = "cmd";
+static const char* TAG_BNO055_TASK = "bno055_task";
+static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
+static const char* TAG_AS5600_TASK = "as5600_task";
+static const char* TAG_CTRL_TASK = "ctrl_task";
+
+led_rgb_t gLed;
+bldc_pwm_motor_t gMotor;
+system_t gSys;
+ctrl_senfusion_t gCtrl;
+uart_console_t gUc;
+
+AS5600_t gAS5600;
+vl53l1x_t gVL53L1X;
+BNO055_t gBNO055;
+
+
 /**
  * @brief Flash
  * Some useful commands to read and write data to the flash memory via python console:
@@ -130,52 +210,5 @@ typedef struct
  * 
  */
 
-
-/** 
-esp_err_t ret = adc_continuous_read(gAs5600.adc_cont_handle, gAs5600.buffer, AS5600_ADC_READ_SIZE_BYTES, &gAs5600.ret_num, portMAX_DELAY);
-uint32_t ret_num = gAs5600.ret_num;
-if (ret == ESP_OK) {
-
-    ESP_LOGI(TAG_ADC_TASK, "ret is %x, ret_num is %d bytes, in time %d", ret, (int)ret_num, (int)(gSys.done_adc_time - gSys.start_adc_time));
-    gSys.start_adc_time = esp_rtc_get_time_us();
-
-    """"
-        -  'data_frame' is a buffer to save the data readed from the ADC. The data is saved in a .txt file .
-        -  See 'types.h' file for more details about python commands.
-        -  20 is a right-minded of the number of characters (bytes) needed per data (per line in the .txt file), but
-        in many cases, it will be less than 20.
-    """"
-    char data_frame[(ret_num / SOC_ADC_DIGI_DATA_BYTES_PER_CONV)*20];
-    uint32_t cnt_bytes = 0;
-    static uint32_t time = 0;
-
-    for (int i = 0; i < ret_num; i += SOC_ADC_DIGI_RESULT_BYTES) {
-        adc_digi_output_data_t *p = (adc_digi_output_data_t*)&gAs5600.buffer[i];
-        uint32_t chan_num = p->type2.channel;
-        uint32_t data = p->type2.data;
-        ///< Check the channel number validation, the data is invalid if the channel num exceed the maximum channel 
-        if (!(chan_num < SOC_ADC_CHANNEL_NUM(AS5600_ADC_CONF_UNIT))) {
-            ESP_LOGW(TAG_ADC_TASK, "Invalid data [%d_%"PRIu32"_%"PRIx32"]", gAs5600.unit, chan_num, data);
-        }
-        // Save the data in the data_frame array taking into account the time, angle and duty.
-        time += AS5600_ADC_SAMPLE_PERIOD_US;
-        uint16_t duty = gSys.duty_to_save;
-        uint16_t angle = 0;
-        as5600_adc_raw_to_angle(&gAs5600, data, &angle);
-
-        uint8_t length = snprintf(NULL, 0, "%d\t\t%d\t\t%d\n", (int)time, (int)angle, (int)duty);
-        char str[length + 1];
-        snprintf(str, length + 1, "%d\t\t%d\t\t%d\n", (int)time, (int)angle, (int)duty);
-        for(int j = 0; j < length; j++) { // copy the string to the data_frame array
-            data_frame[cnt_bytes++] = str[j];
-        }
-    }
-    // Write the data to the flash memory
-    esp_flash_write(gSys.part->flash_chip, data_frame, gSys.part->address + gSys.current_bytes_written, cnt_bytes);
-    gSys.current_bytes_written += cnt_bytes;
-    ESP_LOGI(TAG_ADC_TASK, "current_bytes_written: %d", (int)gSys.current_bytes_written);
-}
-
-*/
 
 #endif // __TYPES_H__

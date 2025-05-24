@@ -19,7 +19,7 @@
 #include "hal/uart_types.h"
 #include "hal/uart_hal.h"
 #include "freertos/queue.h"
-#include "types.h"
+// #include "types.h"
 
 #define PATTERN_CHR_NUM    (3)  /*!< Set the number of consecutive and identical characters received 
                                      by receiver which defines a UART pattern*/

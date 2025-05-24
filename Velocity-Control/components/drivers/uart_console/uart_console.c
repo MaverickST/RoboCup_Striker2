@@ -60,5 +60,5 @@ void uconsole_intr_handler(void *arg)
 
     uconsole_read_data(uc);
     ESP_LOGI("UART", "Data received: %s", uc->data);
-    gFlag.uc_data = true;
+    // gFlag.uc_data = true;
 }
