@@ -6,7 +6,7 @@
 // -------------------------------------------------------------
 
 
-bool i2c_init(i2c_t *i2c, i2c_port_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda, uint32_t clk_speed_hz, uint16_t addr)
+bool i2c_init(i2c_t *i2c, uint8_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda, uint32_t clk_speed_hz, uint16_t addr)
 {
     esp_err_t ret = ESP_OK;
 
@@ -27,8 +27,10 @@ bool i2c_init(i2c_t *i2c, i2c_port_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda
     };
 
     i2c_master_bus_handle_t bus_handle;
-    ESP_GOTO_ON_ERROR(i2c_new_master_bus(&i2c_mst_config, &bus_handle), err, TAG_I2C, "i2c io to channel failed");
+    ESP_GOTO_ON_ERROR(i2c_new_master_bus(&i2c_mst_config, &bus_handle), err, TAG_I2C, "i2c new master bus failed");
+    i2c->bus_handle = bus_handle;
 
+    // ------------- I2C device configuration ------------- //
     i2c_device_config_t dev_cfg = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
         .device_address = addr,
@@ -36,31 +38,117 @@ bool i2c_init(i2c_t *i2c, i2c_port_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda
     };
 
     static i2c_master_dev_handle_t dev_handle;
-    ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_cfg, &dev_handle));
+    ESP_GOTO_ON_ERROR(i2c_master_bus_add_device(bus_handle, &dev_cfg, &dev_handle), err, TAG_I2C, "i2c new device failed");
     i2c->dev_handle = dev_handle;
 
     return true;
 err:
-    return false;//ret == ESP_OK;
+    return false;
 }
 
-void i2c_deinit(i2c_t *i2c)
+bool i2c_get_bus_handle(uint8_t i2c_num, i2c_master_bus_handle_t *ret_bus_handle)
 {
-    i2c_del_master_bus(i2c->bus_handle);
+    esp_err_t ret = ESP_OK;
+
+    i2c_master_bus_handle_t bus_handle = NULL;
+    ESP_GOTO_ON_ERROR(i2c_master_get_bus_handle(i2c_num, &bus_handle), err, TAG_I2C, "i2c getting bus handle failed");
+    if (bus_handle == NULL) {
+        ESP_LOGE(TAG_I2C, "i2c bus handle is NULL");
+        return false;
+    }
+    *ret_bus_handle = bus_handle;
+
+    return true;
+err:
+    return false;
 }
 
-void i2c_read_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len)
+bool i2c_deinit(i2c_t *i2c)
 {
+    esp_err_t ret = ESP_OK;
+
+    ESP_GOTO_ON_ERROR(i2c_del_master_bus(i2c->bus_handle), err, TAG_I2C, "i2c delete master bus failed");
+
+    return true;
+err:
+    return false;
+}
+
+bool i2c_init_new_bus(i2c_t *i2c, uint8_t i2c_num, uint8_t gpio_scl, uint8_t gpio_sda)
+{
+    esp_err_t ret = ESP_OK;
+
+    i2c->i2c_num = i2c_num;
+    i2c->gpio_scl = gpio_scl;
+    i2c->gpio_sda = gpio_sda;
+
+    // ------------- I2C master configuration ------------- //
+    i2c_master_bus_config_t i2c_mst_config = {
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .i2c_port = i2c_num,
+        .scl_io_num = gpio_scl,
+        .sda_io_num = gpio_sda,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+
+    i2c_master_bus_handle_t bus_handle;
+    ESP_GOTO_ON_ERROR(i2c_new_master_bus(&i2c_mst_config, &bus_handle), err, TAG_I2C, "i2c new master bus failed");
+    i2c->bus_handle = bus_handle;
+
+    return true;
+err:
+    return false;
+}
+
+bool i2c_init_new_device(i2c_t *i2c, uint8_t i2c_num, uint8_t addr, uint32_t clk_speed_hz)
+{
+    esp_err_t ret = ESP_OK;
+
+    i2c->addr = addr;
+    i2c->clk_speed_hz = clk_speed_hz;
+    i2c->i2c_num = i2c_num;
+
+    // ------------- I2C device configuration ------------- //
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = addr,
+        .scl_speed_hz = clk_speed_hz,
+    };
+
+    static i2c_master_dev_handle_t dev_handle;
+    ESP_GOTO_ON_ERROR(i2c_master_bus_add_device(i2c->bus_handle, &dev_cfg, &dev_handle), err, TAG_I2C, "i2c new device initializing failed");
+    i2c->dev_handle = dev_handle;
+
+    return true;
+err:
+    return false;
+}
+
+bool i2c_read_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len)
+{
+    esp_err_t ret = ESP_OK;
+
     uint8_t write_buffer[] = {reg};
-    i2c_master_transmit_receive(i2c->dev_handle, write_buffer, 1, (uint8_t *)data, len, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
+    ESP_GOTO_ON_ERROR(i2c_master_transmit_receive(i2c->dev_handle, write_buffer, 1, (uint8_t *)data, len, I2C_TIMEOUT_MS / portTICK_PERIOD_MS), err, TAG_I2C, "i2c read reg failed");
+
+    return true;
+err:
+    return false;
 }
 
-void i2c_write_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len)
+bool i2c_write_reg(i2c_t *i2c, uint8_t reg, uint8_t *data, size_t len)
 {
+    esp_err_t ret = ESP_OK;
+
     uint8_t write_buffer[len + 1];
     write_buffer[0] = reg;
     memcpy(&write_buffer[1], data, len);
-    i2c_master_transmit(i2c->dev_handle, write_buffer, len + 1, I2C_TIMEOUT_MS / portTICK_PERIOD_MS);
+    ESP_GOTO_ON_ERROR(i2c_master_transmit(i2c->dev_handle, write_buffer, len + 1, I2C_TIMEOUT_MS / portTICK_PERIOD_MS), err, TAG_I2C, "i2c write reg failed");
+
+    return true;
+err:
+    return false;
 }
 
 void i2c_write(i2c_t *i2c, uint8_t *data, size_t len)

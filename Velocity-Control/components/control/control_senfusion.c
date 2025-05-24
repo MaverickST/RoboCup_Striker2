@@ -1,7 +1,11 @@
 #include "control_senfusion.h"
 
-void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, float dt)
+void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, float dt)
 {
+    ///< ---------------- PID CONTROLLER -----------------
+    ctrl_senfusion->pid = pid; ///< Set the PID controller
+
+    ///< ----------------- SENSOR FUSION -----------------
     ctrl_senfusion->dt = dt;
     ctrl_senfusion->k = 0;
     ctrl_senfusion->x[0][0] = 0;
@@ -97,14 +101,14 @@ void ctrl_senfusion_update(ctrl_senfusion_t *ctrl_senfusion, float p_enc, float 
     matrixMultiplication(3, 2, 3, H_P_pred, ctrl_senfusion->H_T, S); // H * Pₖ|ₖ₋₁ * Hᵀ
     matrixAddSub(3, 3, S, ctrl_senfusion->R, S, '+'); // H * Pₖ|ₖ₋₁ * Hᵀ + R
     // print S
-    printf("S: %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n", S[0][0], S[0][1], S[0][2], S[1][0], S[1][1], S[1][2], S[2][0], S[2][1], S[2][2]);
+    // printf("S: %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n", S[0][0], S[0][1], S[0][2], S[1][0], S[1][1], S[1][2], S[2][0], S[2][1], S[2][2]);
 
     ///< Kalman gain: K = Pₖ|ₖ₋₁ * Hᵀ * inv(S)  , 2x2 * 2x3 * 3x3 = 2x3
     float K[2][3] = {0};
     float P_pred_H_T[2][3] = {0};
     matrixMultiplication(2, 2, 3, ctrl_senfusion->P_pred, ctrl_senfusion->H_T, P_pred_H_T); // Pₖ|ₖ₋₁ * Hᵀ
     solve_LU_system(S, P_pred_H_T, K); // solve the linear system S * K = Pₖ|ₖ₋₁ * Hᵀ
-    printf("K: %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n", K[0][0], K[0][1], K[0][2], K[1][0], K[1][1], K[1][2]);
+    // printf("K: %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n", K[0][0], K[0][1], K[0][2], K[1][0], K[1][1], K[1][2]);
 
     ///< Innovation (residue): y = z - H * xₖ|ₖ₋₁
     float v_imu = ctrl_senfusion->v_imu_prev + a_imu * ctrl_senfusion->dt; ///< IMU velocity: v_imu = v_imu_prev + a_imu * dt
@@ -113,14 +117,14 @@ void ctrl_senfusion_update(ctrl_senfusion_t *ctrl_senfusion, float p_enc, float 
     matrixMultiplication(3, 2, 2, ctrl_senfusion->H, ctrl_senfusion->x_pred, y); // H * xₖ|ₖ₋₁
     matrixAddSub(3, 1, z, y, y, '-'); // z - H * xₖ|ₖ₋₁
     ctrl_senfusion->v_imu_prev = v_imu; ///< Update the IMU velocity for the next iteration
-    printf("y: %.4f, %.4f, %.4f\n", y[0][0], y[1][0], y[2][0]);
+    // printf("y: %.4f, %.4f, %.4f\n", y[0][0], y[1][0], y[2][0]);
 
     ///< Update the state: xₖ = xₖ|ₖ₋₁ + K * y
     float x[2][1] = {0};
     matrixMultiplication(2, 3, 1, K, y, x); // K * y
     ctrl_senfusion->x[0][0] = ctrl_senfusion->x_pred[0][0] + x[0][0]; // xₖ = xₖ|ₖ₋₁ + K * y
     ctrl_senfusion->x[1][0] = ctrl_senfusion->x_pred[1][0] + x[1][0]; // xₖ = xₖ|ₖ₋₁ + K * y
-    printf("x: %.4f, %.4f\n", x[0][0], x[1][0]);
+    // printf("x: %.4f, %.4f\n", x[0][0], x[1][0]);
 
     ///< Update the error covariance matrix: Pₖ = (I - K * H) * Pₖ|ₖ₋₁
     float I_K_H[2][2] = {0};
@@ -131,8 +135,33 @@ void ctrl_senfusion_update(ctrl_senfusion_t *ctrl_senfusion, float p_enc, float 
     I_K_H[1][0] = -KH[1][0];
     I_K_H[1][1] = 1 - KH[1][1];
     matrixMultiplication(2, 2, 2, I_K_H, ctrl_senfusion->P_pred, ctrl_senfusion->P); // (I - K * H) * Pₖ|ₖ₋₁
-    printf("KH: %.4f, %.4f\n %.4f, %.4f\n", KH[0][0], KH[0][1], KH[1][0], KH[1][1]);
-    printf("P: %.4f, %.4f\n %.4f, %.4f\n", ctrl_senfusion->P[0][0], ctrl_senfusion->P[0][1], ctrl_senfusion->P[1][0], ctrl_senfusion->P[1][1]);
+    // printf("KH: %.4f, %.4f\n %.4f, %.4f\n", KH[0][0], KH[0][1], KH[1][0], KH[1][1]);
+    // printf("P: %.4f, %.4f\n %.4f, %.4f\n", ctrl_senfusion->P[0][0], ctrl_senfusion->P[0][1], ctrl_senfusion->P[1][0], ctrl_senfusion->P[1][1]);
+}
+
+float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error)
+{
+    float output = 0;
+    /* Add current error to the integral error */
+    ctrl_senfusion->pid.integral_err += error;
+    /* If the integral error is out of the range, it will be limited */
+    ctrl_senfusion->pid.integral_err = MIN(ctrl_senfusion->pid.integral_err, ctrl_senfusion->pid.max_integral);
+    ctrl_senfusion->pid.integral_err = MAX(ctrl_senfusion->pid.integral_err, ctrl_senfusion->pid.min_integral);
+
+    /* Calculate the pid control value by location formula */
+    /* u(k) = e(k)*Kp + (e(k)-e(k-1))*Kd + integral*Ki */
+    output = error * ctrl_senfusion->pid.Kp +
+             (error - ctrl_senfusion->pid.previous_err1) * ctrl_senfusion->pid.Kd +
+             ctrl_senfusion->pid.integral_err * ctrl_senfusion->pid.Ki;
+
+    /* If the output is out of the range, it will be limited */
+    output = MIN(output, ctrl_senfusion->pid.max_output);
+    output = MAX(output, ctrl_senfusion->pid.min_output);
+
+    /* Update previous error */
+    ctrl_senfusion->pid.previous_err1 = error;
+
+    return output;
 }
 
 ///<-------------------------------------------------------------
