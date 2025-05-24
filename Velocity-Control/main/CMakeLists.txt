@@ -1,5 +1,5 @@
 
-file(GLOB MAIN_SRCS "*.c")
+file(GLOB MAIN_SRCS "main.c" "tasks.c" "functions.c" "*.c")
 file(GLOB PLATFORM_SRCS "../components/platform/*.c")
 file(GLOB AS5600_SRCS "../components/drivers/as5600/*.c")
 file(GLOB BLDC_PWM_SRCS "../components/drivers/bldc_pwm/*.c")
