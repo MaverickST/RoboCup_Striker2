@@ -22,15 +22,17 @@
 #define AS5600_I2C_MASTER_SCL_GPIO 4    /*!< gpio number for I2C master clock */
 #define AS5600_I2C_MASTER_SDA_GPIO 5    /*!< gpio number for I2C master data  */
 #define AS5600_OUT_GPIO 6               /*!< gpio number for OUT signal */
-#define AS5600_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
+#define AS5600_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
 
 #define BNO055_I2C_MASTER_SCL_GPIO 11    /*!< gpio number for I2C master clock */
-#define BNO055_I2C_MASTER_SDA_GPIO 13    /*!< gpio number for I2C master data  */
+#define BNO055_I2C_MASTER_SDA_GPIO 12    /*!< gpio number for I2C master data  */
 #define BNO055_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
+#define BNO055_RST_GPIO 13           /*!< gpio number for I2C reset */
 
-#define VL53L1X_I2C_MASTER_SCL_GPIO 15    /*!< gpio number for I2C master clock */
-#define VL53L1X_I2C_MASTER_SDA_GPIO 16    /*!< gpio number for I2C master data  */
+#define VL53L1X_I2C_MASTER_SCL_GPIO 38    /*!< gpio number for I2C master clock */
+#define VL53L1X_I2C_MASTER_SDA_GPIO 39    /*!< gpio number for I2C master data  */
 #define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
+#define VL53L1X_RST_GPIO 41              /*!< gpio number for I2C reset */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
 #define MOTOR_MCPWM_FREQ_HZ             50    // 50Hz PWM
@@ -45,13 +47,16 @@
 
 #define UART_NUM        0
 
-#define TIME_SAMPLING_US    10*1000 // 10ms
 #define TIME_SAMPLING_S		10		/* 10s sampling data */
 #define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
+#define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
+#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
 
-#define RAD_TO_DEG 57.2957795 // Conversion factor from radians to degrees
-#define MAX_BRIGHTNESS 5 // Max brightness of the LED
+#define RAD_TO_DEG      57.2957795 // Conversion factor from radians to degrees
+#define DEG2RAD         (3.14159265358979323846f / 180.0f)
+#define RADIUS_M        0.03
+#define MAX_BRIGHTNESS  5 // Max brightness of the LED
 
 // --------------------------------------------------------------------------
 // ----------------------------- GLOBAL VARIABLES ---------------------------
@@ -169,7 +174,17 @@ void save_nvs_task(void *pvParameters);
 void app_main(void)
 {
     ///< ---------------- CNTROL + SENFUSION ----------------
-    ctrl_senfusion_init(&gCtrl, 0.01); // 10ms sampling time
+    pid_block_t config_pid = {
+        .Kp = 80, ///< Proportional gain
+        .Kd = 1, ///< Derivative gain
+        .Ki = 5, ///< Integral gain
+        .max_output   = 80,
+        .min_output   = -80,
+        .max_integral = 200,
+        .min_integral = -200,
+    };
+
+    ctrl_senfusion_init(&gCtrl, config_pid, 0.01); // 10ms sampling time
 
     ///< ---------------------- LED ----------------------
     led_init(&gLed, LED_LSB_GPIO, LED_TIME_US, true);
@@ -186,69 +201,72 @@ void app_main(void)
     bldc_enable(&gMotor);
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
-    ///< ---------------------- BNO055 ------------------
-    // // Initialize BNO055 sensor
-    // int8_t success = 0;
-    // success = BNO055_Init(&bno055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM);
-    // while (success != BNO055_SUCCESS) {
-    //     printf("Error: Failed to initialize BNO055 sensor\n");
-    //     vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
-    //     success = BNO055_Init(&bno055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM);
-    // }
-    
-    // //Load Calibration Data
-    // BNO055_SetOperationMode(&bno055, CONFIGMODE);
-    // uint8_t calib_offsets[22] = {
-    //     0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
-    //     0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
-    //     0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
-    //     0xE8, 0x03, 0xAD, 0x01   
-    // };
-    // BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
-    // BNO055_SetOperationMode(&bno055, IMU);
-    // gSys.is_bno055_calibrated= true;
-
-    ///< Create a task to manage the BNO055 sensor
-    xTaskCreate(bno055_task, "bno055_task", 2*1024, NULL, 2, &gSys.task_handle_bno055);
-
-    ///< ---------------------- VL53L1X ------------------
-    ///< Initialize the VL53L1X sensor and set the parameters
-    if (!VL53L1X_init(&gvl53l1x, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
-        ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed");
-        return;
-    }
-
-    ///< Flag to check if the sensor is calibrated
-    gSys.is_vl53l1x_calibrated = true;
-    VL53L1X_startContinuous(&gvl53l1x,10);
-
-    ///< Create a task to manage the VL53L1X sensor
-    xTaskCreate(vl53l1x_task, "vl53l1x_task", 2*1024, NULL, 3, &gSys.task_handle_vl53l1x);
-
     ///< ---------------------- AS5600 -------------------
     // Initialize the AS5600 sensor
+    ESP_LOGI(TAG_AS5600_TASK, "Initializing AS5600 sensor");
     AS5600_Init(&gAs5600, AS5600_I2C_MASTER_NUM, AS5600_I2C_MASTER_SCL_GPIO, AS5600_I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
     AS5600_config_t conf = {
         .PM = AS5600_POWER_MODE_NOM, ///< Normal mode
-        .HYST = AS5600_HYSTERESIS_OFF, ///< Hysteresis off
+        .HYST = AS5600_HYSTERESIS_2LSB, ///< Hysteresis off
         .OUTS = AS5600_OUTPUT_STAGE_ANALOG_RR, ///< Analog output 10%-90%
         .PWMF = AS5600_PWM_FREQUENCY_115HZ, ///< PWM frequency 115Hz
-        .SF = AS5600_SLOW_FILTER_16X, ///< Slow filter 16x
-        .FTH = AS5600_FF_THRESHOLD_SLOW_FILTER_ONLY, ///< Slow filter only
+        .SF = AS5600_SLOW_FILTER_8X, ///< Slow filter 16x
+        .FTH = AS5600_FF_THRESHOLD_6LSB, ///< Slow filter only
         .WD = AS5600_WATCHDOG_ON, ///< Watchdog on
     };
-    AS5600_SetConf(&gAs5600, conf);
-    AS5600_InitADC(&gAs5600);
+    gAs5600.conf = conf;
 
-    ///< Sensor calibration
-    AS5600_SetStartPosition(&gAs5600, 0x0000);
-    AS5600_SetStopPosition(&gAs5600, 0x0FFF);
+    AS5600_InitADC(&gAs5600);
+    gSys.angle_origin_offset = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle in degrees
     gSys.is_as5600_calibrated = true;
     
     // Create a task to manage the AS5600 sensor
-    xTaskCreate(as5600_task, "as5600_task", 2*1024, NULL, 4, &gSys.task_handle_as5600);
+    xTaskCreate(as5600_task, "as5600_task", 4*1024, NULL, 4, &gSys.task_handle_as5600);
+
+    ///< ---------------------- BNO055 ------------------
+    // Initialize BNO055 sensor
+    ESP_LOGI(TAG_BNO055_TASK, "Initializing BNO055 sensor");
+    int8_t success = BNO055_Init(&bno055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM, BNO055_RST_GPIO);
+    if (success != BNO055_SUCCESS) {
+        printf("Error: Failed to initialize BNO055 sensor\n");
+    }
+    
+    //Load Calibration Data
+    BNO055_SetOperationMode(&bno055, CONFIGMODE);
+    uint8_t calib_offsets[22] = {
+        0xF7, 0xFF, 0xCC, 0xFF, 0xC5, 0xFF, 
+        0x8A, 0x01, 0x4E, 0x01, 0x5D, 0x00,
+        0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xE8, 0x03, 0xAD, 0x01   
+    };
+    BN055_Write(&bno055, BNO055_ACCEL_OFFSET_X_LSB_ADDR, calib_offsets, 22);
+    BNO055_SetOperationMode(&bno055, IMU);
+    gSys.is_bno055_calibrated = true;
+
+    ///< Create a task to manage the BNO055 sensor
+    xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 4, &gSys.task_handle_bno055);
+
+    ///< ---------------------- VL53L1X ------------------
+    ///< Initialize the VL53L1X sensor and set the parameters
+    ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor");
+    if (!VL53L1X_init(&gvl53l1x, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
+        ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed\n");
+    }
+
+    ///< Get the distance respect to the origin
+    VL53L1X_startContinuous(&gvl53l1x,10);
+    while (true) {
+        if (VL53L1X_dataReady(&gvl53l1x)) {
+            gSys.dist_origin_offset = VL53L1X_readDistance(&gvl53l1x, false); ///< Get the distance in meters
+            break;
+        }
+    }
+    gSys.is_vl53l1x_calibrated = true;
+
+    ///< Create a task to manage the VL53L1X sensor
+    xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 3, &gSys.task_handle_vl53l1x);
 
     ///< ---------------------- SYSTEM -------------------
     // 'System' refers to more general variables and functions that are used to control the system, which
@@ -275,7 +293,7 @@ void init_system(void)
         return;
     }
     ESP_ERROR_CHECK(esp_flash_erase_region(gSys.part->flash_chip, gSys.part->address, gSys.part->size));
-    vTaskDelay(1000 / portTICK_PERIOD_MS); ///< Wait for the erase to finish
+    esp_partition_erase_range(gSys.part, 0, gSys.part->size);
     char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\n";
     part_label[strlen(part_label)] = '\0'; ///< Add the null terminator to the string
     // esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
@@ -307,7 +325,16 @@ void init_system(void)
     xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 1, &gSys.task_handle_trigger);
 
     ///< Create the save task
-    gSys.queue = xQueueCreate(5, sizeof(uint8_t)*25); ///< Create a queue to send the data to the save task
+    gSys.queue = xQueueCreate(5, sizeof(uint8_t)*30); ///< Create a queue to send the data to the save task
+    gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
+    if (gSys.queue == NULL) {
+        ESP_LOGI("init_system", "Queue not created");
+        return;
+    }
+    if (gSys.mutex == NULL) {
+        ESP_LOGI("init_system", "Mutex not created");
+        return;
+    }
     xTaskCreate(save_nvs_task, "save_nvs_task", 3*1024, NULL, 6, &gSys.task_handle_save);
 
 }
@@ -428,23 +455,34 @@ void trigger_task(void *pvParameters)
 void bno055_task(void *pvParameters)
 {
     float ax, ay;
+    float acce_prev = 0;
 
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        gSys.acceleration = 19.0; ///< Read the acceleration from the BNO055 sensor (dummy value)
+        float acceleration = 0; ///< Read the acceleration from the BNO055 sensor (dummy value)
       
         ///< Read All data from BNO055 sensor
-        BNO055_ReadAll(&bno055);
+        if (BNO055_ReadAll(&bno055)) { // error reading data 
+            acceleration = acce_prev; ///< Set the acceleration to the previous value  
 
-        ///< Data from the BNO055 sensor
-        ///< acceleration m/s^2 in x, y, z axis
-        ax = bno055.ax;
-        ay = bno055.ay;
+        }else {
+            ///< Data from the BNO055 sensor
+            ///< acceleration m/s^2 in x, y, z axis
+            ax = bno055.ax;
+            ay = bno055.ay;
 
-        ///< From ax and ay we can calculate the accelation in the plane
-        gSys.acceleration = sqrt(ax*ax + ay*ay);
-    
+            ///< From ax and ay we can calculate the accelation in the plane
+            acceleration = sqrt(ax*ax + ay*ay);
+            float dir = atan2(ay, ax); ///< Get the direction of the acceleration in radians
+
+            ///< Update
+            acce_prev = acceleration;
+        }
+        xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
+        gSys.acceleration = acceleration;
+        xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
+
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
     }
@@ -455,16 +493,17 @@ void vl53l1x_task(void *pvParameters)
 {
     uint16_t distance_mm = 0; ///< Variable to store the distance readed from the VL53L1X sensor
     while (true) {
-        
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        gSys.distance = 12.0; ///< Read the distance from the VL53L1X sensor (dummy value)
         
         ///< Read the distance from the VL53L1X sensor
         if (VL53L1X_dataReady(&gvl53l1x)) {
             // If data is ready, read it non-blockingly
             distance_mm = VL53L1X_readDistance(&gvl53l1x, false); // false for non-blocking read
-        }  
+        }
+        xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
+        gSys.distance = distance_mm/1000.0f - gSys.dist_origin_offset; ///< Read the distance from the VL53L1X sensor
+        xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
 
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
@@ -474,12 +513,32 @@ void vl53l1x_task(void *pvParameters)
 
 void as5600_task(void *pvParameters)
 {
+    float prevAngleDeg = 0;      /**< Last raw angle reading, in degrees [0..360). */
+    float unwrappedDeg = 0;      /**< Cumulative unwrapped angle, in degrees. */
+
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         ///< Read the angle from the AS5600 sensor and save it in the buffer
-        gSys.angle = AS5600_ADC_GetAngle(&gAs5600); ///< Get the angle from the ADC
+        float angle = AS5600_ADC_GetAngle(&gAs5600) - gSys.angle_origin_offset; ///< Get the angle from the ADC
+
+        // Compute difference
+        float delta = angle - prevAngleDeg;
+
+        // Wrap jumps greater than ±180°
+        // if      (delta >  180.0f) delta -= 360.0f;
+        // else if (delta < -180.0f) delta += 360.0f;
+
+        // Accumulate
+        unwrappedDeg += delta;
+        prevAngleDeg = angle;
+
+        // Convert degrees to radians and multiply by radius
+        xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
+        gSys.dist_enc = RADIUS_M * unwrappedDeg * DEG2RAD;
+        gSys.angle = angle;
+        xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
 
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 3);
@@ -530,7 +589,7 @@ void control_task(void *pvParameters)
             bldc_set_duty_motor(&gMotor, gSys.duty);
         }
         else if (gSys.cnt_sample < 6.5*SAMPLING_RATE_HZ) { ///<
-            gSys.duty = 25;
+            gSys.duty = 20;
             bldc_set_duty_motor(&gMotor, gSys.duty);
         }
         else if (gSys.cnt_sample < 7.5*SAMPLING_RATE_HZ) { ///<
@@ -542,7 +601,7 @@ void control_task(void *pvParameters)
             bldc_set_duty_motor(&gMotor, gSys.duty);
         }
         else if (gSys.cnt_sample < 9*SAMPLING_RATE_HZ) { ///<
-            gSys.duty = -25;
+            gSys.duty = -20;
             bldc_set_duty_motor(&gMotor, gSys.duty);
         }
         else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///<
@@ -551,18 +610,45 @@ void control_task(void *pvParameters)
         }
 
         ///< Send the sensor data to the queue
-        uint8_t length = snprintf(NULL, 0, "%d\t%.2f\t%.3f\t%.3f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.distance);
+        uint8_t length = snprintf(NULL, 0, "%d\t%.2f\t%.3f\t%.2f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.dist_enc);
         char str[length + 1];
-        snprintf(str, length + 1, "%d\t%.2f\t%.3f\t%.3f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.distance);
+        snprintf(str, length + 1, "%d\t%.2f\t%.3f\t%.2f\n", (int)gSys.duty, gSys.angle, gSys.acceleration, gSys.dist_enc);
         // xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
 
         ///< Use Sensor Fusion to get the states of the system: position(m), velocity(m/s)
         ctrl_senfusion_predict(&gCtrl, gSys.duty);
-        ctrl_senfusion_update(&gCtrl, gSys.angle, gSys.distance, gSys.acceleration, gSys.cnt_sample);
+        ctrl_senfusion_update(&gCtrl, gSys.dist_enc, gSys.dist_enc, gSys.acceleration, gSys.cnt_sample);
         float pos = ctrl_senfusion_get_pos(&gCtrl);
         float vel = ctrl_senfusion_get_vel(&gCtrl);
         ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s", pos, vel);
+        ESP_LOGI(TAG_CTRL_TASK, "angle-> %.2f deg, dist-> %.2f m, acc-> %.2f m/s^2", gSys.angle, gSys.dist_enc, gSys.acceleration);
 
+        ///< Safety check to stop the motor if the distance is less than 0.4m and greater than 0.4m
+        if (fabs(gSys.dist_enc) > 0.4) {
+            bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
+            esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
+            gSys.STATE = NONE;
+        }
+
+        ///< Calculate the PID control if the system is in the control state
+        if (gSys.STATE == SYS_SAMPLING_CONTROL) {
+            float error_pos = gSys.setpoint_dist - pos; ///< Calculate the error
+            float error_vel = gSys.setpoint_vel - vel; ///< Calculate the error
+            float control = ctrl_senfusion_calc_pid(&gCtrl, error_pos); ///< Calculate the control value
+            bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
+            // if (gSys.setpoint_dist < 0) {
+            //     bldc_set_duty_motor(&gMotor, -control); ///< Set the duty to the motor
+            // }else {
+            //     bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
+            // }
+            ESP_LOGI(TAG_CTRL_TASK, "control-> %.2f", control);
+
+            if (fabs(gSys.setpoint_dist - pos) < 0.01){
+                bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
+                esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
+                gSys.STATE = NONE;
+            }
+        }
     }
     vTaskDelete(NULL);
 }
@@ -728,8 +814,14 @@ void process_cmd(const char *cmd)
         ESP_LOGI(TAG_CMD, "dir-> %d, dist-> %d, vel-> %d", dir, dist, vel);
 
         gSys.setpoint_dir = dir; ///< Set the direction of the motor
-        gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
-        gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+        if (gSys.setpoint_dir) {
+            gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
+            gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+        }
+        else {
+            gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
+            gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+        }
 
         ///< Init the control experiment
         vTaskDelay(5000 / portTICK_PERIOD_MS); ///< wait 5 seconds to start the experiment

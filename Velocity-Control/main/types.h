@@ -21,14 +21,6 @@
 #include "esp_flash.h"
 #include "esp_timer.h"
 
-
-#define TIME_SAMPLING_US    10*1000 // 10ms
-#define TIME_SAMPLING_S		10		/* 10s sampling data */
-#define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
-#define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
-#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
-
-
 typedef union
 {
     uint8_t B;
@@ -71,16 +63,22 @@ typedef struct
      * Each value is saved in a 5 bytes integer.
      * 
      */
-    int8_t buffer[1*SAMPLING_RATE_HZ][5*4]; 
+    // int8_t buffer[1*SAMPLING_RATE_HZ][5*4]; 
+
+
     
     uint16_t raw_angle; ///< Raw angle readed from the AS5600 sensor
     QueueHandle_t queue; ///< Queue to send the data to the save task
+    SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
 
     ///< Values for the sensors
     float distance; ///< Distance readed from the VL53L1X sensor
     float angle;    ///< Angle readed from the AS5600 sensor
+    float dist_enc; ///< Distance readed from the AS5600 sensor
     float acceleration; ///< Acceleration readed from the BNO055 sensor
     float duty; ///< Duty cycle of the BLDC motor
+    float dist_origin_offset; ///< Distance offset for the VL53L1X sensor
+    float angle_origin_offset; ///< Angle offset for the AS5600 sensor
 
     ///< Flags to check if the sensors are calibrated or not
     bool is_as5600_calibrated;  ///< Flag to check if the AS5600 sensor is calibrated or not
@@ -103,7 +101,6 @@ typedef struct
 
     uint32_t current_bytes_written; ///< Number of samples readed from the ADC
     esp_timer_handle_t oneshot_timer;    ///< Timer to control the sequence
-    esp_timer_handle_t oneshot_timer2;    ///< Timer to control the sequence
     int8_t cnt_cali; ///< Counter for the calibration process
     const esp_partition_t *part;   ///< Pointer to the partition table
 
