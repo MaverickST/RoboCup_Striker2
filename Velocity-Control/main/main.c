@@ -29,10 +29,24 @@ BNO055_t gBNO055;
 
 void app_main(void)
 {
-    ///< Initialize the drivers: LED, UART, BLDC, AS5600, BNO055, VL53L1X
+    ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
 
-    ///< Verify the sensors
+    ///< Initialize and setup each sensor
+    if (!setup_as5600(100)) { ///< Setup the AS5600 sensor
+        ESP_LOGI("app_main", "AS5600 sensor is not ready");
+        return;
+    }
+    if (!setup_bno055(100)) { ///< Setup the BNO055 sensor
+        ESP_LOGI("app_main", "BNO055 sensor is not ready");
+        return;
+    }
+    if (!setup_vl53l1x(100)) { ///< Setup the VL53L1X sensor
+        ESP_LOGI("app_main", "VL53L1X sensor is not ready");
+        return;
+    }
+
+    ///< Verify the sensors together
     if (verify_sensors(100)) { 
         ESP_LOGI("app_main", "Sensors are ready");
     }
@@ -40,11 +54,12 @@ void app_main(void)
         ESP_LOGI("app_main", "Sensors are not ready");
         return;
     }
+    
+    ///< Create the tasks
+    create_tasks(); 
 
-    create_tasks(); ///< Create the tasks
-
-    ///< ---------------------- SYSTEM -------------------
-    // 'System' refers to more general variables and functions that are used to control the system.
+    ///< Initialize the system
+    ///< 'System' refers to more general variables and functions that are used to control the project.
     init_system();
 
 }
