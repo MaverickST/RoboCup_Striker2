@@ -73,6 +73,7 @@
 
 #define TIME_SAMPLING_S		10		/* 10s sampling data */
 #define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
+#define SAMPLING_PERIOD_S        1.0/SAMPLING_RATE_HZ // 10ms
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
 #define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
 #define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
@@ -120,10 +121,9 @@ typedef struct
      * Each value is saved in a 5 bytes integer.
      * 
      */
-    // int8_t buffer[1*SAMPLING_RATE_HZ][5*4]; 
+    // int8_t buffer[1*SAMPLING_RATE_HZ][5*4];
 
-
-    
+    gpio_t rst_pin; ///< GPIO pin for the reset of the ESP32S3
     uint16_t raw_angle; ///< Raw angle readed from the AS5600 sensor
     QueueHandle_t queue; ///< Queue to send the data to the save task
     SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
@@ -158,7 +158,6 @@ typedef struct
 
     uint32_t current_bytes_written; ///< Number of samples readed from the ADC
     esp_timer_handle_t oneshot_timer;    ///< Timer to control the sequence
-    int8_t cnt_cali; ///< Counter for the calibration process
     const esp_partition_t *part;   ///< Pointer to the partition table
 
 }system_t;
@@ -175,15 +174,15 @@ static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
 static const char* TAG_AS5600_TASK = "as5600_task";
 static const char* TAG_CTRL_TASK = "ctrl_task";
 
-led_rgb_t gLed;
-bldc_pwm_motor_t gMotor;
-system_t gSys;
-ctrl_senfusion_t gCtrl;
-uart_console_t gUc;
+extern led_rgb_t gLed;
+extern bldc_pwm_motor_t gMotor;
+extern system_t gSys;
+extern ctrl_senfusion_t gCtrl;
+extern uart_console_t gUc;
 
-AS5600_t gAS5600;
-vl53l1x_t gVL53L1X;
-BNO055_t gBNO055;
+extern AS5600_t gAS5600;
+extern vl53l1x_t gVL53L1X;
+extern BNO055_t gBNO055;
 
 
 /**

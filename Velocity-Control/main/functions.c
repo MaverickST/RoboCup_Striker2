@@ -13,7 +13,7 @@ void init_drivers(void)
         .min_integral = -200,
     };
 
-    ctrl_senfusion_init(&gCtrl, config_pid, 0.01); // 10ms sampling time
+    ctrl_senfusion_init(&gCtrl, config_pid, SAMPLING_PERIOD_S); // 10ms sampling time
 
     ///< ---------------------- LED ----------------------
     led_init(&gLed, LED_LSB_GPIO, LED_TIME_US, true);
@@ -31,7 +31,7 @@ void init_drivers(void)
 
     ///< ---------------------- AS5600 -------------------
     // Initialize the AS5600 sensor
-    ESP_LOGI(TAG_AS5600_TASK, "Initializing AS5600 sensor");
+    ESP_LOGI(TAG_AS5600_TASK, "Initializing AS5600 sensor\n");
     AS5600_Init(&gAS5600, AS5600_I2C_MASTER_NUM, AS5600_I2C_MASTER_SCL_GPIO, AS5600_I2C_MASTER_SDA_GPIO, AS5600_OUT_GPIO);
 
     // Set some configurations to the AS5600
@@ -52,10 +52,12 @@ void init_drivers(void)
 
     ///< ---------------------- BNO055 ------------------
     // Initialize BNO055 sensor
-    ESP_LOGI(TAG_BNO055_TASK, "Initializing BNO055 sensor");
+    ESP_LOGI(TAG_BNO055_TASK, "Initializing BNO055 sensor\n");
     int8_t success = BNO055_Init(&gBNO055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM, BNO055_RST_GPIO);
-    if (success != BNO055_SUCCESS) {
+    while (success != BNO055_SUCCESS) {
         printf("Error: Failed to initialize BNO055 sensor\n");
+        success = BNO055_Init(&gBNO055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM, BNO055_RST_GPIO);
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
     }
     
     //Load Calibration Data
@@ -72,9 +74,10 @@ void init_drivers(void)
 
     ///< ---------------------- VL53L1X ------------------
     ///< Initialize the VL53L1X sensor and set the parameters
-    ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor");
-    if (!VL53L1X_init(&gVL53L1X, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
+    ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor\n");
+    while (!VL53L1X_init(&gVL53L1X, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
         ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed\n");
+        vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
     }
 
     ///< Get the distance respect to the origin
@@ -87,6 +90,60 @@ void init_drivers(void)
     }
     gSys.is_vl53l1x_calibrated = true;
 
+}
+
+bool verify_sensors(uint32_t num_checks)
+{
+    ///< Count the number of times the sensors are sensing the same value
+    int cnt_as5600 = 0;
+    int cnt_vl53l1x = 0;
+    int cnt_bno055 = 0;
+
+    float angle_prev = 0;
+    float dist_prev = 0;
+    float acce_prev = 0;
+
+    for (uint8_t i = 0; i < num_checks; i++) {
+        float angle = 0;
+        float dist = 0;
+        float acce = 0;
+
+        ///< Get sensor values
+        angle = AS5600_ADC_GetAngle(&gAS5600); ///< Get the angle in degrees
+
+        if (VL53L1X_dataReady(&gVL53L1X)){            
+            dist = VL53L1X_readDistance(&gVL53L1X, false); // false for non-blocking read
+        }
+
+        BNO055_ReadAll(&gBNO055);
+        acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
+
+        ///< Print the values
+        // printf("Angle: %.2f deg, Distance: %.3f m, Acce: %.2f m^2\n", angle, dist/1000.0, acce);
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+        if (fabs(angle - angle_prev) < 0.001) {
+            cnt_as5600++;
+        }
+        if (fabs(dist - dist_prev) < 0.001) {
+            cnt_vl53l1x++;
+        }
+        if (fabs(acce - acce_prev) < 0.001) {
+            cnt_bno055++;
+        }
+
+        angle_prev = angle;
+        dist_prev = dist;
+        acce_prev = acce;
+
+    }
+    ESP_LOGI("verify_sensors", "AS5600: %d, VL53L1X: %d, BNO055: %d", cnt_as5600, cnt_vl53l1x, cnt_bno055);
+
+    if (cnt_as5600 > num_checks/2 && cnt_vl53l1x > num_checks/2 && cnt_bno055 > num_checks/2) {
+        return false;
+    }
+
+    return true;
 }
 
 void init_system(void)

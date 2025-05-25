@@ -23,6 +23,15 @@
 void init_drivers(void);
 
 /**
+ * @brief Verify and check if all the sensors are ready to be used.
+ * 
+ * @param num_checks 
+ * @return true 
+ * @return false 
+ */
+bool verify_sensors(uint32_t num_checks);
+
+/**
  * @brief Initialize the system variables
  * 
  */
