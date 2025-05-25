@@ -23,6 +23,39 @@
 void init_drivers(void);
 
 /**
+ * @brief Initialize and setup the AS5600 sensor.
+ * Also runs an individual check to verify the sensor.
+ * 
+ * @param num_checks Number of checks to verify the sensor.
+ */
+bool setup_as5600(uint32_t num_checks);
+
+/**
+ * @brief Initialize and setup the VL53L1X sensor
+ * Also runs an individual check to verify the sensor.
+ * 
+ * @param num_checks Number of checks to verify the sensor.
+ */
+bool setup_bno055(uint32_t num_checks);
+
+/**
+ * @brief Initialize and setup the BNO055 sensor
+ * Also runs an individual check to verify the sensor.
+ * 
+ * @param num_checks Number of checks to verify the sensor.
+ */
+bool setup_vl53l1x(uint32_t num_checks);
+
+/**
+ * @brief Verify and check if all the sensors are ready to be used.
+ * 
+ * @param num_checks 
+ * @return true 
+ * @return false 
+ */
+bool verify_sensors(uint32_t num_checks);
+
+/**
  * @brief Initialize the system variables
  * 
  */
