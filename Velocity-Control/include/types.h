@@ -53,9 +53,9 @@
 #define BNO055_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
 #define BNO055_RST_GPIO 13           /*!< gpio number for I2C reset */
 
-#define VL53L1X_I2C_MASTER_SCL_GPIO 38    /*!< gpio number for I2C master clock */
-#define VL53L1X_I2C_MASTER_SDA_GPIO 39    /*!< gpio number for I2C master data  */
-#define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
+#define VL53L1X_I2C_MASTER_SCL_GPIO 17    /*!< gpio number for I2C master clock */
+#define VL53L1X_I2C_MASTER_SDA_GPIO 18    /*!< gpio number for I2C master data  */
+#define VL53L1X_I2C_MASTER_NUM 0        /*!< I2C port number for master dev */
 #define VL53L1X_RST_GPIO 41              /*!< gpio number for I2C reset */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
@@ -175,16 +175,15 @@ static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
 static const char* TAG_AS5600_TASK = "as5600_task";
 static const char* TAG_CTRL_TASK = "ctrl_task";
 
-led_rgb_t gLed;
-bldc_pwm_motor_t gMotor;
-system_t gSys;
-ctrl_senfusion_t gCtrl;
-uart_console_t gUc;
+extern led_rgb_t gLed;
+extern bldc_pwm_motor_t gMotor;
+extern system_t gSys;
+extern ctrl_senfusion_t gCtrl;
+extern uart_console_t gUc;
 
-AS5600_t gAS5600;
-vl53l1x_t gVL53L1X;
-BNO055_t gBNO055;
-
+extern AS5600_t gAS5600;
+extern vl53l1x_t gVL53L1X;
+extern BNO055_t gBNO055;
 
 /**
  * @brief Flash

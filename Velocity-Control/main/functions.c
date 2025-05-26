@@ -70,8 +70,8 @@ void init_drivers(void)
     BNO055_SetOperationMode(&gBNO055, IMU);
     gSys.is_bno055_calibrated = true;
 
-    ///< ---------------------- VL53L1X ------------------
-    ///< Initialize the VL53L1X sensor and set the parameters
+    // /< ---------------------- VL53L1X ------------------
+    // /< Initialize the VL53L1X sensor and set the parameters
     ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor");
     if (!VL53L1X_init(&gVL53L1X, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
         ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed\n");
