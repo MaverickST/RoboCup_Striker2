@@ -157,13 +157,14 @@ bool AS5600_IsValidWriteReg(AS5600_t *as5600, AS5600_reg_t reg)
 
 // -------------------------------------------------------------
 // ------------------ GPIO and ADC FUNCTIONS -------------------
-void AS5600_InitADC(AS5600_t *as5600)
+bool AS5600_InitADC(AS5600_t *as5600)
 {
     // ADC pin OUT configuration 
     if (!adc_init(&as5600->adc_handle, as5600->out)) {
         printf("ADC initialization failed");
-        return;
+        return false;
     }
+    return true;
 }
 
 void AS5600_DeinitADC(AS5600_t *as5600)

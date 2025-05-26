@@ -118,8 +118,10 @@ AS5600_reg_t AS5600_RegStrToAddr(AS5600_t *as5600, const char *reg_str);
  * @brief Initialize the ADC driver
  * 
  * @param as5600 
+ * @return true if the ADC driver was initialized successfully
+ * @return false if the ADC driver was not initialized successfully
  */
-void AS5600_InitADC(AS5600_t *as5600);
+bool AS5600_InitADC(AS5600_t *as5600);
 
 /**
  * @brief Deinitialize the ADC driver

@@ -194,6 +194,7 @@ void BNO055_Reset(BNO055_t *bno055)
         printf("Error: Null pointer provided\n");
         return; // Error: Null pointer
     }
+    i2c_deinit(&bno055->i2c_handle); // Deinitialize I2C
 
     // Reset the BNO055 sensor
     gpio_set_low(&bno055->rst_pin);
