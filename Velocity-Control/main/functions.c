@@ -83,6 +83,24 @@ bool setup_bno055(uint32_t num_checks)
     BNO055_SetOperationMode(&gBNO055, IMU);
     gSys.is_bno055_calibrated = true;
 
+    ///< Individual sensor checks
+    float acce = 0, acce_prev = 0;
+    uint16_t cnt = 0;
+    for (uint32_t i = 0; i < num_checks; i++) {
+        BNO055_ReadAll(&gBNO055);
+        acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
+        if (fabs(acce - acce_prev) < 0.0001) {
+            cnt++;
+        }
+        acce_prev = acce;
+        // printf("Acce: %.2f m^2\n", acce);
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    ESP_LOGI("setup_bno055", "Verifing BNO055 sensor: err %d - num %d", (int)cnt, (int)num_checks);
+    if (cnt > num_checks/2) {
+        return false;
+    }
+
     return true;
 }
 
@@ -92,6 +110,7 @@ bool setup_vl53l1x(uint32_t num_checks)
     ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor\n");
     while (!VL53L1X_init(&gVL53L1X, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
         ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed\n");
+        i2c_deinit(&gVL53L1X.i2c_handle); ///< Deinitialize the I2C handle
         vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
     }
 
@@ -119,11 +138,11 @@ bool verify_sensors(uint32_t num_checks)
     float dist_prev = 0;
     float acce_prev = 0;
 
-    for (uint8_t i = 0; i < num_checks; i++) {
-        float angle = 0;
-        float dist = 0;
-        float acce = 0;
+    float angle = 0;
+    float dist = 0;
+    float acce = 0;
 
+    for (uint8_t i = 0; i < num_checks; i++) {
         ///< Get sensor values
         angle = AS5600_ADC_GetAngle(&gAS5600); ///< Get the angle in degrees
 
