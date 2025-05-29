@@ -4,11 +4,11 @@ void init_drivers(void)
 {
     ///< ---------------- CNTROL + SENFUSION ----------------
     pid_block_t config_pid = {
-        .Kp = 80, ///< Proportional gain
+        .Kp = 70, ///< Proportional gain
         .Kd = 1, ///< Derivative gain
         .Ki = 5, ///< Integral gain
-        .max_output   = 80,
-        .min_output   = -80,
+        .max_output   = 60,
+        .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
     };
@@ -83,6 +83,24 @@ bool setup_bno055(uint32_t num_checks)
     BNO055_SetOperationMode(&gBNO055, IMU);
     gSys.is_bno055_calibrated = true;
 
+    ///< Individual sensor checks
+    float acce = 0, acce_prev = 0;
+    uint16_t cnt = 0;
+    for (uint32_t i = 0; i < num_checks; i++) {
+        BNO055_ReadAll(&gBNO055);
+        acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
+        if (fabs(acce - acce_prev) < 0.0001) {
+            cnt++;
+        }
+        acce_prev = acce;
+        // printf("Acce: %.2f m^2\n", acce);
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    ESP_LOGI("setup_bno055", "Verifing BNO055 sensor: err %d - num %d", (int)cnt, (int)num_checks);
+    if (cnt > num_checks/2) {
+        return false;
+    }
+
     return true;
 }
 
@@ -92,6 +110,7 @@ bool setup_vl53l1x(uint32_t num_checks)
     ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor\n");
     while (!VL53L1X_init(&gVL53L1X, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
         ESP_LOGE(TAG_VL53L1X, "VL53L1X initialization failed\n");
+        i2c_deinit(&gVL53L1X.i2c_handle); ///< Deinitialize the I2C handle
         vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
     }
 
@@ -99,7 +118,7 @@ bool setup_vl53l1x(uint32_t num_checks)
     VL53L1X_startContinuous(&gVL53L1X,10);
     while (true) {
         if (VL53L1X_dataReady(&gVL53L1X)) {
-            gSys.dist_origin_offset = VL53L1X_readDistance(&gVL53L1X, false); ///< Get the distance in meters
+            gSys.dist_origin_offset = VL53L1X_readDistance(&gVL53L1X, false)/1000.0f; ///< Get the distance in meters
             break;
         }
     }
@@ -119,11 +138,11 @@ bool verify_sensors(uint32_t num_checks)
     float dist_prev = 0;
     float acce_prev = 0;
 
-    for (uint8_t i = 0; i < num_checks; i++) {
-        float angle = 0;
-        float dist = 0;
-        float acce = 0;
+    float angle = 0;
+    float dist = 0;
+    float acce = 0;
 
+    for (uint8_t i = 0; i < num_checks; i++) {
         ///< Get sensor values
         angle = AS5600_ADC_GetAngle(&gAS5600); ///< Get the angle in degrees
 
@@ -178,7 +197,7 @@ void init_system(void)
     }
     ESP_ERROR_CHECK(esp_flash_erase_region(gSys.part->flash_chip, gSys.part->address, gSys.part->size));
     esp_partition_erase_range(gSys.part, 0, gSys.part->size);
-    char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\n";
+    char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\tPos(m)\tVel(m/s)\n";
     part_label[strlen(part_label)] = '\0'; ///< Add the null terminator to the string
     esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
     gSys.current_bytes_written += strlen(part_label);
@@ -276,10 +295,10 @@ void process_cmd(const char *cmd)
         char str_value[len_uc_data - 4]; ///< 4 is the length of the command "pwm "
         strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
 
-        float value = atof(str_value);
-        ESP_LOGI(TAG_CMD, "value-> %.2f", value);
+        int value = atoi(str_value)/10;
+        ESP_LOGI(TAG_CMD, "value-> %d", (int)value);
         if (value != 0) { ///< If value=0, that means data is not a number
-            bldc_set_duty_motor(&gMotor, value);
+            bldc_set_duty(&gMotor, (int)value);
         }
     }
     ///< Command to read the angle from the AS5600 sensor
@@ -391,11 +410,11 @@ void process_cmd(const char *cmd)
 
         gSys.setpoint_dir = dir; ///< Set the direction of the motor
         if (gSys.setpoint_dir) {
-            gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
+            gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
             gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
         }
         else {
-            gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
+            gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
             gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
         }
 

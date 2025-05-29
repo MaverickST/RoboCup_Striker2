@@ -509,7 +509,7 @@ int8_t BNO055_Read(BNO055_t *bno055, uint8_t reg, uint8_t *data, uint8_t len)
     }
     
     if(!i2c_read_reg(&bno055->i2c_handle, reg, data, len)){
-        printf("Error: i2c failed to read data (BNO055 sensor)\n");
+        // printf("Error: i2c failed to read data (BNO055 sensor)\n");
         return BNO055_ERROR;
     }
     
@@ -544,7 +544,7 @@ int8_t BNO055_ReadAll(BNO055_t *bno055)
 
     // Check if the read operation was successful
     if (log != BNO055_SUCCESS) {
-        printf("Error: Failed to read data from the BNO055 sensor\n");
+        // printf("Error: Failed to read data from the BNO055 sensor\n");
         return BNO055_ERROR;
     }
 
