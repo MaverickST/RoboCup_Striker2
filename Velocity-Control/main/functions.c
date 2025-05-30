@@ -187,28 +187,6 @@ void init_system(void)
     ///< Initialize the system variables
     gSys.cnt_sample = 0; ///< Initialize the number of samples readed from all the sensors
     gSys.STATE = INIT_BLDC_STEP_1; ///< Initialize the state machine: initialize the BLDC motor
-    gSys.current_bytes_written = 0; ///< Initialize the number of samples readed from the ADC
-
-    // Get the partition table and erase the partition to store new data
-    gSys.part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "angle_pos");
-    if (gSys.part == NULL) {
-        ESP_LOGI("init_system", "Partition not found");
-        return;
-    }
-    ESP_ERROR_CHECK(esp_flash_erase_region(gSys.part->flash_chip, gSys.part->address, gSys.part->size));
-    esp_partition_erase_range(gSys.part, 0, gSys.part->size);
-    char part_label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\tPos(m)\tVel(m/s)\n";
-    part_label[strlen(part_label)] = '\0'; ///< Add the null terminator to the string
-    esp_err_t rest = esp_partition_write(gSys.part, 0, part_label, strlen(part_label));
-    gSys.current_bytes_written += strlen(part_label);
-
-    // Print the result of the operation
-    if (rest == ESP_OK) {
-        ESP_LOGI("init_system", "Text written successfully");
-    }
-    else {
-        ESP_LOGI("init_system", "Error writing text");
-    }
 
     // Create a one-shot timer to control the sequence
     const esp_timer_create_args_t oneshot_timer_args = {
@@ -267,12 +245,14 @@ void sys_timer_cb(void *arg)
             vTaskNotifyGiveFromISR(gSys.task_handle_trigger, &mustYield);
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
 
-            gSys.cnt_smp_control++; ///< Increment the number of samples readed from all the sensors
+            gSys.cnt_smp_control++; ///< Increment the number of samples readed from all the sensors for control
+            gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
             if (gSys.cnt_smp_control >= NUM_SAMPLES_CONTROL) {
                 ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
                 bldc_set_duty(&gMotor, 0); ///< Stop the motor
                 ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_smp_control);
+                gSys.STATE = NONE; ///< Set the state to NONE to stop the system
             }
             break;
 

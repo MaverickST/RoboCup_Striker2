@@ -22,7 +22,7 @@ void create_tasks(void)
 
     ///< Create the save task
     gSys.queue = xQueueCreate(10, sizeof(uint8_t)*45); ///< Create a queue to send the data to the save task
-    xTaskCreate(save_nvs_task, "save_nvs_task", 5*1024, NULL, 2, &gSys.task_handle_save);
+    xTaskCreate(save_data_task, "save_nvs_task", 70*1024, NULL, 2, &gSys.task_handle_save);
 
     ///< Crate some kernel objects
     gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
@@ -101,7 +101,7 @@ void vl53l1x_task(void *pvParameters)
             distance_mm = VL53L1X_readDistance(&gVL53L1X, false); // false for non-blocking read
         }
         xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
-        gSys.distance = distance_mm/1000.0f - gSys.dist_origin_offset; ///< Read the distance from the VL53L1X sensor
+        gSys.distance = gSys.dist_origin_offset - distance_mm/1000.0f; ///< Read the distance from the VL53L1X sensor
         xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
 
         ///< Notify the control task to process the data
@@ -213,13 +213,14 @@ void control_task(void *pvParameters)
         ctrl_senfusion_update(&gCtrl, gSys.dist_enc, gSys.distance, gSys.acceleration, gSys.cnt_sample);
         float pos = ctrl_senfusion_get_pos(&gCtrl);
         float vel = ctrl_senfusion_get_vel(&gCtrl);
-        ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s, enc-> %.2f m, dist-> %.2f m, acc-> %.2f m/s^2\n", pos, vel, gSys.dist_enc, gSys.distance, gSys.acceleration);
+        // ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s, enc-> %.2f m, dist-> %.2f m, acc-> %.2f m/s^2\n", pos, vel, gSys.dist_enc, gSys.distance, gSys.acceleration);
 
         ///< Safety check to stop the motor if the distance is less than 0.4m and greater than 0.4m
-        if (fabs(gSys.distance) > 0.30 || fabs(gSys.dist_enc) > 0.30) {
+        if (fabs(gSys.distance) > 0.34 || fabs(gSys.dist_enc) > 0.30) {
             bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
             esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
             gSys.STATE = NONE;
+            printf("Safety check triggered. Position: %.2f m, Velocity: %.2f m/s\n", pos, vel);
         }
 
         ///< Calculate the PID control if the system is in the control state
@@ -227,19 +228,15 @@ void control_task(void *pvParameters)
             float error_pos = gSys.setpoint_dist - gSys.distance; ///< Calculate the error
             float error_vel = gSys.setpoint_vel - vel; ///< Calculate the error
             float control = ctrl_senfusion_calc_pid(&gCtrl, error_pos); ///< Calculate the control value
+            gSys.duty = control; ///< Set the duty to the motor
             bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
             // if (gSys.setpoint_dist < 0) {
             //     bldc_set_duty_motor(&gMotor, -control); ///< Set the duty to the motor
             // }else {
             //     bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
             // }
-            ESP_LOGI(TAG_CTRL_TASK, "control-> %.2f", control);
+            // ESP_LOGI(TAG_CTRL_TASK, "control-> %.2f", control);
 
-            if (fabs(gSys.setpoint_dist - pos) < 0.001){
-                bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
-                esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
-                gSys.STATE = NONE;
-            }
         }
         ///< Send the sensor data to the queue
         uint8_t length = snprintf(NULL, 0, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel); 
@@ -250,23 +247,46 @@ void control_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void save_nvs_task(void *pvParameters)
+void save_data_task(void *pvParameters)
 {
-    uint8_t data[25]; ///< Buffer to save the data from the queue
+    ///< Label to print at the beginning of the file
+    char label[] = "Duty\tAngle(deg)\tAcce(m^2)\tDist(m)\tPos(m)\tVel(m/s)\n";
+    label[strlen(label)] = '\0'; ///< Add the null terminator to the string
+
+    ///< Buffer to save the data from the queue
+    uint8_t data[45]; 
+
+    ///< Buffer to save the data from the sensors. Each sample has 6 values: duty, angle, acceleration, distance, position, velocity.
+    int8_t buffer[15*SAMPLING_RATE_HZ][45]; // each sample sizes 40 bytes, for 15 seconds of data
+
     while (true) {
         ///< Wait for the data from the control task
         xQueueReceive(gSys.queue, (void *const)data, portMAX_DELAY); ///< Receive the data from the queue
         uint8_t length = strlen((const char *)data); ///< Get the length of the data
 
-        ///< Save the data in the NVS
-        esp_partition_write(gSys.part, gSys.current_bytes_written, data, length); ///< Write the data to the NVS partition
-        gSys.current_bytes_written += length; ///< Increment the number of bytes written to the NVS
+        ///< Save the data in the buffer
+        if (gSys.cnt_sample < 15*SAMPLING_RATE_HZ) { ///< If the buffer is not full
+            data[length] = '\0'; ///< Add the null terminator to the data
+            strncpy((char *)buffer[gSys.cnt_sample], (const char *)data, length + 1); ///< Copy the data to the buffer
 
-        if (gSys.cnt_sample >= NUM_SAMPLES) { ///< If the number of samples is greater than the number of samples to save, stop the task
-            ESP_LOGI(TAG_CMD, "Save task finished");
-            break;
+        } else { ///< If the buffer is full
+            ESP_LOGI("save_data_task", "Buffer full, printing data to console");
+
+            ///< Print the data to the console
+            printf("%s", label); ///< Print the label to the console
+            for (int i = 0; i < gSys.cnt_sample; i++) {
+                printf("%s", buffer[i]); ///< Print the data to the console
+                if (i % 500 == 0) vTaskDelay(pdMS_TO_TICKS(100)); ///< Delay to avoid blocking the task for too long
+            }
+
+            printf("Total samples: %d\n", gSys.cnt_sample); ///< Print the total number of samples
+            printf("Data saved successfully.\n");
+
+            ///< Reset the buffer
+            memset(buffer, 0, sizeof(buffer)); ///< Clear the buffer
+
+            gSys.cnt_sample = 0; ///< Reset the number of samples
         }
-
     }
     vTaskDelete(NULL);
 }

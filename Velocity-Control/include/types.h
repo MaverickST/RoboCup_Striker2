@@ -156,9 +156,7 @@ typedef struct
     TaskHandle_t task_handle_trigger;    ///< Task handle for the trigger task
     TaskHandle_t task_handle_save;      ///< Task handle for the save task
 
-    uint32_t current_bytes_written; ///< Number of samples readed from the ADC
     esp_timer_handle_t oneshot_timer;    ///< Timer to control the sequence
-    const esp_partition_t *part;   ///< Pointer to the partition table
 
 }system_t;
 

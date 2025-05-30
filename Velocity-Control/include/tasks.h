@@ -57,11 +57,11 @@ void as5600_task(void *pvParameters);
 void control_task(void *pvParameters);
 
 /**
- * @brief Task to save the data in the NVS
+ * @brief Task to save the data collected by the sensors
  * 
  * @param pvParameters 
  */
-void save_nvs_task(void *pvParameters);
+void save_data_task(void *pvParameters);
 
 /**
  * @brief Task to handle the UART events
