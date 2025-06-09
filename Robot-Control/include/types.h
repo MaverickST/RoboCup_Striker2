@@ -76,7 +76,7 @@
 #define SAMPLING_PERIOD_S        1.0/SAMPLING_RATE_HZ // 10ms
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
 #define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
-#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
+#define NUM_SAMPLES_CONTROL        10*SAMPLING_RATE_HZ /* 5s sampling data */
 
 #define RAD_TO_DEG      57.2957795 // Conversion factor from radians to degrees
 #define DEG2RAD         (3.14159265358979323846f / 180.0f)
