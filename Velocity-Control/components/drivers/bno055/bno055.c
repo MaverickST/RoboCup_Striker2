@@ -544,7 +544,7 @@ int8_t BNO055_ReadAll(BNO055_t *bno055)
 
     // Check if the read operation was successful
     if (log != BNO055_SUCCESS) {
-        // printf("Error: Failed to read data from the BNO055 sensor\n");
+        printf("Error: Failed to read data from the BNO055 sensor\n");
         return BNO055_ERROR;
     }
 

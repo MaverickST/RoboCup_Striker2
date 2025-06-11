@@ -136,3 +136,19 @@ esp_err_t bldc_set_duty_motor(bldc_pwm_motor_t *motor, float duty)
 
     return ESP_OK;
 }
+
+esp_err_t bldc_calibrate(bldc_pwm_motor_t *motor, uint16_t bottom_duty, uint16_t top_duty)
+{
+    ESP_RETURN_ON_FALSE(bottom_duty < top_duty, ESP_ERR_INVALID_ARG, BLDC_TAG, "bottom duty must be less than top duty");
+
+    ///< Calibration of the motor
+    ESP_RETURN_ON_ERROR(bldc_set_duty(motor, top_duty), BLDC_TAG, "set top duty failed");
+    vTaskDelay(pdMS_TO_TICKS(6000)); ///< Wait for 6 seconds to calibrate the motor
+    ESP_RETURN_ON_ERROR(bldc_set_duty(motor, bottom_duty), BLDC_TAG, "set bottom duty failed");
+    vTaskDelay(pdMS_TO_TICKS(2000)); ///< Wait for 2 seconds to calibrate the motor
+
+    motor->pwm_bottom_duty = bottom_duty;
+    motor->pwm_top_duty = top_duty;
+
+    return ESP_OK;
+}
