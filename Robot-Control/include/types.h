@@ -53,9 +53,9 @@
 #define BNO055_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
 #define BNO055_RST_GPIO 13           /*!< gpio number for I2C reset */
 
-#define VL53L1X_I2C_MASTER_SCL_GPIO 17    /*!< gpio number for I2C master clock */
-#define VL53L1X_I2C_MASTER_SDA_GPIO 18    /*!< gpio number for I2C master data  */
-#define VL53L1X_I2C_MASTER_NUM 0        /*!< I2C port number for master dev */
+#define VL53L1X_I2C_MASTER_SCL_GPIO 38    /*!< gpio number for I2C master clock */
+#define VL53L1X_I2C_MASTER_SDA_GPIO 39    /*!< gpio number for I2C master data  */
+#define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
 #define VL53L1X_RST_GPIO 41              /*!< gpio number for I2C reset */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
@@ -76,7 +76,7 @@
 #define SAMPLING_PERIOD_S        1.0/SAMPLING_RATE_HZ // 10ms
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
 #define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
-#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
+#define NUM_SAMPLES_CONTROL        10*SAMPLING_RATE_HZ /* 5s sampling data */
 
 #define RAD_TO_DEG      57.2957795 // Conversion factor from radians to degrees
 #define DEG2RAD         (3.14159265358979323846f / 180.0f)

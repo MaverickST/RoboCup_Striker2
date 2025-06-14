@@ -58,7 +58,7 @@ void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, floa
     //< for lidar: sigma_p_lidar = 0.02 m
     //< for IMU: sigma_v_imu = sqrt(k) * sigma_a * dt, sigma_a = 0.0148 m/s^2
     float sigma_p_enc = 0.000784; ///< 7.84 um
-    float sigma_p_lidar = 0.05; ///< 2 cm
+    float sigma_p_lidar = 0.02; ///< 2 cm
     float sigma_v_imu = sqrt(ctrl_senfusion->k) * 0.0148 * ctrl_senfusion->dt; ///< sqrt(k) * sigma_a * dt
     ctrl_senfusion->R[0][0] = sigma_p_enc * sigma_p_enc; ///< Encoder
     ctrl_senfusion->R[0][1] = 0;
