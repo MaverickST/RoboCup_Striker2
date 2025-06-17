@@ -29,6 +29,7 @@ void init_drivers(void)
     bldc_enable(&gMotor);
     // bldc_calibrate(&gMotor, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY); ///< Calibrate the BLDC motor
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
 }
 
@@ -394,11 +395,11 @@ void process_cmd(const char *cmd)
         gSys.setpoint_dir = dir; ///< Set the direction of the motor
         if (gSys.setpoint_dir) {
             gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
-            gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+            gSys.setpoint_vel = (float)vel/100; ///< Set the velocity to move (m/s)
         }
         else {
             gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
-            gSys.setpoint_vel = -vel/100; ///< Set the velocity to move (m/s)
+            gSys.setpoint_vel = -(float)vel/100; ///< Set the velocity to move (m/s)
         }
         gSys.setpoint_dist = gSys.setpoint_dist + gSys.dist_enc; ///< Add the distance from the encoder to the setpoint distance
         printf("Setpoint: dir %d, dist %.3f m, vel %.3f m/s\n", gSys.setpoint_dir, gSys.setpoint_dist, gSys.setpoint_vel);
