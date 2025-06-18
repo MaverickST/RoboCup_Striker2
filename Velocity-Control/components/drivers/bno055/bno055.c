@@ -126,9 +126,9 @@ void BNO055_ConvertData_Mag(BNO055_t *bno055, uint8_t *data, float *x, float *y,
 
 int8_t BNO055_Init(BNO055_t *bno055, uint8_t sda, uint8_t scl, uint8_t i2c_num, uint8_t rst_gpio)
 {
-    gpio_init_basic(&bno055->rst_pin, rst_gpio, 2, false, false);
+    // gpio_init_basic(&bno055->rst_pin, rst_gpio, 2, false, false);
     // BNO055_Reset(bno055);
-    gpio_set_high(&bno055->rst_pin);
+    // gpio_set_high(&bno055->rst_pin);
 
     int8_t success = BNO055_SUCCESS;
 
@@ -544,7 +544,7 @@ int8_t BNO055_ReadAll(BNO055_t *bno055)
 
     // Check if the read operation was successful
     if (log != BNO055_SUCCESS) {
-        printf("Error: Failed to read data from the BNO055 sensor\n");
+        // printf("Error: Failed to read data from the BNO055 sensor\n");
         return BNO055_ERROR;
     }
 
