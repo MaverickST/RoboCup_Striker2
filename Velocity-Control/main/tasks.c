@@ -22,7 +22,7 @@ void create_tasks(void)
 
     ///< Create the save task
     gSys.queue = xQueueCreate(10, sizeof(uint8_t)*45); ///< Create a queue to send the data to the save task
-    xTaskCreate(save_data_task, "save_nvs_task", 70*1024, NULL, 2, &gSys.task_handle_save);
+    xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
 
     ///< Crate some kernel objects
     gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
@@ -221,12 +221,12 @@ void control_task(void *pvParameters)
         // ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s, enc-> %.2f m, dist-> %.2f m, acc-> %.2f m/s^2\n", pos, vel, gSys.dist_enc, gSys.distance, gSys.acceleration);
 
         ///< Safety check to stop the motor if the distance is less than 0.4m and greater than 0.4m
-        // if (fabs(gSys.distance) > 0.40) {
-        //     bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
-        //     esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
-        //     gSys.STATE = NONE;
-        //     printf("Safety check triggered. Position: %.2f m, Velocity: %.2f m/s\n", pos, vel);
-        // }
+        if (fabs(gSys.distance) > 0.40) {
+            bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
+            esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
+            gSys.STATE = NONE;
+            printf("Safety check triggered. Position: %.2f m, Velocity: %.2f m/s\n", pos, vel);
+        }
 
         ///< Calculate the PID control if the system is in the control state
         if (gSys.STATE == SYS_SAMPLING_CONTROL) {
@@ -254,10 +254,12 @@ void control_task(void *pvParameters)
 
         }
         ///< Send the sensor data to the queue
-        uint8_t length = snprintf(NULL, 0, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel); 
-        char str[length + 1];
-        snprintf(str, length + 1, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel);
-        // xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
+        if (gSys.cnt_sample <= 10*SAMPLING_RATE_HZ) {
+            uint8_t length = snprintf(NULL, 0, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel); 
+            char str[length + 1];
+            snprintf(str, length + 1, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel);
+            xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
+        }
 
         if (gSys.STATE == NONE) bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor if the system is in the NONE state
     }
@@ -274,19 +276,19 @@ void save_data_task(void *pvParameters)
     uint8_t data[45]; 
 
     ///< Buffer to save the data from the sensors. Each sample has 6 values: duty, angle, acceleration, distance, position, velocity.
-    int8_t buffer[15*SAMPLING_RATE_HZ][45]; // each sample sizes 40 bytes, for 15 seconds of data
+    int8_t buffer[10*SAMPLING_RATE_HZ + 1][45]; // each sample sizes 40 bytes, for 15 seconds of data
 
     while (true) {
         ///< Wait for the data from the control task
         xQueueReceive(gSys.queue, (void *const)data, portMAX_DELAY); ///< Receive the data from the queue
         uint8_t length = strlen((const char *)data); ///< Get the length of the data
 
-        ///< Save the data in the buffer
-        if (gSys.cnt_sample < 15*SAMPLING_RATE_HZ) { ///< If the buffer is not full
-            data[length] = '\0'; ///< Add the null terminator to the data
-            strncpy((char *)buffer[gSys.cnt_sample], (const char *)data, length + 1); ///< Copy the data to the buffer
+        ///< Save the data to the buffer
+        data[length] = '\0'; ///< Add the null terminator to the data
+        strncpy((char *)buffer[gSys.cnt_sample], (const char *)data, length + 1); ///< Copy the data to the buffer
 
-        } else { ///< If the buffer is full
+        ///< If the buffer is full
+        if (gSys.cnt_sample >= 10*SAMPLING_RATE_HZ) {
             ESP_LOGI("save_data_task", "Buffer full, printing data to console");
 
             ///< Print the data to the console
