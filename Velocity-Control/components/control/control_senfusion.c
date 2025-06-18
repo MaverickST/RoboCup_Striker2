@@ -4,11 +4,6 @@ void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, floa
 {
     ///< ---------------- PID CONTROLLER -----------------
     ctrl_senfusion->pid = pid; ///< Set the PID controller
-    ctrl_senfusion->pid.prev_err1 = 0; ///< Initialize the previous error
-    ctrl_senfusion->pid.prev_err2 = 0; ///< Initialize the previous error
-    ctrl_senfusion->pid.prev_u1 = 0; ///< Initialize the previous control output
-    ctrl_senfusion->pid.prev_u2 = 0; ///< Initialize the previous control output
-    ctrl_senfusion->pid.integral_err = 0; ///< Initialize the integral error
 
     ///< ----------------- SENSOR FUSION -----------------
     ctrl_senfusion->dt = dt;
@@ -63,7 +58,7 @@ void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, floa
     //< for lidar: sigma_p_lidar = 0.02 m
     //< for IMU: sigma_v_imu = sqrt(k) * sigma_a * dt, sigma_a = 0.0148 m/s^2
     float sigma_p_enc = 0.000784; ///< 7.84 um
-    float sigma_p_lidar = 0.02; ///< 2 cm
+    float sigma_p_lidar = 0.05; ///< 2 cm
     float sigma_v_imu = sqrt(ctrl_senfusion->k) * 0.0148 * ctrl_senfusion->dt; ///< sqrt(k) * sigma_a * dt
     ctrl_senfusion->R[0][0] = sigma_p_enc * sigma_p_enc; ///< Encoder
     ctrl_senfusion->R[0][1] = 0;
@@ -156,7 +151,7 @@ float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error)
     /* Calculate the pid control value by location formula */
     /* u(k) = e(k)*Kp + (e(k)-e(k-1))*Kd + integral*Ki */
     output = error * ctrl_senfusion->pid.Kp +
-             (error - ctrl_senfusion->pid.prev_err1) * ctrl_senfusion->pid.Kd +
+             (error - ctrl_senfusion->pid.previous_err1) * ctrl_senfusion->pid.Kd +
              ctrl_senfusion->pid.integral_err * ctrl_senfusion->pid.Ki;
 
     /* If the output is out of the range, it will be limited */
@@ -164,27 +159,9 @@ float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error)
     output = MAX(output, ctrl_senfusion->pid.min_output);
 
     /* Update previous error */
-    ctrl_senfusion->pid.prev_err1 = error;
+    ctrl_senfusion->pid.previous_err1 = error;
 
     return output;
-}
-
-float ctrl_senfusion_calc_pid_z(ctrl_senfusion_t *ctrl_senfusion, float error)
-{
-    float control = -0.558*ctrl_senfusion->pid.prev_err2 - 0.254*ctrl_senfusion->pid.prev_err1 + 0.812*error
-                  -ctrl_senfusion->pid.prev_u2 + 2*ctrl_senfusion->pid.prev_u1;
-
-    ///< Update the PID controller state
-    ctrl_senfusion->pid.prev_err2 = ctrl_senfusion->pid.prev_err1; // e(k-2) = e(k-1)
-    ctrl_senfusion->pid.prev_err1 = error; // e(k-1) = e(k)
-    ctrl_senfusion->pid.prev_u2 = ctrl_senfusion->pid.prev_u1; // u(k-2) = u(k-1)
-    ctrl_senfusion->pid.prev_u1 = control; // u(k-1) = u(k)
-
-    ///< Limit the control output
-    control = MIN(control, ctrl_senfusion->pid.max_output);
-    control = MAX(control, ctrl_senfusion->pid.min_output);
-
-    return control; ///< Return the control output
 }
 
 ///<-------------------------------------------------------------

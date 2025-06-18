@@ -22,7 +22,7 @@ void create_tasks(void)
 
     ///< Create the save task
     gSys.queue = xQueueCreate(10, sizeof(uint8_t)*45); ///< Create a queue to send the data to the save task
-    xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
+    xTaskCreate(save_data_task, "save_nvs_task", 70*1024, NULL, 2, &gSys.task_handle_save);
 
     ///< Crate some kernel objects
     gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
@@ -120,7 +120,7 @@ void as5600_task(void *pvParameters)
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         ///< Read the angle from the AS5600 sensor and save it in the buffer
-        float angle = -AS5600_ADC_GetAngle(&gAS5600) + gSys.angle_origin_offset; ///< Get the angle from the ADC
+        float angle = AS5600_ADC_GetAngle(&gAS5600) - gSys.angle_origin_offset; ///< Get the angle from the ADC
 
         // Compute difference
         float delta = angle - prevAngleDeg;
@@ -147,9 +147,6 @@ void as5600_task(void *pvParameters)
 
 void control_task(void *pvParameters)
 {
-    float pos_prev = 0; ///< Previous position
-    float vel_prev = 0; ///< Previous velocity
-
     while (true) {
         ///< Wait for the notification from all task sensors. configTASK_NOTIFICATION_ARRAY_ENTRIES
         ulTaskNotifyTakeIndexed(1, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the BNO055 task
@@ -157,60 +154,58 @@ void control_task(void *pvParameters)
         ulTaskNotifyTakeIndexed(3, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the AS5600 task
 
         ///< Process the data from the sensors and control the BLDC motor
-        if (gSys.STATE == SYS_SAMPLING_EXP) {
-            if (gSys.cnt_sample < 0.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 7;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 15;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 2.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 3*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -7;
-                bldc_set_duty_motor(&gMotor, gSys.duty); 
-            }
-            else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -15;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
+        if (gSys.cnt_sample < 0.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 7;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 15;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 2.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 3*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -7;
+            bldc_set_duty_motor(&gMotor, gSys.duty); 
+        }
+        else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -15;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
 
-            else if (gSys.cnt_sample < 5.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 7;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 6.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 20;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 7.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -7;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 9*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -20;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
+        else if (gSys.cnt_sample < 5.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 7;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 6.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 20;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 7.5*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -7;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 9*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = -20;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
+        }
+        else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///<
+            gSys.duty = 0;
+            bldc_set_duty_motor(&gMotor, gSys.duty);
         }
 
         ///< Use Sensor Fusion to get the states of the system: position(m), velocity(m/s)
@@ -221,7 +216,7 @@ void control_task(void *pvParameters)
         // ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s, enc-> %.2f m, dist-> %.2f m, acc-> %.2f m/s^2\n", pos, vel, gSys.dist_enc, gSys.distance, gSys.acceleration);
 
         ///< Safety check to stop the motor if the distance is less than 0.4m and greater than 0.4m
-        if (fabs(gSys.distance) > 0.40) {
+        if (fabs(gSys.distance) > 0.34 || fabs(gSys.dist_enc) > 0.30) {
             bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
             esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
             gSys.STATE = NONE;
@@ -230,38 +225,24 @@ void control_task(void *pvParameters)
 
         ///< Calculate the PID control if the system is in the control state
         if (gSys.STATE == SYS_SAMPLING_CONTROL) {
-            vel = (gSys.dist_enc - pos_prev) / (1.0f / SAMPLING_RATE_HZ); ///< Calculate the velocity from the position
-            pos_prev = gSys.dist_enc; ///< Update the previous position
-
-            float error_pos = gSys.setpoint_dist - gSys.dist_enc; ///< Calculate the error
+            float error_pos = gSys.setpoint_dist - gSys.distance; ///< Calculate the error
             float error_vel = gSys.setpoint_vel - vel; ///< Calculate the error
-            float control = ctrl_senfusion_calc_pid_z(&gCtrl, error_vel); ///< Calculate the control value
+            float control = ctrl_senfusion_calc_pid(&gCtrl, error_pos); ///< Calculate the control value
             gSys.duty = control; ///< Set the duty to the motor
             bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
-            printf("\nControl: %.2f, Pos enc: %.2f m, Vel enc: %.3f", control, gSys.dist_enc, vel);
-            // if (!gSys.setpoint_dir) { ///< If the direction is negative, set the duty to negative
+            // if (gSys.setpoint_dist < 0) {
             //     bldc_set_duty_motor(&gMotor, -control); ///< Set the duty to the motor
             // }else {
             //     bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
             // }
-
-            if (fabs(error_pos) < 0.01 || fabs(error_pos) > 0.40) { ///< If the error is less than 5mm, stop the motor
-                gSys.STATE = NONE; ///< Set the state to NONE if the error is less than 0.01m
-                bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
-                esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
-                printf("\nControl task finished. Position: %.2f m, Velocity: %.2f m/s\n", pos, vel);
-            }
+            // ESP_LOGI(TAG_CTRL_TASK, "control-> %.2f", control);
 
         }
         ///< Send the sensor data to the queue
-        if (gSys.cnt_sample <= 10*SAMPLING_RATE_HZ) {
-            uint8_t length = snprintf(NULL, 0, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel); 
-            char str[length + 1];
-            snprintf(str, length + 1, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel);
-            xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
-        }
-
-        if (gSys.STATE == NONE) bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor if the system is in the NONE state
+        uint8_t length = snprintf(NULL, 0, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel); 
+        char str[length + 1];
+        snprintf(str, length + 1, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel);
+        xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
     }
     vTaskDelete(NULL);
 }
@@ -276,26 +257,26 @@ void save_data_task(void *pvParameters)
     uint8_t data[45]; 
 
     ///< Buffer to save the data from the sensors. Each sample has 6 values: duty, angle, acceleration, distance, position, velocity.
-    int8_t buffer[10*SAMPLING_RATE_HZ + 1][45]; // each sample sizes 40 bytes, for 15 seconds of data
+    int8_t buffer[15*SAMPLING_RATE_HZ][45]; // each sample sizes 40 bytes, for 15 seconds of data
 
     while (true) {
         ///< Wait for the data from the control task
         xQueueReceive(gSys.queue, (void *const)data, portMAX_DELAY); ///< Receive the data from the queue
         uint8_t length = strlen((const char *)data); ///< Get the length of the data
 
-        ///< Save the data to the buffer
-        data[length] = '\0'; ///< Add the null terminator to the data
-        strncpy((char *)buffer[gSys.cnt_sample], (const char *)data, length + 1); ///< Copy the data to the buffer
+        ///< Save the data in the buffer
+        if (gSys.cnt_sample < 15*SAMPLING_RATE_HZ) { ///< If the buffer is not full
+            data[length] = '\0'; ///< Add the null terminator to the data
+            strncpy((char *)buffer[gSys.cnt_sample], (const char *)data, length + 1); ///< Copy the data to the buffer
 
-        ///< If the buffer is full
-        if (gSys.cnt_sample >= 10*SAMPLING_RATE_HZ) {
+        } else { ///< If the buffer is full
             ESP_LOGI("save_data_task", "Buffer full, printing data to console");
 
             ///< Print the data to the console
             printf("%s", label); ///< Print the label to the console
             for (int i = 0; i < gSys.cnt_sample; i++) {
                 printf("%s", buffer[i]); ///< Print the data to the console
-                if (i % 200 == 0) vTaskDelay(pdMS_TO_TICKS(100)); ///< Delay to avoid blocking the task for too long
+                if (i % 500 == 0) vTaskDelay(pdMS_TO_TICKS(100)); ///< Delay to avoid blocking the task for too long
             }
 
             printf("Total samples: %d\n", gSys.cnt_sample); ///< Print the total number of samples
