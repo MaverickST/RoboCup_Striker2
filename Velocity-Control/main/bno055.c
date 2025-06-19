@@ -563,6 +563,56 @@ int8_t BNO055_ReadAll(BNO055_t *bno055)
 
 }
 
+int8_t BNO055_ReadAll_Lineal(BNO055_t *bno055)
+{
+    uint8_t data[24]; // 24 bytes of data (6 bytes for each value, Accelerometer, Magnetometer, Gyroscope, Euler angles)
+    //int8_t log = BNO055_Read_Uart(bno055, BNO055_ACCEL_DATA_X_LSB_ADDR, data, 24, 5);
+    int8_t log = BNO055_Read(bno055, BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR, data, 6);
+    int8_t log2 = BNO055_Read(bno055, BNO055_MAG_DATA_X_LSB_ADDR, data+6, 18);
+
+    // Check if the read operation was successful
+    if (log != BNO055_SUCCESS || log2 != BNO055_SUCCESS) {
+        printf("Error: Failed to read data from the BNO055 sensor\n");
+        return BNO055_ERROR;
+    }
+
+    // Convert the data to float
+    uint8_t data_accel[6] = {0};
+    uint8_t data_mag[6] = {0};
+    uint8_t data_gyro[6] = {0};
+    uint8_t data_euler[6] = {0};
+
+    // Accelerometer data
+    for (uint8_t i = 0; i < 6; i++) {
+        data_accel[i] = data[i];
+    }
+
+    // Magnetometer data
+    for (uint8_t i = 0; i < 6; i++) {
+        data_mag[i] = data[6 + i];
+    }
+
+    // Gyroscope data
+    for (uint8_t i = 0; i < 6; i++) {
+        data_gyro[i] = data[12 + i];
+    }
+
+    // Euler angles data
+    for (uint8_t i = 0; i < 6; i++) {
+        data_euler[i] = data[18 + i];
+    }
+
+
+    // Convert the data to float
+    BNO055_ConvertData_Accel(bno055, data_accel, &bno055->ax, &bno055->ay, &bno055->az);
+    BNO055_ConvertData_Gyro(bno055, data_gyro, &bno055->gx, &bno055->gy, &bno055->gz);
+    BNO055_ConvertData_Euler(bno055, data_euler, &bno055->yaw, &bno055->pitch, &bno055->roll);
+    BNO055_ConvertData_Mag(bno055, data_mag, &bno055->mx, &bno055->my, &bno055->mz);
+
+    return BNO055_SUCCESS;
+
+}
+
 int8_t BNO055_SetOperationMode(BNO055_t *bno055, BNO055_OperationMode mode)
 {
     if (bno055 == NULL) {
