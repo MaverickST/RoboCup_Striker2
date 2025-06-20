@@ -31,7 +31,6 @@
 #include "uart_console.h"
 #include "functions.h"
 #include "tasks.h"
-#include "led.h"
 #include "platform_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
@@ -50,12 +49,12 @@
 
 #define BNO055_I2C_MASTER_SCL_GPIO 11    /*!< gpio number for I2C master clock */
 #define BNO055_I2C_MASTER_SDA_GPIO 12    /*!< gpio number for I2C master data  */
-#define BNO055_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
+#define BNO055_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
 #define BNO055_RST_GPIO 13           /*!< gpio number for I2C reset */
 
 #define VL53L1X_I2C_MASTER_SCL_GPIO 38    /*!< gpio number for I2C master clock */
 #define VL53L1X_I2C_MASTER_SDA_GPIO 39    /*!< gpio number for I2C master data  */
-#define VL53L1X_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
+#define VL53L1X_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
 #define VL53L1X_RST_GPIO 41              /*!< gpio number for I2C reset */
 
 #define MOTOR_MCPWM_TIMER_RESOLUTION_HZ 1000*1000 // 1MHz, 1 tick = 1us
@@ -76,7 +75,7 @@
 #define SAMPLING_PERIOD_S        1.0/SAMPLING_RATE_HZ // 10ms
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
 #define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
-#define NUM_SAMPLES_CONTROL        10*SAMPLING_RATE_HZ /* 5s sampling data */
+#define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
 
 #define RAD_TO_DEG      57.2957795 // Conversion factor from radians to degrees
 #define DEG2RAD         (3.14159265358979323846f / 180.0f)
@@ -172,7 +171,6 @@ static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
 static const char* TAG_AS5600_TASK = "as5600_task";
 static const char* TAG_CTRL_TASK = "ctrl_task";
 
-extern led_rgb_t gLed;
 extern bldc_pwm_motor_t gMotor;
 extern system_t gSys;
 extern ctrl_senfusion_t gCtrl;
@@ -181,31 +179,6 @@ extern uart_console_t gUc;
 extern AS5600_t gAS5600;
 extern vl53l1x_t gVL53L1X;
 extern BNO055_t gBNO055;
-
-
-/**
- * @brief Flash
- * Some useful commands to read and write data to the flash memory via python console:
- *      - Erase partition with name 'storage'
- *              parttool.py --port "/dev/ttyUSB1" erase_partition --partition-name=storage
- *      - Read partition with type 'data' and subtype 'spiffs' and save to file 'spiffs.bin' 
- *              parttool.py --port "/dev/ttyUSB1" read_partition --partition-type=data --partition-subtype=spiffs --output "spiffs.bin"
- *      - Write to partition 'factory' the contents of a file named 'factory.bin'
- *              parttool.py --port "/dev/ttyUSB1" write_partition --partition-name=factory --input "factory.bin"
- *      - Print the size of default boot partition
- *              parttool.py --port "/dev/ttyUSB1" get_partition_info --partition-boot-default --info size
- *      - Print the size of the partition with name 'storage'
- *              parttool.py --port "/dev/ttyUSB1" get_partition_info --partition-name=storage --info size 
- * 
- * You just have to replace the port with the one you are using: "/dev/ttyUSB1" --> com5, com6, etc.
- * 
- * You may need to specify the path to the python script:
- *              python C:\Espressif\esp-idf-v5.2.2\components\partition_table\parttool.py --port com5.... 
- * 
- * python C:\Espressif\esp-idf-v5.2.2\components\partition_table\parttool.py --port com5 read_partition --partition-name=angle_pos --partition-subtype=nvs --output "angle.txt"
- * 
- * 
- */
 
 
 #endif // __TYPES_H__

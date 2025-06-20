@@ -4,6 +4,11 @@ void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, floa
 {
     ///< ---------------- PID CONTROLLER -----------------
     ctrl_senfusion->pid = pid; ///< Set the PID controller
+    ctrl_senfusion->pid.prev_err1 = 0; ///< Initialize the previous error
+    ctrl_senfusion->pid.prev_err2 = 0; ///< Initialize the previous error
+    ctrl_senfusion->pid.prev_u1 = 0; ///< Initialize the previous control output
+    ctrl_senfusion->pid.prev_u2 = 0; ///< Initialize the previous control output
+    ctrl_senfusion->pid.integral_err = 0; ///< Initialize the integral error
 
     ///< ----------------- SENSOR FUSION -----------------
     ctrl_senfusion->dt = dt;
@@ -151,7 +156,7 @@ float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error)
     /* Calculate the pid control value by location formula */
     /* u(k) = e(k)*Kp + (e(k)-e(k-1))*Kd + integral*Ki */
     output = error * ctrl_senfusion->pid.Kp +
-             (error - ctrl_senfusion->pid.previous_err1) * ctrl_senfusion->pid.Kd +
+             (error - ctrl_senfusion->pid.prev_err1) * ctrl_senfusion->pid.Kd +
              ctrl_senfusion->pid.integral_err * ctrl_senfusion->pid.Ki;
 
     /* If the output is out of the range, it will be limited */
@@ -159,9 +164,27 @@ float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error)
     output = MAX(output, ctrl_senfusion->pid.min_output);
 
     /* Update previous error */
-    ctrl_senfusion->pid.previous_err1 = error;
+    ctrl_senfusion->pid.prev_err1 = error;
 
     return output;
+}
+
+float ctrl_senfusion_calc_pid_z(ctrl_senfusion_t *ctrl_senfusion, float error)
+{
+    float control = -0.558*ctrl_senfusion->pid.prev_err2 - 0.254*ctrl_senfusion->pid.prev_err1 + 0.812*error
+                  -ctrl_senfusion->pid.prev_u2 + 2*ctrl_senfusion->pid.prev_u1;
+
+    ///< Update the PID controller state
+    ctrl_senfusion->pid.prev_err2 = ctrl_senfusion->pid.prev_err1; // e(k-2) = e(k-1)
+    ctrl_senfusion->pid.prev_err1 = error; // e(k-1) = e(k)
+    ctrl_senfusion->pid.prev_u2 = ctrl_senfusion->pid.prev_u1; // u(k-2) = u(k-1)
+    ctrl_senfusion->pid.prev_u1 = control; // u(k-1) = u(k)
+
+    ///< Limit the control output
+    control = MIN(control, ctrl_senfusion->pid.max_output);
+    control = MAX(control, ctrl_senfusion->pid.min_output);
+
+    return control; ///< Return the control output
 }
 
 ///<-------------------------------------------------------------
