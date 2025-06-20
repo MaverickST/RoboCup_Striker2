@@ -15,11 +15,6 @@ void init_drivers(void)
 
     ctrl_senfusion_init(&gCtrl, config_pid, SAMPLING_PERIOD_S); // 10ms sampling time
 
-    ///< ---------------------- LED ----------------------
-    led_init(&gLed, LED_LSB_GPIO, LED_TIME_US, true);
-    led_set_blink(&gLed, true, 3);
-    led_setup_green(&gLed, LED_TIME_US);
-
     ///< ---------------------- UART ---------------------
     uconsole_init(&gUc, UART_NUM);
 
@@ -29,7 +24,6 @@ void init_drivers(void)
     bldc_enable(&gMotor);
     // bldc_calibrate(&gMotor, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY); ///< Calibrate the BLDC motor
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
-    vTaskDelay(pdMS_TO_TICKS(1000));
 
 }
 
@@ -89,7 +83,7 @@ bool setup_bno055(uint32_t num_checks)
     float acce = 0, acce_prev = 0;
     uint16_t cnt = 0;
     for (uint32_t i = 0; i < num_checks; i++) {
-        BNO055_ReadAll(&gBNO055);
+        BNO055_ReadAll_Lineal(&gBNO055);
         acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
         if (fabs(acce - acce_prev) < 0.0001) {
             cnt++;
@@ -152,7 +146,7 @@ bool verify_sensors(uint32_t num_checks)
             dist = VL53L1X_readDistance(&gVL53L1X, false); // false for non-blocking read
         }
 
-        BNO055_ReadAll(&gBNO055);
+        BNO055_ReadAll_Lineal(&gBNO055);
         acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
 
         ///< Print the values
@@ -222,8 +216,8 @@ void sys_timer_cb(void *arg)
             // Check if the sensors are calibrated
             if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated && gSys.is_bldc_calibrated) {
                 // gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
-                gSys.STATE = NONE; ///< Set the state to sampling
-                ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
+                gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
+                // ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
             }
             break;
