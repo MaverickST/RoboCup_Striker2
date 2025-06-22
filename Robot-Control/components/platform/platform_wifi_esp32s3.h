@@ -16,40 +16,16 @@
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
+#include "nvs_flash.h"
 
-typedef struct {
-    char ssid[32];
-    char password[32];
-    wifi_mode_t mode;
-    bool connected;
-} wifi_t;
 
 /**
- * @brief Inicializa el stack WiFi y configura el modo (STA/AP)
- * 
- * @param wifi Estructura de configuración WiFi
- * @param mode Modo WiFi (WIFI_MODE_STA, WIFI_MODE_AP, etc)
- * @return true si la inicialización fue exitosa
- * @return false si falló la inicialización
+ * @brief Initializes the WiFi station mode and connects to the specified access point (AP)
+ * @param ssid SSID of the AP
+ * @param password Password of the AP
+ * @return True if the connection was successful, false otherwise
  */
-bool wifi_init(wifi_t *wifi, wifi_mode_t mode);
+bool wifi_sta_init(const char *ssid, const char *password);
 
-/**
- * @brief Conecta a una red WiFi (modo estación)
- * 
- * @param wifi Estructura de configuración WiFi (con SSID y password)
- * @return true si la conexión fue exitosa
- * @return false si falló la conexión
- */
-bool wifi_connect(wifi_t *wifi);
-
-/**
- * @brief Desconecta de la red WiFi
- * 
- * @param wifi Estructura de configuración WiFi
- * @return true si la desconexión fue exitosa
- * @return false si falló la desconexión
- */
-bool wifi_disconnect(wifi_t *wifi);
 
 #endif // __HAL_WIFI_ESP32S3__

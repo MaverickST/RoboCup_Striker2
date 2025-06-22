@@ -13,6 +13,10 @@
 #include "functions.h"
 #include "tasks.h"
 
+//Test WiFi
+#include "platform_wifi_esp32s3.h"
+
+
 // --------------------------------------------------------------------------
 // ----------------------------- GLOBAL VARIABLES ---------------------------
 // --------------------------------------------------------------------------
@@ -27,10 +31,18 @@ AS5600_t gAS5600;
 vl53l1x_t gVL53L1X;
 BNO055_t gBNO055;
 
+#define WIFI_SSID "Jannis"
+#define WIFI_PASS "Krakus3008"
 void app_main(void)
 {
+    if (wifi_sta_init(WIFI_SSID, WIFI_PASS)) {
+        ESP_LOGI("APP", "Wi-Fi connected successfully");
+    } else {
+        ESP_LOGE("APP", "Wi-Fi connection failed");
+    }
+}
     ///< Initialize the drivers: LED, UART, BLDC
-    init_drivers(); 
+    //init_drivers(); 
 
     ///< Initialize and setup each sensor
     
@@ -39,4 +51,4 @@ void app_main(void)
     ///< Initialize the system
     ///< 'System' refers to more general variables and functions that are used to control the project.
 
-}
+

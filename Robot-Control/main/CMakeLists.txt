@@ -30,5 +30,7 @@ idf_component_register(
         "../components/drivers/bno055"
         "../components/drivers/led"
         "../components/drivers/uart_console"
-        "../components/drivers/vl53l1x"
+        "../components/drivers/vl53l1x" 
+
+    
 )
