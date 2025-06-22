@@ -167,15 +167,17 @@ typedef struct
  */
 typedef struct
 {
-    // Peripheral handles
-    distanceMode_t distance_mode;
-    uint16_t fast_osc_frq;
-    uint16_t osc_calibrate_val;
+   // Peripheral handles
+   distanceMode_t distance_mode;
+   uint16_t fast_osc_frq;
+   uint16_t osc_calibrate_val;
 
-    resultBuffer_t results;
-    rangingData_t ranging_data;
+   resultBuffer_t results;
+   rangingData_t ranging_data;
 
-    i2c_t i2c_handle;
+   i2c_t i2c_handle;
+   uint16_t dist_mm; // last read distance in millimeters
+   bool is_calibrated; // flag to check if the sensor is calibrated
 } vl53l1x_t;
 
 static uint16_t timeout_start_ms = 0;

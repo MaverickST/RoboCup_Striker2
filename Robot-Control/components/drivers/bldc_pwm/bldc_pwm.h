@@ -35,7 +35,9 @@ typedef struct {
     uint16_t pwm_bottom_duty; ///< Bottom duty cycle in percentage from 0 to 1000
     uint16_t pwm_top_duty;    ///< Top duty cycle in percentage from 0 to 1000
 
-    uint16_t duty_cycle;    ///< Duty cycle in percentage
+    uint16_t duty_cycle;    ///< Duty cycle in percentage from 0 to 1000
+    float duty; ///< Duty cycle in percentage from 0 to 100
+    bool is_calibrated; ///< Flag to check if the motor is calibrated
     int group_id;           ///< MCPWM group number 
     uint32_t resolution_hz; ///< MCPWM timer frequency
 

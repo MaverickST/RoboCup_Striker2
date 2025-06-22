@@ -134,6 +134,9 @@ typedef struct {
     float my; ///> Magnetometer Y value
     float mz; ///> Magnetometer Z value
 
+    float accel; ///> Acceleration value in the X-Y plane
+    float dir; ///> Direction of the acceleration in radians
+    bool is_calibrated; ///> Flag to check if the sensor is calibrated
     gpio_t rst_pin; ///> Reset pin
     
 } BNO055_t;

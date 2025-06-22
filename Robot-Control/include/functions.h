@@ -85,4 +85,26 @@ void process_cmd(const char *cmd);
  */
 void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel);
 
+/**
+ * @brief Check if the drivers and sensors are ready to be used.
+ * 
+ * @return true 
+ * @return false 
+ */
+bool is_drivers_ready(void);
+
+/**
+ * @brief Stop the robot by setting the duty cycle of the BLDC motors to 0.
+ * 
+ */
+void stop_robot(void);
+
+/**
+ * @brief Wrapper function for printf to handle formatted output.
+ * 
+ * @param format 
+ * @param ... 
+ */
+void wrap_printf(const char *format, ...);
+
 #endif // FUNCTIONS_H

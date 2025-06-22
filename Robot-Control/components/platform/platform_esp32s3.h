@@ -227,6 +227,28 @@ bool adc_init(adc_t *adc, uint8_t gpio_out);
 bool adc_deinit(adc_t *adc);
 
 /**
+ * @brief Create a new ADC unit.
+ * 
+ * @param handle pointer to the ADC unit handle to be created
+ * @param unit_id it can be either ADC_UNIT_1 or ADC_UNIT_2
+ * @return true 
+ * @return false 
+ */
+bool adc_create_unit(adc_oneshot_unit_handle_t *handle, uint8_t unit_id);
+
+/**
+ * @brief Configure the ADC channel for a specific GPIO pin.
+ * ADC unit must be initialized before calling this function, using adc_create_unit.
+ * 
+ * @param adc 
+ * @param gpio 
+ * @param unit_id it can be either ADC_UNIT_1 or ADC_UNIT_2
+ * @return true 
+ * @return false 
+ */
+bool adc_config_channel(adc_t *adc, uint8_t gpio, uint8_t unit_id);
+
+/**
  * @brief Read the raw ADC value. Range: 0 - 4095
  * 
  * @param adc 

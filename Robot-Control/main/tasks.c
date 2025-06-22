@@ -5,9 +5,6 @@ void create_tasks(void)
     ///< Create a task to handle the UART events
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 1, NULL);
 
-    ///< Create a task to manage the AS5600 sensor
-    xTaskCreate(as5600_task, "as5600_task", 4*1024, NULL, 8, &gSys.task_handle_as5600);
-
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
 
@@ -34,6 +31,12 @@ void create_tasks(void)
         ESP_LOGI("init_system", "Mutex not created");
         return;
     }
+    
+    gSys.mtx_printf = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the printf function
+    if (gSys.mtx_printf == NULL) {
+        ESP_LOGI("init_system", "Mutex for printf not created");
+        return;
+    }
 }
 
 
@@ -46,7 +49,6 @@ void trigger_task(void *pvParameters)
         // Notify the each sensor task to read the data from the sensor
         xTaskNotifyGive(gSys.task_handle_bno055);
         xTaskNotifyGive(gSys.task_handle_vl53l1x);
-        xTaskNotifyGive(gSys.task_handle_as5600);
     }
     vTaskDelete(NULL);
 }
@@ -79,7 +81,7 @@ void bno055_task(void *pvParameters)
             acce_prev = acceleration;
         }
         xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
-        gSys.acceleration = acceleration;
+        gBNO055.accel = acceleration;
         xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
 
         ///< Notify the control task to process the data
@@ -90,57 +92,24 @@ void bno055_task(void *pvParameters)
 
 void vl53l1x_task(void *pvParameters)
 {
-    uint16_t distance_mm = 0; ///< Variable to store the distance readed from the VL53L1X sensor
+    ///< Distances in mm for each lidar
+    uint16_t dist_mm[3] = {0};
+    uint16_t prev_dist_mm[3] = {0}; ///< Distance in mm for the VL53L1X sensor
     while (true) {
         ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         
-        ///< Read the distance from the VL53L1X sensor
-        if (VL53L1X_dataReady(&gVL53L1X)) {
-            // If data is ready, read it non-blockingly
-            distance_mm = VL53L1X_readDistance(&gVL53L1X, false); // false for non-blocking read
+        ///< Read the distance from the VL53L1X sensors
+        for (int i = 0; i < 3; i++) {
+            if (VL53L1X_dataReady(&gVL53L1X[i])) { ///< Check if the data is ready
+                dist_mm[i] = VL53L1X_readDistance(&gVL53L1X[i], false); ///< Read the distance in mm
+            } else {
+                dist_mm[i] = prev_dist_mm[i]; ///< If the data is not ready, use the previous value
+            }
         }
-        xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
-        gSys.distance = gSys.dist_origin_offset - distance_mm/1000.0f; ///< Read the distance from the VL53L1X sensor
-        xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
 
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
-    }
-    vTaskDelete(NULL);
-}
-
-void as5600_task(void *pvParameters)
-{
-    float prevAngleDeg = 0;      /**< Last raw angle reading, in degrees [0..360). */
-    float unwrappedDeg = 0;      /**< Cumulative unwrapped angle, in degrees. */
-
-    while (true) {
-        ///< Wait for the notification from the timer
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-        ///< Read the angle from the AS5600 sensor and save it in the buffer
-        float angle = -AS5600_ADC_GetAngle(&gAS5600) + gSys.angle_origin_offset; ///< Get the angle from the ADC
-
-        // Compute difference
-        float delta = angle - prevAngleDeg;
-
-        // Wrap jumps greater than ±180°
-        if      (delta >  180.0f) delta -= 360.0f;
-        else if (delta < -180.0f) delta += 360.0f;
-
-        // Accumulate
-        unwrappedDeg += delta;
-        prevAngleDeg = angle;
-
-        // Convert degrees to radians and multiply by radius
-        xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
-        gSys.dist_enc = RADIUS_M * unwrappedDeg * DEG2RAD;
-        gSys.angle = angle;
-        xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
-
-        ///< Notify the control task to process the data
-        xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 3);
     }
     vTaskDelete(NULL);
 }
@@ -158,110 +127,29 @@ void control_task(void *pvParameters)
 
         ///< Process the data from the sensors and control the BLDC motor
         if (gSys.STATE == SYS_SAMPLING_EXP) {
-            if (gSys.cnt_sample < 0.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 1*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 7;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 2*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 15;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 2.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 3*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -7;
-                bldc_set_duty_motor(&gMotor, gSys.duty); 
-            }
-            else if (gSys.cnt_sample < 4*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -15;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-
-            else if (gSys.cnt_sample < 5.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 7;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 6.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 20;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 7.5*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 8*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -7;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 9*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = -20;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
-            else if (gSys.cnt_sample < 10*SAMPLING_RATE_HZ) { ///<
-                gSys.duty = 0;
-                bldc_set_duty_motor(&gMotor, gSys.duty);
-            }
         }
 
-        ///< Use Sensor Fusion to get the states of the system: position(m), velocity(m/s)
-        ctrl_senfusion_predict(&gCtrl, gSys.duty);
-        ctrl_senfusion_update(&gCtrl, gSys.dist_enc, gSys.distance, gSys.acceleration, gSys.cnt_sample);
-        float pos = ctrl_senfusion_get_pos(&gCtrl);
-        float vel = ctrl_senfusion_get_vel(&gCtrl);
-        // ESP_LOGI(TAG_CTRL_TASK, "pos-> %.2f m, vel-> %.2f m/s, enc-> %.2f m, dist-> %.2f m, acc-> %.2f m/s^2\n", pos, vel, gSys.dist_enc, gSys.distance, gSys.acceleration);
-
-        ///< Safety check to stop the motor if the distance is less than 0.4m and greater than 0.4m
-        if (fabs(gSys.distance) > 0.40) {
-            bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
+        ///< Safety check to stop the robot if the distance is less than 10cm
+        if (gVL53L1X[0].dist_mm < 100 || gVL53L1X[1].dist_mm < 100 || gVL53L1X[2].dist_mm < 100) {
+            stop_robot();
             esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
             gSys.STATE = NONE;
-            printf("Safety check triggered. Position: %.2f m, Velocity: %.2f m/s\n", pos, vel);
+            printf("Safety check triggered. Position: %.2f m, Velocity: %.2f m/s\n", gSenFusion.pos, gSenFusion.vel);
         }
 
         ///< Calculate the PID control if the system is in the control state
         if (gSys.STATE == SYS_SAMPLING_CONTROL) {
-            vel = (gSys.dist_enc - pos_prev) / (1.0f / SAMPLING_RATE_HZ); ///< Calculate the velocity from the position
-            pos_prev = gSys.dist_enc; ///< Update the previous position
-
-            float error_pos = gSys.setpoint_dist - gSys.dist_enc; ///< Calculate the error
-            float error_vel = gSys.setpoint_vel - vel; ///< Calculate the error
-            float control = ctrl_senfusion_calc_pid_z(&gCtrl, error_vel); ///< Calculate the control value
-            gSys.duty = control; ///< Set the duty to the motor
-            bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
-            printf("\nControl: %.2f, Pos enc: %.2f m, Vel enc: %.3f", control, gSys.dist_enc, vel);
-            // if (!gSys.setpoint_dir) { ///< If the direction is negative, set the duty to negative
-            //     bldc_set_duty_motor(&gMotor, -control); ///< Set the duty to the motor
-            // }else {
-            //     bldc_set_duty_motor(&gMotor, control); ///< Set the duty to the motor
-            // }
-
-            if (fabs(error_pos) < 0.01 || fabs(error_pos) > 0.40) { ///< If the error is less than 5mm, stop the motor
-                gSys.STATE = NONE; ///< Set the state to NONE if the error is less than 0.01m
-                bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor
-                esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
-                printf("\nControl task finished. Position: %.2f m, Velocity: %.2f m/s\n", pos, vel);
-            }
-
         }
+
         ///< Send the sensor data to the queue
         if (gSys.cnt_sample <= 10*SAMPLING_RATE_HZ) {
-            uint8_t length = snprintf(NULL, 0, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel); 
+            uint8_t length = snprintf(NULL, 0, "%.4f\t \n", gBNO055.accel); 
             char str[length + 1];
-            snprintf(str, length + 1, "%.1f\t%.2f\t%.4f\t%.4f\t%.4f\t%.4f\n", gSys.duty, gSys.angle, gSys.acceleration, gSys.distance, pos, vel);
+            snprintf(str, length + 1, "%.4f\t \n", gBNO055.accel);
             xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
         }
 
-        if (gSys.STATE == NONE) bldc_set_duty_motor(&gMotor, 0); ///< Stop the motor if the system is in the NONE state
+        if (gSys.STATE == NONE) stop_robot();
     }
     vTaskDelete(NULL);
 }
