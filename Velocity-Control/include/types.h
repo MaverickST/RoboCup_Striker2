@@ -53,6 +53,7 @@
 #define BNO055_I2C_MASTER_NUM 0         /*!< I2C port number for master dev */
 #define BNO055_RST_GPIO 13           /*!< gpio number for I2C reset */
 
+
 #define VL53L1X_I2C_MASTER_SCL_GPIO 38    /*!< gpio number for I2C master clock */
 #define VL53L1X_I2C_MASTER_SDA_GPIO 39    /*!< gpio number for I2C master data  */
 #define VL53L1X_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
