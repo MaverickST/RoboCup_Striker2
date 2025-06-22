@@ -20,6 +20,7 @@
 #include "esp_mac.h"
 #include "esp_log.h"
 #include "esp_check.h"
+#include "freertos/FreeRTOS.h"
 #include "driver/mcpwm_prelude.h"
 #include "driver/gpio.h"
 
@@ -99,5 +100,15 @@ esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int duty);
  * @return esp_err_t 
  */
 esp_err_t bldc_set_duty_motor(bldc_pwm_motor_t *motor, float duty);
+
+/**
+ * @brief Calibrate the BLDC motor.
+ * 
+ * @param motor 
+ * @param bottom_duty 
+ * @param top_duty 
+ * @return esp_err_t 
+ */
+esp_err_t bldc_calibrate(bldc_pwm_motor_t *motor, uint16_t bottom_duty, uint16_t top_duty);
 
 #endif // __PWM_MOTOR_H__

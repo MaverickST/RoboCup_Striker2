@@ -26,8 +26,10 @@ typedef struct {
     float Kp; // PID Kp value
     float Ki; // PID Ki value
     float Kd; // PID Kd value
-    float previous_err1; // e(k-1)
-    float previous_err2; // e(k-2)
+    float prev_err1; // e(k-1)
+    float prev_err2; // e(k-2)
+    float prev_u1; // u(k-1)
+    float prev_u2; // u(k-2)
     float integral_err;  // Sum of error
     float last_output;  // PID output in last control period
     float max_output;   // PID maximum output limitation
@@ -136,6 +138,15 @@ static inline float ctrl_senfusion_get_vel(ctrl_senfusion_t *ctrl_senfusion)
  * @return float PID control value
  */
 float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error);
+
+/**
+ * @brief Calculate the PID discrete control value
+ * 
+ * @param ctrl_senfusion 
+ * @param error 
+ * @return float 
+ */
+float ctrl_senfusion_calc_pid_z(ctrl_senfusion_t *ctrl_senfusion, float error);
 
 ///<-------------------------------------------------------------
 ///<--------------- LINEAR ALGEBRA FUNCTIONS --------------------

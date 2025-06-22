@@ -306,6 +306,14 @@ int8_t BNO055_CheckAck(uint8_t *data);
 int8_t BNO055_ReadAll(BNO055_t *bno055);
 
 /**
+ * @brief Read all data from the BNO055 sensor with I2C (or uart) with Lineal Acceleration
+ * 
+ * @param bno055
+ * @return int8_t 
+ */
+int8_t BNO055_ReadAll_Lineal(BNO055_t *bno055);
+
+/**
  * @brief Set the unit of the BNO055 sensor
  * 
  * ## Bit Values:
