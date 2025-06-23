@@ -38,10 +38,12 @@ float control_calc_pid(control_t *ctrl, float error)
     return output;
 }
 
-float contrl_calc_pid_z(control_t *ctrl, float error)
+float control_calc_pid_z(control_t *ctrl, float value)
 {
-    float control = -0.558*ctrl->pid.prev_err2 - 0.254*ctrl->pid.prev_err1 + 0.812*error
-                  -ctrl->pid.prev_u2 + 2*ctrl->pid.prev_u1;
+    float error = ctrl->setpoint - value;
+
+    float control = (ctrl->pid.a0*ctrl->pid.prev_err2 + ctrl->pid.a1*ctrl->pid.prev_err1 + ctrl->pid.a2*error
+                    -ctrl->pid.b0*ctrl->pid.prev_u2 - ctrl->pid.b1*ctrl->pid.prev_u1)/ctrl->pid.b2;
 
     ///< Update the PID controller state
     ctrl->pid.prev_err2 = ctrl->pid.prev_err1; // e(k-2) = e(k-1)
@@ -54,4 +56,15 @@ float contrl_calc_pid_z(control_t *ctrl, float error)
     control = MAX(control, ctrl->pid.min_output);
 
     return control; ///< Return the control output
+}
+
+
+void control_set_setpoint(control_t *ctrl, float setpoint)
+{
+    ctrl->setpoint = setpoint; ///< Set the setpoint value
+    ctrl->output = 0; ///< Reset the output value
+    ctrl->pid.prev_err1 = 0; ///< Reset the previous error
+    ctrl->pid.prev_err2 = 0; ///< Reset the previous error
+    ctrl->pid.prev_u1 = 0; ///< Reset the previous control output
+    ctrl->pid.prev_u2 = 0; ///< Reset the previous control output
 }

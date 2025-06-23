@@ -12,7 +12,7 @@ void create_tasks(void)
     xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 10, &gSys.task_handle_vl53l1x);
 
     ///< Create the control task
-    xTaskCreate(control_task, "control_task", 4*1024, NULL, 12, &gSys.task_handle_ctrl);
+    xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
     xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
@@ -22,31 +22,37 @@ void create_tasks(void)
 
 }
 
-void create_kernel_objects(void)
+bool create_kernel_objects(void)
 {    
     gSys.queue = xQueueCreate(10, sizeof(uint8_t)*45); ///< Create a queue to send the data to the save task
     if (gSys.queue == NULL) {
         ESP_LOGI("init_system", "Queue not created");
-        return;
+        return false;
     }
 
     gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
     if (gSys.mutex == NULL) {
         ESP_LOGI("init_system", "Mutex not created");
-        return;
+        return false;
     }
     
     gSys.mtx_printf = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the printf function
     if (gSys.mtx_printf == NULL) {
         ESP_LOGI("init_system", "Mutex for printf not created");
-        return;
+        return false;
     }
 
     gSys.smph_bldc = xSemaphoreCreateBinary(); ///< Create a semaphore to synchronize the motor identification task
     if (gSys.smph_bldc == NULL) {
         ESP_LOGI("init_system", "Semaphore for BLDC not created");
-        return;
+        return false;
     }
+    gSys.mtx_cntrl = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the control variables
+    if (gSys.mtx_cntrl == NULL) {
+        ESP_LOGI("init_system", "Mutex for control not created");
+        return false;
+    }
+    return true; 
 }
 
 void trigger_task(void *pvParameters)
@@ -89,12 +95,10 @@ void bno055_task(void *pvParameters)
             ///< Update
             acce_prev = acceleration;
         }
-        xSemaphoreTake(gSys.mutex, portMAX_DELAY); ///< Take the mutex to protect the access to the global variables
         gBNO055.accel = acceleration;
-        xSemaphoreGive(gSys.mutex); ///< Give the mutex to protect the access to the global variables
 
         ///< Notify the control task to process the data
-        xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 1); ///< Notify the control task to process the data
+        xTaskNotifyGiveIndexed(gSys.task_handle_robot_ctrl, 1); ///< Notify the control task to process the data
     }
     vTaskDelete(NULL);
 }
@@ -118,7 +122,7 @@ void vl53l1x_task(void *pvParameters)
         }
 
         ///< Notify the control task to process the data
-        xTaskNotifyGiveIndexed(gSys.task_handle_ctrl, 2);
+        xTaskNotifyGiveIndexed(gSys.task_handle_robot_ctrl, 2);
     }
     vTaskDelete(NULL);
 }
@@ -159,6 +163,81 @@ void control_task(void *pvParameters)
         }
 
         if (gSys.STATE == NONE) stop_robot();
+    }
+    vTaskDelete(NULL);
+}
+
+void bldc_control_task(void *pvParameters)
+{
+    ///< Timer wich will be used for all motors
+    const esp_timer_create_args_t timer_args = {
+        .callback = &motor_bldc_cb,
+        .arg = NULL,
+        .name = "bldc-ident"
+    };
+    esp_timer_handle_t timer_handle;
+    ESP_ERROR_CHECK(esp_timer_create(&timer_args, &timer_handle));
+    gSys.timer_bldc = timer_handle;
+    ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
+
+    ///< Initialize the PID controllers for each motor
+    control_set_setpoint(&gCtrl[0], 0);
+    control_set_setpoint(&gCtrl[1], 0);
+    control_set_setpoint(&gCtrl[2], 0);
+
+    ///< Initialize some variables for the control task
+    float duty[3] = {0};
+    float angle[3] = {0}; // in radians [0, 2π]
+    float angle_prev[3] = {0};
+    float speed[3] = {0}; // in rad/s
+    uint32_t cnt = 0;
+
+    while (true) {
+        xSemaphoreTake(gSys.smph_bldc, portMAX_DELAY);
+
+        ///< Control variables: get angle and calculate speed
+        for (int i = 0; i < 3; i++) {
+            float raw = AS5600_ADC_GetAngle(&gAS5600[i]);
+            float delta = raw - angle_prev[i];
+
+            if      (delta >  M_PI) delta -= 2 * M_PI;
+            else if (delta < -M_PI) delta += 2 * M_PI;
+
+            angle[i] += delta;                         // unwrap directly into angle[i]
+            angle_prev[i] = raw;
+            speed[i] = delta * SAMP_RATE_MOTOR_HZ;
+        }
+
+        ///< Experiment
+        if (cnt%1000 <= 1000) {
+            duty[0] = 8; duty[1] = 8; duty[2] = 8;
+        }else if (cnt%1000 <= 2000) {
+            duty[0] = 16; duty[1] = 16; duty[2] = 16;
+        }else if (cnt%1000 <= 3000) {
+            duty[0] = 24; duty[1] = 24; duty[2] = 24;
+        }else if (cnt%1000 <= 4000) {
+            duty[0] = 32; duty[1] = 32; duty[2] = 32;
+        }else if (cnt%1000 <= 5000) {
+            duty[0] = 50; duty[1] = 50; duty[2] = 50;
+        }
+
+        // ///< Control: calculate the duty cycle for each motor using the PID controller
+        // for (int i = 0; i < 3; i++) {
+        //     ///< Get the duty cycle from the PID controller
+        //     duty[i] = control_calc_pid_z(&gCtrl[i], speed[i]);
+        // }
+
+        ///< Set the duty cycle of the motors
+        xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); 
+        for (int i = 0; i < 3; i++) {
+            bldc_set_duty_motor(&gMotor[i], duty[i]);
+        }
+        xSemaphoreGive(gSys.mtx_cntrl); ///< Give the mutex to protect the access to the control variables
+
+        ///< Send the data via serial
+        wrap_printf("I,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n", cnt*1000,
+                    duty[0], duty[1], duty[2], angle[0], angle[1], angle[2]);
+        cnt++; ///< Increment the counter
     }
     vTaskDelete(NULL);
 }
@@ -219,11 +298,7 @@ void uart_event_task(void *pvParameters)
                 ESP_LOGI(TAG_UART_TASK, "UART_DATA");
                 uconsole_read_data(&gUc);
 
-                char cmd[4];
-                strncpy(cmd, (const char *)gUc.data, 3); ///< Get the first 3 characters
-                cmd[3] = '\0'; ///< Add the null terminator
-                ESP_LOGI(TAG_UART_TASK, "cmd-> %s", cmd);
-                process_cmd(cmd);
+                parse_and_update_setpoints((const char *)gUc.data);
                 break;
 
             case UART_FIFO_OVF: ///< Event of HW FIFO overflow

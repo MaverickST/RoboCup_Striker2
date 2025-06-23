@@ -103,6 +103,9 @@
 #define DEG2RAD         (3.14159265358979323846f / 180.0f)
 #define RADIUS_M        0.03
 #define UART_NUM     0 // UART number for the console
+
+#define MAX_JSON_LEN 64
+#define MAX_PARSED_LEN 32
 // #define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
 
 // --------------------------------------------------------------------------
@@ -150,6 +153,7 @@ typedef struct
     QueueHandle_t queue; ///< Queue to send the data to the save task
     SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
     SemaphoreHandle_t mtx_printf; ///< Mutex to protect the access to the printf function
+    SemaphoreHandle_t mtx_cntrl; ///< Mutex to protect the access to the control variables
     SemaphoreHandle_t smph_bldc; ///< Semaphore to synchronize the motor identification task
 
     ///< Values for the sensors
@@ -163,7 +167,8 @@ typedef struct
     ///< Task handles for the tasks
     TaskHandle_t task_handle_bno055;    ///< Task handle for the BNO055 sensor
     TaskHandle_t task_handle_vl53l1x;   ///< Task handle for the VL53L1X sensor
-    TaskHandle_t task_handle_ctrl;      ///< Task handle for the control task
+    TaskHandle_t task_handle_bldc_ctrl;      ///< Task handle for the control task
+    TaskHandle_t task_handle_robot_ctrl;      ///< Task handle for the robot control task
     TaskHandle_t task_handle_trigger;    ///< Task handle for the trigger task
     TaskHandle_t task_handle_save;      ///< Task handle for the save task
 

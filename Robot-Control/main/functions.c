@@ -11,6 +11,7 @@ void init_drivers(void)
         .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
+        .a2 = 0.812, .a1 = - 1.487, .a0 = 0.675, .b2 = 1, .b1 = -2, .b0 = 1,
     };
 
     senfusion_init(&gSenFusion, SAMPLING_PERIOD_S); // 10ms sampling time
@@ -68,7 +69,7 @@ bool setup_as5600(uint32_t num_checks)
     //     AS5600_GetStartPosition(&gAS5600[i], &start_pos);
     //     AS5600_GetStopPosition(&gAS5600[i], &stop_pos);
 
-    //     printf("Start Position: 0x%03X, Stop Position: 0x%03X\n", start_pos, stop_pos);
+    //     wrap_printf("Start Position: 0x%03X, Stop Position: 0x%03X\n", start_pos, stop_pos);
     //     if (read_conf.WORD == conf.WORD && start_pos == 0x000 && stop_pos == 0xFFF) {
     //         ESP_LOGI(TAG_AS5600_TASK, "AS5600 sensor %d initialized successfully\n", i);
     //     } else {
@@ -105,7 +106,7 @@ bool setup_bno055(uint32_t num_checks)
     ESP_LOGI(TAG_BNO055_TASK, "Initializing BNO055 sensors \n");
     int8_t success = BNO055_Init(&gBNO055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM, BNO055_RST_GPIO);
     while (success != BNO055_SUCCESS) {
-        printf("Error: Failed to initialize BNO055 sensor\n");
+        wrap_printf("Error: Failed to initialize BNO055 sensor\n");
         BNO055_Reset(&gBNO055);
         vTaskDelay(pdMS_TO_TICKS(1000)); // Wait 1 second
         success = BNO055_Init(&gBNO055, BNO055_I2C_MASTER_SDA_GPIO, BNO055_I2C_MASTER_SCL_GPIO, BNO055_I2C_MASTER_NUM, BNO055_RST_GPIO);
@@ -133,7 +134,7 @@ bool setup_bno055(uint32_t num_checks)
             cnt++;
         }
         acce_prev = acce;
-        // printf("Acce: %.2f m^2\n", acce);
+        // wrap_printf("Acce: %.2f m^2\n", acce);
         vTaskDelay(pdMS_TO_TICKS(50));
     }
     ESP_LOGI("setup_bno055", "Verifing BNO055 sensor: err %d - num %d", (int)cnt, (int)num_checks);
@@ -203,7 +204,7 @@ bool verify_sensors(uint32_t num_checks)
         acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
 
         ///< Print the values
-        // printf("Angle: %.2f deg, Distance: %.3f m, Acce: %.2f m^2\n", angle, dist/1000.0, acce);
+        // wrap_printf("Angle: %.2f deg, Distance: %.3f m, Acce: %.2f m^2\n", angle, dist/1000.0, acce);
 
         ///< Check if the values are the same
         for (int j = 0; j < 3; j++) {
@@ -320,200 +321,43 @@ void sys_timer_cb(void *arg)
     }
 }
 
-void process_cmd(const char *cmd)
+void parse_and_update_setpoints(const char* uart_buffer)
 {
-    ///< Check if the data is valid
-    uint8_t len_uc_data = strlen((const char *)gUc.data);
-    if (len_uc_data < 5) { ///< If the data is less than 5 characters, that means the data is not valid
-        ESP_LOGI(TAG_CMD, "Invalid CMD");
-        return;
-    }
-    ///< Command to set the speed of the motor
-    if (strcmp(cmd, "pwm") == 0) {
-        char str_value[len_uc_data - 4]; ///< 4 is the length of the command "pwm "
-        strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
+    char parsed[MAX_PARSED_LEN];
+    float setpoints[3] = {0};
 
-        float value = atof(str_value)/10;
-        ESP_LOGI(TAG_CMD, "value-> %.2f", (float)value);
-        if (value != 0) { ///< If value=0, that means data is not a number
-            for (int i = 0; i < 3; i++) {
-                bldc_set_duty_motor(&gMotor[i], value); ///< Set the duty cycle of the motor
+    // Find the "default" key in the string
+    char *start = strstr(uart_buffer, "\"default\":\"");
+    if (start) {
+        start += strlen("\"default\":\""); // Move past the key
+
+        // Find the closing quote of the value
+        char *end = strchr(start, '"');
+        if (end && (end - start) < sizeof(parsed)) {
+            // Copy the value substring into a temporary buffer
+            strncpy(parsed, start, end - start);
+            parsed[end - start] = '\0';
+
+            float sp0 = 0, sp1 = 0, sp2 = 0;
+
+            // Parse three float values from the string
+            if (sscanf(parsed, "%f %f %f", &sp0, &sp1, &sp2) == 3) {
+                // Update the setpoints array
+                xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); // Take the mutex to protect the control variables
+                control_set_setpoint(&gCtrl[0], sp0);
+                control_set_setpoint(&gCtrl[1], sp1);
+                control_set_setpoint(&gCtrl[2], sp2);
+                xSemaphoreGive(gSys.mtx_cntrl); // Release the mutex
+
+                wrap_printf("Setpoints updated: %.2f, %.2f, %.2f\n", sp0, sp1, sp2);
+            } else {
+                wrap_printf("Failed to parse three float values.\n");
             }
-        }
-    }
-    ///< Control ommand to set the setpoint of the motor
-    else if (strcmp(cmd, "set") == 0) {
-        if (gSys.STATE != NONE) { ///< If the system is not in the NONE state, that means the system is busy
-            ESP_LOGI(TAG_CMD, "System is busy");
-            return;
-        }
-        if (len_uc_data < 8) { ///< 4 for the command "set " and 4 for the setpoint
-            ESP_LOGI(TAG_CMD, "Invalid SET cmd");
-            return;
-        }
-        char str_value[len_uc_data - 4]; ///< 4 is the length of the command "set "
-        strncpy(str_value, (const char *)gUc.data + 4, len_uc_data - 4); ///< Get the value after the command
-        str_value[len_uc_data - 4] = '\0'; ///< Add the null terminator
-
-        bool dir = false; ///< Direction of the motor
-        int dist = 0; ///< Distance to move (cm)
-        int vel = 0; ///< Velocity to move (cm/s)
-
-        parse_command_setpoint((const uint8_t *)str_value, &dir, &dist, &vel); ///< Parse the command to get the direction, distance and velocity
-        ESP_LOGI(TAG_CMD, "dir-> %d, dist-> %d, vel-> %d", dir, dist, vel);
-
-        gSys.setpoint_dir = dir; ///< Set the direction of the motor
-        if (gSys.setpoint_dir) {
-            gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
-            gSys.setpoint_vel = (float)vel/100; ///< Set the velocity to move (m/s)
-        }
-        else {
-            gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
-            gSys.setpoint_vel = -(float)vel/100; ///< Set the velocity to move (m/s)
-        }
-        gSys.setpoint_dist = gSys.setpoint_dist; ///< Add the distance from the encoder to the setpoint distance
-        printf("Setpoint: dir %d, dist %.3f m, vel %.3f m/s\n", gSys.setpoint_dir, gSys.setpoint_dist, gSys.setpoint_vel);
-
-        ///< Init the control experiment
-        gSys.STATE = SYS_SAMPLING_CONTROL; ///< Set the state to control the BLDC motor
-        gSys.duty = 0; ///< Set the duty to 0
-        gSys.cnt_smp_control = 0; ///< Set the number of samples to 0
-        ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
-    }
-    else {
-        ESP_LOGI(TAG_CMD, "cmd not recognized");
-    }
-}
-
-
-void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel) {
-    ///< The first character indicates the direction
-    if (command[0] == 'D') {
-        *dir = true;  // right
-    } else if (command[0] == 'I') {
-        *dir = false; // left
-    } else {
-        printf("Invalid command: unknown direction\n");
-        return;
-    }
-
-    ///< Find the position of the '_'
-    const char *underscore = strchr((const char *)command, '_');
-    if (!underscore) {
-        printf("Invalid command: '_' not found\n");
-        return;
-    }
-
-    ///< Extract distance: from command[1] up to the character before '_'
-    char distance_str[16] = {0};
-    strncpy(distance_str, (const char *)&command[1], underscore - (const char *)&command[1]);
-    *dist = atoi(distance_str);
-
-    ///< Extract speed: from the character after '_'
-    *vel = atoi(underscore + 1);
-}
-
-bool is_drivers_ready(void)
-{
-    ///< Check if the drivers and sensors are ready to be used
-    if (gMotor[0].is_calibrated && gMotor[1].is_calibrated && gMotor[2].is_calibrated &&
-        gAS5600[0].is_calibrated && gAS5600[1].is_calibrated && gAS5600[2].is_calibrated &&
-        gBNO055.is_calibrated && gVL53L1X[0].is_calibrated && gVL53L1X[1].is_calibrated && gVL53L1X[2].is_calibrated) {
-        return true;
-    }
-    return false;
-}
-
-void stop_robot(void)
-{
-    for (int i = 0; i < 3; i++) {
-        bldc_set_duty_motor(&gMotor[i], 0); ///< Stop the motor
-    }
-}
-
-void wrap_printf(const char *format, ...)
-{
-    va_list args;
-
-    xSemaphoreTake(gSys.mtx_printf, portMAX_DELAY);
-
-    va_start(args, format);
-    vprintf(format, args); ///< Use vprintf to handle formatted output
-    va_end(args);
-    fflush(stdout); ///< Ensure the output is flushed to the console
-
-    xSemaphoreGive(gSys.mtx_printf); ///< Release the mutex after printing
-}
-
-void motor_identification(uint8_t motor_num, uint8_t as5600_num)
-{    
-    wrap_printf("Starting motor identification...\n");
-
-    ///< Get the motor and AS5600 sensor from the arguments
-    bldc_pwm_motor_t *motor = &gMotor[motor_num];
-    AS5600_t *as5600 = &gAS5600[as5600_num];
-
-    wrap_printf("Creating timer...\n");
-
-    ///< Create periodic timer for motor identification
-    const esp_timer_create_args_t oneshot_timer_args = {
-        .callback = &motor_ident_cb,
-        .arg = NULL, ////< argument specified here will be passed to timer callback function
-        .name = "bldc-ident" ///< name is optional, but may help identify the timer when debugging
-    };
-    esp_timer_handle_t oneshot_timer_s;
-    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer_s));
-    gSys.timer_bldc = oneshot_timer_s;
-    ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
-
-    ///< Experiment
-    char (*data)[15] = calloc(TIME_SAMP_MOTOR_S * SAMP_RATE_MOTOR_HZ + 1, sizeof(*data));
-    int cnt = 0; ///< Counter to store the number of samples
-
-    while (cnt < TIME_SAMP_MOTOR_S * SAMP_RATE_MOTOR_HZ) {
-        xSemaphoreTake(gSys.smph_bldc, portMAX_DELAY); ///< Wait for the semaphore to be given by the timer callback
-
-        ///< Get the angle from the AS5600 sensor
-        float angle = AS5600_ADC_GetAngle(as5600) - as5600->angle_offset;
-
-        ///< Set a duty cycle to the motor
-        int duty;
-        if (cnt < 0.5 * SAMP_RATE_MOTOR_HZ) {
-            duty = 7;
-        } else if (cnt < 1.5 * SAMP_RATE_MOTOR_HZ) {
-            duty = 20;
-        } else if (cnt < 2.5 * SAMP_RATE_MOTOR_HZ) {
-            duty = 30;
-        } else if (cnt < 3 * SAMP_RATE_MOTOR_HZ) {
-            duty = 0;
-        } else if (cnt < 3.5 * SAMP_RATE_MOTOR_HZ) {
-            duty = -7;
-        } else if (cnt < 4.5 * SAMP_RATE_MOTOR_HZ) {
-            duty = -20;
-        } else if (cnt < 5 * SAMP_RATE_MOTOR_HZ) {
-            duty = -30;
         } else {
-            ESP_ERROR_CHECK(esp_timer_stop(gSys.timer_bldc)); ///< Stop the timer to stop the experiment
-            break; ///< Stop the experiment after 5 seconds
+            wrap_printf("Invalid format: closing quote not found.\n");
         }
-        bldc_set_duty_motor(motor, (float)duty);
-
-        ///< Store the duty cycle and angle in the data buffer
-        snprintf(data[cnt], sizeof(data[cnt]), "%d, %.2f", (int)duty, angle); ///< Store the data in the buffer
-        cnt++; ///< Increment the counter
-    }
-
-    ///< Print the data to the console
-    wrap_printf("Duty Cycle (0-100): Angle (rad)\n");
-    for (uint32_t i = 0; i <= cnt; i++) {
-        wrap_printf("%s\n", data[i]);
-        if (i % 100 == 0) {
-            vTaskDelay(pdMS_TO_TICKS(100)); ///< Delay to avoid flooding the console
-        }
-    }
-    if (data != NULL) {
-        free(data);
-        data = NULL;  // avoid using dangling pointers
+    } else {
+        wrap_printf(" 'default' key not found.\n");
     }
 }
 
@@ -536,9 +380,9 @@ void motor_identification_all(void)
         return;
     }
 
-    ///< Crear el timer de forma general, se usará para todos los motores
+    ///< Timer wich will be used for all motors
     const esp_timer_create_args_t timer_args = {
-        .callback = &motor_ident_cb,
+        .callback = &motor_bldc_cb,
         .arg = NULL,
         .name = "bldc-ident"
     };
@@ -596,7 +440,7 @@ void motor_identification_all(void)
     wrap_printf("\n Resultados:\n");
     wrap_printf("Duty(%%)\tAngle_M1\tAngle_M2\tAngle_M3\n");
     for (int i = 0; i < num_samples; i++) {
-        wrap_printf("%d\t\t%.2f\t\t%.2f\t\t%.2f\n",
+        wrap_printf("%d\t%.2f\t%.2f\t%.2f\n",
                     data[i].duty,
                     data[i].angle[0],
                     data[i].angle[1],
@@ -610,9 +454,41 @@ void motor_identification_all(void)
     free(data);
 }
 
-
-void motor_ident_cb(void *arg)
+void motor_bldc_cb(void *arg)
 {
     BaseType_t mustYield = pdFALSE;
     xSemaphoreGiveFromISR(gSys.smph_bldc, &mustYield); 
 }
+
+bool is_drivers_ready(void)
+{
+    ///< Check if the drivers and sensors are ready to be used
+    if (gMotor[0].is_calibrated && gMotor[1].is_calibrated && gMotor[2].is_calibrated &&
+        gAS5600[0].is_calibrated && gAS5600[1].is_calibrated && gAS5600[2].is_calibrated &&
+        gBNO055.is_calibrated && gVL53L1X[0].is_calibrated && gVL53L1X[1].is_calibrated && gVL53L1X[2].is_calibrated) {
+        return true;
+    }
+    return false;
+}
+
+void stop_robot(void)
+{
+    for (int i = 0; i < 3; i++) {
+        bldc_set_duty_motor(&gMotor[i], 0); ///< Stop the motor
+    }
+}
+
+void wrap_printf(const char *format, ...)
+{
+    va_list args;
+
+    xSemaphoreTake(gSys.mtx_printf, portMAX_DELAY);
+
+    va_start(args, format);
+    vprintf(format, args); ///< Use vprintf to handle formatted output
+    va_end(args);
+    fflush(stdout); ///< Ensure the output is flushed to the console
+
+    xSemaphoreGive(gSys.mtx_printf); ///< Release the mutex after printing
+}
+

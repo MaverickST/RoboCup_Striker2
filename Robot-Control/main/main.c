@@ -28,12 +28,15 @@ vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 BNO055_t gBNO055;
 
 void app_main(void)
-{
-    ///< Kernel objects creation
-    create_kernel_objects(); ///< Create kernel objects like mutexes, semaphores, and queues
-    
+{   
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
+
+    ///< Kernel objects creation like mutexes, semaphores, and queues
+    if (!create_kernel_objects()){
+        ESP_LOGI("app_main", "Kernel objects not created");
+        return;
+    }
 
     ///< Initialize and setup each sensor
     if (!setup_as5600(100)) { ///< Setup the AS5600 sensor
@@ -41,8 +44,8 @@ void app_main(void)
         return;
     }
 
-    ///< Perform motor identification for all motors
-    motor_identification_all();
+    // ///< Perform motor identification for all motors
+    // motor_identification_all();
 
     // while (!setup_bno055(100)) { ///< Setup the BNO055 sensor
     //     ESP_LOGI("app_main", "BNO055 sensor is not ready. Resetting...");
@@ -63,8 +66,8 @@ void app_main(void)
     //     return;
     // }
     
-    // ///< Create the tasks
-    // create_tasks(); 
+    ///< Create the tasks
+    create_tasks(); 
 
     // ///< Initialize the system
     // ///< 'System' refers to more general variables and functions that are used to control the project.

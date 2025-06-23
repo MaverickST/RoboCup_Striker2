@@ -69,21 +69,26 @@ void init_system(void);
 void sys_timer_cb(void *arg);
 
 /**
- * @brief Proccess the command received from the UART console
+ * @brief Parses a JSON-like string and updates the velocity setpoints for the motors.
  * 
- * @param cmd 
+ * @param uart_buffer 
  */
-void process_cmd(const char *cmd);
+void parse_and_update_setpoints(const char *uart_buffer);
 
 /**
- * @brief Parse the setpoint command received from the UART console.
+ * @brief Perform motor identification for all motors.
  * 
- * @param command 
- * @param dir 
- * @param dist 
- * @param vel 
+ * This function will iterate through all motors and perform the identification process.
+ * It will also handle the AS5600 sensors associated with each motor.
  */
-void parse_command_setpoint(const uint8_t *command, bool *dir, int *dist, int *vel);
+void motor_identification_all();
+
+/**
+ * @brief Callback function for motor identification.
+ * 
+ * @param arg 
+ */
+void motor_bldc_cb(void *arg);
 
 /**
  * @brief Check if the drivers and sensors are ready to be used.
@@ -106,22 +111,5 @@ void stop_robot(void);
  * @param ... 
  */
 void wrap_printf(const char *format, ...);
-
-/**
- * @brief Perform an experiment to identify the motor parameters.
- * 
- * @param motor 
- * @param as5600
- */
-void motor_identification(uint8_t motor_num, uint8_t as5600_num);
-
-void motor_identification_all();
-
-/**
- * @brief Callback function for motor identification.
- * 
- * @param arg 
- */
-void motor_ident_cb(void *arg);
 
 #endif // FUNCTIONS_H

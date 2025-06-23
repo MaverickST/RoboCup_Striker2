@@ -25,7 +25,7 @@ void create_tasks(void);
  * @brief Create kernel objects like mutexes, semaphores, and queues
  * 
  */
-void create_kernel_objects(void);
+bool create_kernel_objects(void);
 
 /**
  * @brief Task to trigger the flow of the tasks
@@ -61,6 +61,14 @@ void as5600_task(void *pvParameters);
  * @param pvParameters 
  */
 void control_task(void *pvParameters);
+
+/**
+ * @brief Task for the control of each BLDC motor. 
+ * It will control the speed motor: input -> setpoint speed (rad/s) and output -> duty cycle (0-100%).
+ * 
+ * @param pvParameters 
+ */
+void bldc_control_task(void *pvParameters);
 
 /**
  * @brief Task to save the data collected by the sensors

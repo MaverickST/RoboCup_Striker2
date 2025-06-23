@@ -29,6 +29,14 @@ typedef struct {
     float min_output;   // PID minimum output limitation
     float max_integral; // PID maximum integral value limitation
     float min_integral; // PID minimum integral value limitation
+
+    ///< Constants for the discrete PID controller
+    float a2;
+    float a1; 
+    float a0;
+    float b2;
+    float b1;
+    float b0;
 } pid_block_t; ///< PID controller block
 
 /**
@@ -38,6 +46,8 @@ typedef struct {
 typedef struct {
     pid_block_t pid; ///< PID controller block
     float dt; ///< Sampling time in seconds
+    float setpoint; ///< Setpoint value
+    float output; ///< Output value of thecontroller
 } control_t; ///< Control PID structure
 
 /**
@@ -62,9 +72,17 @@ float control_calc_pid(control_t *ctrl, float error);
  * @brief Calculate the PID discrete control value
  * 
  * @param ctrl_senfusion 
- * @param error 
+ * @param value speed in rad/s 
  * @return float 
  */
-float control_calc_pid_z(control_t *ctrl, float error);
+float control_calc_pid_z(control_t *ctrl, float value);
+
+/**
+ * @brief Set the setpoint value for the PID controller
+ * 
+ * @param ctrl Pointer to the control structure
+ * @param setpoint Setpoint value
+ */
+void control_set_setpoint(control_t *ctrl, float setpoint);
 
 #endif // __CONTROL_PID_H__
