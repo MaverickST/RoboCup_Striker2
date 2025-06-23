@@ -40,6 +40,10 @@
 #define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
 #define AS5600_SENSOR_ADDR  0x36        /*!< slave address for AS5600 sensor */
 
+/**
+ * @brief AS5600 sensor structure
+ * 
+ */
 typedef struct
 {
     AS5600_config_t conf; ///< AS5600 configuration

@@ -18,15 +18,19 @@ void create_tasks(void)
     xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
 
     ///< Create the save task
-    gSys.queue = xQueueCreate(10, sizeof(uint8_t)*45); ///< Create a queue to send the data to the save task
     xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
 
-    ///< Crate some kernel objects
-    gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
+}
+
+void create_kernel_objects(void)
+{    
+    gSys.queue = xQueueCreate(10, sizeof(uint8_t)*45); ///< Create a queue to send the data to the save task
     if (gSys.queue == NULL) {
         ESP_LOGI("init_system", "Queue not created");
         return;
     }
+
+    gSys.mutex = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the global variables
     if (gSys.mutex == NULL) {
         ESP_LOGI("init_system", "Mutex not created");
         return;
@@ -37,8 +41,13 @@ void create_tasks(void)
         ESP_LOGI("init_system", "Mutex for printf not created");
         return;
     }
-}
 
+    gSys.smph_bldc = xSemaphoreCreateBinary(); ///< Create a semaphore to synchronize the motor identification task
+    if (gSys.smph_bldc == NULL) {
+        ESP_LOGI("init_system", "Semaphore for BLDC not created");
+        return;
+    }
+}
 
 void trigger_task(void *pvParameters)
 {
@@ -164,7 +173,7 @@ void save_data_task(void *pvParameters)
     uint8_t data[45]; 
 
     ///< Buffer to save the data from the sensors. Each sample has 6 values: duty, angle, acceleration, distance, position, velocity.
-    int8_t buffer[10*SAMPLING_RATE_HZ + 1][45]; // each sample sizes 40 bytes, for 15 seconds of data
+    int8_t buffer[10*SAMPLING_RATE_HZ + 1][45]; // each sample sizes 40 bytes, for 10 seconds of data
 
     while (true) {
         ///< Wait for the data from the control task

@@ -9,7 +9,7 @@
  * 
  */
 
-#include "types.h"
+// #include "types.h"
 #include "functions.h"
 #include "tasks.h"
 
@@ -29,6 +29,9 @@ BNO055_t gBNO055;
 
 void app_main(void)
 {
+    ///< Kernel objects creation
+    create_kernel_objects(); ///< Create kernel objects like mutexes, semaphores, and queues
+    
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
 
@@ -37,6 +40,10 @@ void app_main(void)
         ESP_LOGI("app_main", "AS5600 sensor is not ready");
         return;
     }
+
+    ///< Perform motor identification for all motors
+    motor_identification_all();
+
     // while (!setup_bno055(100)) { ///< Setup the BNO055 sensor
     //     ESP_LOGI("app_main", "BNO055 sensor is not ready. Resetting...");
     //     BNO055_Reset(&gBNO055); ///< Reset the BNO055 sensor

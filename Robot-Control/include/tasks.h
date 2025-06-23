@@ -22,6 +22,12 @@
 void create_tasks(void);
 
 /**
+ * @brief Create kernel objects like mutexes, semaphores, and queues
+ * 
+ */
+void create_kernel_objects(void);
+
+/**
  * @brief Task to trigger the flow of the tasks
  * 
  * @param pvParameters 

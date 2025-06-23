@@ -107,4 +107,21 @@ void stop_robot(void);
  */
 void wrap_printf(const char *format, ...);
 
+/**
+ * @brief Perform an experiment to identify the motor parameters.
+ * 
+ * @param motor 
+ * @param as5600
+ */
+void motor_identification(uint8_t motor_num, uint8_t as5600_num);
+
+void motor_identification_all();
+
+/**
+ * @brief Callback function for motor identification.
+ * 
+ * @param arg 
+ */
+void motor_ident_cb(void *arg);
+
 #endif // FUNCTIONS_H

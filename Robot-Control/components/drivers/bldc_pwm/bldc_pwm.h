@@ -26,6 +26,10 @@
 
 #define MAP(val, in_min, in_max, out_min, out_max) ((val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min) /*!< Map function */
 
+/**
+ * @brief Structure to hold the BLDC motor configuration and state
+ * 
+ */
 typedef struct {
     uint8_t rev_gpio_num;   ///< GPIO number
     uint8_t pwm_gpio_num;   ///< GPIO number

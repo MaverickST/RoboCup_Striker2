@@ -93,7 +93,7 @@
 #define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
 
 ///< Motor control timing definitions
-#define TIME_SAMP_MOTOR_S   10  // 10s sampling data
+#define TIME_SAMP_MOTOR_S   5  // 10s sampling data
 #define SAMP_RATE_MOTOR_HZ  1000 // 1kHz sampling rate
 #define SAMP_PERIOD_MOTOR_S 1.0/SAMP_RATE_MOTOR_HZ // 1ms
 #define TIME_SAMP_MOTOR_US  1e6/SAMP_RATE_MOTOR_HZ // 1ms
@@ -150,6 +150,7 @@ typedef struct
     QueueHandle_t queue; ///< Queue to send the data to the save task
     SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
     SemaphoreHandle_t mtx_printf; ///< Mutex to protect the access to the printf function
+    SemaphoreHandle_t smph_bldc; ///< Semaphore to synchronize the motor identification task
 
     ///< Values for the sensors
     float duty; ///< Duty cycle of the BLDC motor
@@ -166,7 +167,8 @@ typedef struct
     TaskHandle_t task_handle_trigger;    ///< Task handle for the trigger task
     TaskHandle_t task_handle_save;      ///< Task handle for the save task
 
-    esp_timer_handle_t oneshot_timer;    ///< Timer to control the sequence
+    esp_timer_handle_t oneshot_timer;    ///< Timer to control the system
+    esp_timer_handle_t timer_bldc;       ///< Timer to control the BLDC motor
 
 }system_t;
 

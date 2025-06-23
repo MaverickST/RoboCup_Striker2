@@ -2,8 +2,6 @@
 
 void init_drivers(void)
 {
-    gSys.mtx_printf = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the printf function
-
     ///< ---------------- CNTROL + SENFUSION ----------------
     pid_block_t config_pid = {
         .Kp = 0.8, ///< Proportional gain
@@ -30,6 +28,7 @@ void init_drivers(void)
             MOTOR_MCPWM_TIMER_RESOLUTION_HZ, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY);
 
         bldc_set_duty(&gMotor[i], MOTOR_PWM_BOTTOM_DUTY); ///< Set the initial duty cycle to 0%
+        bldc_set_duty_motor(&gMotor[i], MOTOR_PWM_BOTTOM_DUTY); ///< Set the initial duty cycle to 0% for the motor
         // bldc_calibrate(&gMotor[i], MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY); ///< Calibrate the BLDC motor
     }
     ESP_LOGI("drivers", "Drivers initialized successfully");
@@ -444,4 +443,176 @@ void wrap_printf(const char *format, ...)
     fflush(stdout); ///< Ensure the output is flushed to the console
 
     xSemaphoreGive(gSys.mtx_printf); ///< Release the mutex after printing
+}
+
+void motor_identification(uint8_t motor_num, uint8_t as5600_num)
+{    
+    wrap_printf("Starting motor identification...\n");
+
+    ///< Get the motor and AS5600 sensor from the arguments
+    bldc_pwm_motor_t *motor = &gMotor[motor_num];
+    AS5600_t *as5600 = &gAS5600[as5600_num];
+
+    wrap_printf("Creating timer...\n");
+
+    ///< Create periodic timer for motor identification
+    const esp_timer_create_args_t oneshot_timer_args = {
+        .callback = &motor_ident_cb,
+        .arg = NULL, ////< argument specified here will be passed to timer callback function
+        .name = "bldc-ident" ///< name is optional, but may help identify the timer when debugging
+    };
+    esp_timer_handle_t oneshot_timer_s;
+    ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer_s));
+    gSys.timer_bldc = oneshot_timer_s;
+    ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
+
+    ///< Experiment
+    char (*data)[15] = calloc(TIME_SAMP_MOTOR_S * SAMP_RATE_MOTOR_HZ + 1, sizeof(*data));
+    int cnt = 0; ///< Counter to store the number of samples
+
+    while (cnt < TIME_SAMP_MOTOR_S * SAMP_RATE_MOTOR_HZ) {
+        xSemaphoreTake(gSys.smph_bldc, portMAX_DELAY); ///< Wait for the semaphore to be given by the timer callback
+
+        ///< Get the angle from the AS5600 sensor
+        float angle = AS5600_ADC_GetAngle(as5600) - as5600->angle_offset;
+
+        ///< Set a duty cycle to the motor
+        int duty;
+        if (cnt < 0.5 * SAMP_RATE_MOTOR_HZ) {
+            duty = 7;
+        } else if (cnt < 1.5 * SAMP_RATE_MOTOR_HZ) {
+            duty = 20;
+        } else if (cnt < 2.5 * SAMP_RATE_MOTOR_HZ) {
+            duty = 30;
+        } else if (cnt < 3 * SAMP_RATE_MOTOR_HZ) {
+            duty = 0;
+        } else if (cnt < 3.5 * SAMP_RATE_MOTOR_HZ) {
+            duty = -7;
+        } else if (cnt < 4.5 * SAMP_RATE_MOTOR_HZ) {
+            duty = -20;
+        } else if (cnt < 5 * SAMP_RATE_MOTOR_HZ) {
+            duty = -30;
+        } else {
+            ESP_ERROR_CHECK(esp_timer_stop(gSys.timer_bldc)); ///< Stop the timer to stop the experiment
+            break; ///< Stop the experiment after 5 seconds
+        }
+        bldc_set_duty_motor(motor, (float)duty);
+
+        ///< Store the duty cycle and angle in the data buffer
+        snprintf(data[cnt], sizeof(data[cnt]), "%d, %.2f", (int)duty, angle); ///< Store the data in the buffer
+        cnt++; ///< Increment the counter
+    }
+
+    ///< Print the data to the console
+    wrap_printf("Duty Cycle (0-100): Angle (rad)\n");
+    for (uint32_t i = 0; i <= cnt; i++) {
+        wrap_printf("%s\n", data[i]);
+        if (i % 100 == 0) {
+            vTaskDelay(pdMS_TO_TICKS(100)); ///< Delay to avoid flooding the console
+        }
+    }
+    if (data != NULL) {
+        free(data);
+        data = NULL;  // avoid using dangling pointers
+    }
+}
+
+void motor_identification_all(void)
+{
+    wrap_printf("Starting motor identification of all motors one by one...\n");
+
+    const int num_motors = 3;
+    const int num_samples = TIME_SAMP_MOTOR_S * SAMP_RATE_MOTOR_HZ;
+    
+    ///< Estructura: fila = muestra, columnas = duty, ángulos de motor 1-2-3
+    typedef struct {
+        int duty;
+        float angle[3];  // M1, M2, M3
+    } motor_data_t;
+
+    motor_data_t* data = calloc(num_samples, sizeof(motor_data_t));
+    if (data == NULL) {
+        wrap_printf("Error: no se pudo asignar memoria.\n");
+        return;
+    }
+
+    ///< Crear el timer de forma general, se usará para todos los motores
+    const esp_timer_create_args_t timer_args = {
+        .callback = &motor_ident_cb,
+        .arg = NULL,
+        .name = "bldc-ident"
+    };
+    esp_timer_handle_t timer_handle;
+    ESP_ERROR_CHECK(esp_timer_create(&timer_args, &timer_handle));
+    gSys.timer_bldc = timer_handle;
+
+    for (int motor_index = 0; motor_index < num_motors; motor_index++) {
+        wrap_printf("\n⚙️  Identificando motor %d...\n", motor_index + 1);
+
+        bldc_pwm_motor_t *motor = &gMotor[motor_index];
+        AS5600_t *as5600 = &gAS5600[motor_index];
+        bldc_set_duty_motor(motor, 0);
+
+        ///< Iniciar timer periódico
+        ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
+
+        for (int cnt = 0; cnt < num_samples; cnt++) {
+            xSemaphoreTake(gSys.smph_bldc, portMAX_DELAY);
+
+            int duty;
+            if (cnt < 0.5 * SAMP_RATE_MOTOR_HZ) {
+                duty = 7;
+            } else if (cnt < 1.5 * SAMP_RATE_MOTOR_HZ) {
+                duty = 20;
+            } else if (cnt < 2.5 * SAMP_RATE_MOTOR_HZ) {
+                duty = 30;
+            } else if (cnt < 3 * SAMP_RATE_MOTOR_HZ) {
+                duty = 0;
+            } else if (cnt < 3.5 * SAMP_RATE_MOTOR_HZ) {
+                duty = -7;
+            } else if (cnt < 4.5 * SAMP_RATE_MOTOR_HZ) {
+                duty = -20;
+            } else if (cnt < 5 * SAMP_RATE_MOTOR_HZ) {
+                duty = -30;
+            } else {
+                break;
+            }
+
+            bldc_set_duty_motor(motor, (float)duty);
+
+            if (motor_index == 0) {
+                data[cnt].duty = duty;  // Solo se asigna una vez en la primera ronda
+            }
+
+            float angle = AS5600_ADC_GetAngle(as5600) - as5600->angle_offset;
+            data[cnt].angle[motor_index] = angle;
+        }
+
+        ESP_ERROR_CHECK(esp_timer_stop(gSys.timer_bldc));
+        bldc_set_duty_motor(motor, 0);  // Seguridad: detener el motor al terminar
+    }
+
+    ///< Imprimir tabla
+    wrap_printf("\n Resultados:\n");
+    wrap_printf("Duty(%%)\tAngle_M1\tAngle_M2\tAngle_M3\n");
+    for (int i = 0; i < num_samples; i++) {
+        wrap_printf("%d\t\t%.2f\t\t%.2f\t\t%.2f\n",
+                    data[i].duty,
+                    data[i].angle[0],
+                    data[i].angle[1],
+                    data[i].angle[2]);
+
+        if (i % 100 == 0) {
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
+    }
+
+    free(data);
+}
+
+
+void motor_ident_cb(void *arg)
+{
+    BaseType_t mustYield = pdFALSE;
+    xSemaphoreGiveFromISR(gSys.smph_bldc, &mustYield); 
 }
