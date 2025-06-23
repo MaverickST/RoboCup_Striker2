@@ -134,6 +134,9 @@ typedef struct {
     float my; ///> Magnetometer Y value
     float mz; ///> Magnetometer Z value
 
+    float accel; ///> Acceleration value in the X-Y plane
+    float dir; ///> Direction of the acceleration in radians
+    bool is_calibrated; ///> Flag to check if the sensor is calibrated
     gpio_t rst_pin; ///> Reset pin
     
 } BNO055_t;
@@ -304,6 +307,14 @@ int8_t BNO055_CheckAck(uint8_t *data);
  * @return int8_t 
  */
 int8_t BNO055_ReadAll(BNO055_t *bno055);
+
+/**
+ * @brief Read all data from the BNO055 sensor with I2C (or uart) with Lineal Acceleration
+ * 
+ * @param bno055
+ * @return int8_t 
+ */
+int8_t BNO055_ReadAll_Lineal(BNO055_t *bno055);
 
 /**
  * @brief Set the unit of the BNO055 sensor

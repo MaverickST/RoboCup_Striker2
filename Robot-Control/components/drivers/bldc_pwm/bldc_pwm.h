@@ -20,11 +20,16 @@
 #include "esp_mac.h"
 #include "esp_log.h"
 #include "esp_check.h"
+#include "freertos/FreeRTOS.h"
 #include "driver/mcpwm_prelude.h"
 #include "driver/gpio.h"
 
 #define MAP(val, in_min, in_max, out_min, out_max) ((val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min) /*!< Map function */
 
+/**
+ * @brief Structure to hold the BLDC motor configuration and state
+ * 
+ */
 typedef struct {
     uint8_t rev_gpio_num;   ///< GPIO number
     uint8_t pwm_gpio_num;   ///< GPIO number
@@ -34,7 +39,9 @@ typedef struct {
     uint16_t pwm_bottom_duty; ///< Bottom duty cycle in percentage from 0 to 1000
     uint16_t pwm_top_duty;    ///< Top duty cycle in percentage from 0 to 1000
 
-    uint16_t duty_cycle;    ///< Duty cycle in percentage
+    uint16_t duty_cycle;    ///< Duty cycle in percentage from 0 to 1000
+    float duty; ///< Duty cycle in percentage from 0 to 100
+    bool is_calibrated; ///< Flag to check if the motor is calibrated
     int group_id;           ///< MCPWM group number 
     uint32_t resolution_hz; ///< MCPWM timer frequency
 
@@ -99,5 +106,15 @@ esp_err_t bldc_set_duty(bldc_pwm_motor_t *motor, int duty);
  * @return esp_err_t 
  */
 esp_err_t bldc_set_duty_motor(bldc_pwm_motor_t *motor, float duty);
+
+/**
+ * @brief Calibrate the BLDC motor.
+ * 
+ * @param motor 
+ * @param bottom_duty 
+ * @param top_duty 
+ * @return esp_err_t 
+ */
+esp_err_t bldc_calibrate(bldc_pwm_motor_t *motor, uint16_t bottom_duty, uint16_t top_duty);
 
 #endif // __PWM_MOTOR_H__

@@ -40,11 +40,18 @@
 #define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
 #define AS5600_SENSOR_ADDR  0x36        /*!< slave address for AS5600 sensor */
 
+/**
+ * @brief AS5600 sensor structure
+ * 
+ */
 typedef struct
 {
     AS5600_config_t conf; ///< AS5600 configuration
     AS5600_reg_t reg;
     uint8_t out;         ///< GPIO pin connected to the OUT pin of the AS5600 sensor
+    float angle; ///< Angle in radians read from the AS5600 sensor
+    float angle_offset; ///< Angle offset in radians to be subtracted from the angle read from the AS5600 sensor
+    bool is_calibrated; ///< Flag to indicate if the AS5600 sensor is calibrated
 
     // Peripheral handles
     i2c_t i2c_handle;   ///< I2C handle for the AS5600 sensor
@@ -74,7 +81,7 @@ void AS5600_Deinit(AS5600_t *as5600);
 void AS5600_DeinitI2C(AS5600_t *as5600);
 
 /**
- * @brief Get angle in degrees from the AS5600 sensor by ADC.
+ * @brief Get angle in radians from the AS5600 sensor by ADC.
  * Also take into account the range of the OUT pin of the AS5600 sensor, which is 10%-90% of VCC.
  * 
  * @param as5600 
