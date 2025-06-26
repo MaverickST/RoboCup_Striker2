@@ -74,11 +74,33 @@ void AS5600_Init(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda, ui
 void AS5600_Deinit(AS5600_t *as5600);
 
 /**
+ * @brief Initialize the I2C driver with the specified parameters.
+ * 
+ * @param as5600 
+ * @param i2c_num 
+ * @param scl 
+ * @param sda 
+ */
+void AS5600_InitI2C(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda);
+
+/**
  * @brief Initialize the I2C driver
  * 
  * @param as5600 
  */
 void AS5600_DeinitI2C(AS5600_t *as5600);
+
+/**
+ * @brief Calibrate the AS5600 sensor by setting the start and stop positions, and writing the configuration.
+ * 
+ * @param as5600 
+ * @param conf 
+ * @param start_position 
+ * @param stop_position 
+ * @return true 
+ * @return false 
+ */
+bool AS5600_Calibrate(AS5600_t *as5600, AS5600_config_t conf, uint16_t start_position, uint16_t stop_position);
 
 /**
  * @brief Get angle in radians from the AS5600 sensor by ADC.

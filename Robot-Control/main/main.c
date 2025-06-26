@@ -36,15 +36,14 @@ BNO055_t gBNO055;
 
 void app_main(void)
 {   
-
-    if (wifi_sta_init(WIFI_SSID, WIFI_PASS)) {
-        ESP_LOGI("APP", "Wi-Fi connected successfully");
-    } else {
-        ESP_LOGE("APP", "Wi-Fi connection failed");
-    }
+    // if (wifi_sta_init(WIFI_SSID, WIFI_PASS)) {
+    //     ESP_LOGI("APP", "Wi-Fi connected successfully");
+    // } else {
+    //     ESP_LOGE("APP", "Wi-Fi connection failed");
+    // }
     
     ///< Initialize the drivers: LED, UART, BLDC
-    //init_drivers(); 
+    init_drivers(); 
 
     ///< Kernel objects creation like mutexes, semaphores, and queues
     if (!create_kernel_objects()){
@@ -80,11 +79,11 @@ void app_main(void)
     //     return;
     // }
     
-    ///< Create the tasks
-    create_tasks(); 
+    // ///< Create the tasks
+    // create_tasks(); 
 
     // ///< Initialize the system
     // ///< 'System' refers to more general variables and functions that are used to control the project.
     // init_system();
 
-
+}

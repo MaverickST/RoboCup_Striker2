@@ -3,16 +3,9 @@
 void AS5600_Init(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda, uint8_t out)
 {
     as5600->out = out; // Set the GPIO pin connected to the OUT pin of the AS5600 sensor
-
-    //  I2C master configuration 
-    if (!i2c_init(&as5600->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, AS5600_SENSOR_ADDR)) {
-        printf("AS5600: I2C initialization failed\n");
-        return;
-    }
-
-    // i2c_init_new_bus(&as5600->i2c_handle, i2c_num, scl, sda);
-    // i2c_init_new_device(&as5600->i2c_handle, i2c_num, AS5600_SENSOR_ADDR, I2C_MASTER_FREQ_HZ);
-
+    as5600->i2c_handle.i2c_num = i2c_num; // Set the I2C port number
+    as5600->i2c_handle.gpio_scl = scl; // Set the SCL GPIO pin
+    as5600->i2c_handle.gpio_sda = sda; // Set the SDA GPIO pin
 }
 
 void AS5600_Deinit(AS5600_t *as5600)
@@ -22,9 +15,60 @@ void AS5600_Deinit(AS5600_t *as5600)
     gpio_deinit(&as5600->gpio_handle);
 }
 
+void AS5600_InitI2C(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda)
+{
+    //  I2C master configuration 
+    if (!i2c_init(&as5600->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, AS5600_SENSOR_ADDR)) {
+        printf("AS5600: I2C initialization failed\n");
+        return;
+    }
+
+    // i2c_init_new_bus(&as5600->i2c_handle, i2c_num, scl, sda);
+    // i2c_init_new_device(&as5600->i2c_handle, i2c_num, AS5600_SENSOR_ADDR, I2C_MASTER_FREQ_HZ);
+}
+
 void AS5600_DeinitI2C(AS5600_t *as5600)
 {
     i2c_deinit(&as5600->i2c_handle);
+}
+
+bool AS5600_Calibrate(AS5600_t *as5600, AS5600_config_t conf, uint16_t start_position, uint16_t stop_position)
+{
+
+    ///< Initialize the I2C driver
+    AS5600_InitI2C(as5600, as5600->i2c_handle.i2c_num, as5600->i2c_handle.gpio_scl, as5600->i2c_handle.gpio_sda);
+
+    ///< Set configuration, start and stop positions
+    AS5600_SetConf(as5600, conf);
+    AS5600_SetStartPosition(as5600, start_position); 
+    AS5600_SetStopPosition(as5600, stop_position);
+
+    ///< Read the configuration, start and stop positions to verify
+    AS5600_config_t read_conf;
+    uint16_t start_pos, stop_pos;
+    AS5600_GetConf(as5600, &read_conf);
+    AS5600_GetStartPosition(as5600, &start_pos);
+    AS5600_GetStopPosition(as5600, &stop_pos);
+    
+    printf("Config: 0x%04x Start Position: 0x%03X, Stop Position: 0x%03X\n", read_conf.WORD, start_pos, stop_pos);
+
+    assert(read_conf.WORD == conf.WORD); ///< Assert that the configuration is correct
+    assert(start_pos == start_position); ///< Assert that the start position is 0
+    assert(stop_pos == stop_position); ///< Assert that the stop position is 4095
+
+    ///< Burn the angle command and settings to the EEPROM
+    AS5600_BurnAngleCommand(as5600);
+    AS5600_BurnSettingCommand(as5600);
+
+    if (read_conf.WORD == conf.WORD && start_pos == start_position && stop_pos == stop_position) {
+        as5600->is_calibrated = true; ///< Set the flag to true if the configuration is correct
+        printf("AS5600 sensor calibrated successfully\n");
+    } else {
+        as5600->is_calibrated = false; ///< Set the flag to false if the configuration is not correct
+    }
+    AS5600_DeinitI2C(as5600); ///< Deinitialize the AS5600 sensor
+
+    return true;
 }
 
 float AS5600_ADC_GetAngle(AS5600_t *as5600)

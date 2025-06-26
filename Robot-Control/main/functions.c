@@ -50,34 +50,6 @@ bool setup_as5600(uint32_t num_checks)
         .FTH = AS5600_FF_THRESHOLD_6LSB, ///< Fast filter threshold 6LSB
         .WD = AS5600_WATCHDOG_OFF, ///< Watchdog off
     };
-    // for (int i = 0; i < 3; i++) {
-    //     AS5600_Init(&gAS5600[i], AS5600_I2C_MASTER_NUM, AS5600_I2C_MASTER_SCL_GPIO, AS5600_I2C_MASTER_SDA_GPIO, AS5600_N_OUT_GPIO(i)); ///< Initialize the AS5600 sensor
-    //     AS5600_SetConf(&gAS5600[i], conf); ///< Set the configuration for the AS5600 sensor
-    //     AS5600_SetStartPosition(&gAS5600[i], 0x000); ///< Set the start position to 0
-    //     AS5600_SetStopPosition(&gAS5600[i], 0xFFF); ///< Set the stop position to 4095
-
-    //     // ///< Burn the angle command and settings to the EEPROM
-    //     // AS5600_BurnAngleCommand(&gAS5600[i]);
-    //     // AS5600_BurnSettingCommand(&gAS5600[i]);
-    //     // vTaskDelay(pdMS_TO_TICKS(10));
-        
-    //     ///< Read the configuration, start and stop positions to verify
-    //     AS5600_config_t read_conf;
-    //     uint16_t start_pos, stop_pos;
-
-    //     AS5600_GetConf(&gAS5600[i], &read_conf);
-    //     AS5600_GetStartPosition(&gAS5600[i], &start_pos);
-    //     AS5600_GetStopPosition(&gAS5600[i], &stop_pos);
-
-    //     wrap_printf("Start Position: 0x%03X, Stop Position: 0x%03X\n", start_pos, stop_pos);
-    //     if (read_conf.WORD == conf.WORD && start_pos == 0x000 && stop_pos == 0xFFF) {
-    //         ESP_LOGI(TAG_AS5600_TASK, "AS5600 sensor %d initialized successfully\n", i);
-    //     } else {
-    //         ESP_LOGE(TAG_AS5600_TASK, "AS5600 sensor %d initialization failed\n", i);
-    //         return false;
-    //     }
-    //     AS5600_DeinitI2C(&gAS5600[i]); ///< Deinitialize the AS5600 sensor
-    // }
 
     ///< Initialize the ADC for the AS5600 sensors
     adc_oneshot_unit_handle_t handle;
