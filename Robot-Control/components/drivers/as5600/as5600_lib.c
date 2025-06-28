@@ -4,11 +4,11 @@ void AS5600_Init(AS5600_t *as5600, uint8_t i2c_num, uint8_t scl, uint8_t sda, ui
 {
     as5600->out = out; // Set the GPIO pin connected to the OUT pin of the AS5600 sensor
 
-    // //  I2C master configuration 
-    // if (!i2c_init(&as5600->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, AS5600_SENSOR_ADDR)) {
-    //     printf("AS5600: I2C initialization failed\n");
-    //     return;
-    // }
+    //  I2C master configuration 
+    if (!i2c_init(&as5600->i2c_handle, i2c_num, scl, sda, I2C_MASTER_FREQ_HZ, AS5600_SENSOR_ADDR)) {
+        printf("AS5600: I2C initialization failed\n");
+        return;
+    }
 
     // i2c_init_new_bus(&as5600->i2c_handle, i2c_num, scl, sda);
     // i2c_init_new_device(&as5600->i2c_handle, i2c_num, AS5600_SENSOR_ADDR, I2C_MASTER_FREQ_HZ);
@@ -34,12 +34,13 @@ float AS5600_ADC_GetAngle(AS5600_t *as5600)
         uint16_t voltage;
         adc_read_mvolt(&as5600->adc_handle, &voltage);
         voltage = LIMIT(voltage, VCC_3V3_MIN_RR_MV, VCC_3V3_MAX_RR_MV); // The OUT pin of the AS5600 sensor has a range of 10%-90% of VCC
-        angle = MAP((float)voltage, VCC_3V3_MIN_RR_MV, VCC_3V3_MAX_RR_MV, 0, 360); // Map the voltage to the angle
+        angle = MAP((float)voltage, VCC_3V3_MIN_RR_MV, VCC_3V3_MAX_RR_MV, 0, 6.2831853); // Map the voltage to the angle in radians
     }
     else {
-        angle = -1;
+        return -1;
     }
-    return angle;
+    as5600->angle = angle;
+    return angle; // Subtract the angle offset
 }
 
 void AS5600_BurnAngleCommand(AS5600_t *as5600)

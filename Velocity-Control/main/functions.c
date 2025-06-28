@@ -4,9 +4,9 @@ void init_drivers(void)
 {
     ///< ---------------- CNTROL + SENFUSION ----------------
     pid_block_t config_pid = {
-        .Kp = 70, ///< Proportional gain
-        .Kd = 1, ///< Derivative gain
-        .Ki = 5, ///< Integral gain
+        .Kp = 0.8, ///< Proportional gain
+        .Kd = 0.0012, ///< Derivative gain
+        .Ki = 137, ///< Integral gain
         .max_output   = 60,
         .min_output   = -60,
         .max_integral = 200,
@@ -15,11 +15,6 @@ void init_drivers(void)
 
     ctrl_senfusion_init(&gCtrl, config_pid, SAMPLING_PERIOD_S); // 10ms sampling time
 
-    ///< ---------------------- LED ----------------------
-    led_init(&gLed, LED_LSB_GPIO, LED_TIME_US, true);
-    led_set_blink(&gLed, true, 3);
-    led_setup_green(&gLed, LED_TIME_US);
-
     ///< ---------------------- UART ---------------------
     uconsole_init(&gUc, UART_NUM);
 
@@ -27,6 +22,7 @@ void init_drivers(void)
     bldc_init(&gMotor, MOTOR_MCPWM_GPIO, MOTOR_REVERSE_GPIO, MOTOR_MCPWM_FREQ_HZ, 0, 
                 MOTOR_MCPWM_TIMER_RESOLUTION_HZ, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY);
     bldc_enable(&gMotor);
+    // bldc_calibrate(&gMotor, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY); ///< Calibrate the BLDC motor
     bldc_set_duty(&gMotor, MOTOR_PWM_BOTTOM_DUTY); 
 
 }
@@ -87,7 +83,7 @@ bool setup_bno055(uint32_t num_checks)
     float acce = 0, acce_prev = 0;
     uint16_t cnt = 0;
     for (uint32_t i = 0; i < num_checks; i++) {
-        BNO055_ReadAll(&gBNO055);
+        BNO055_ReadAll_Lineal(&gBNO055);
         acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
         if (fabs(acce - acce_prev) < 0.0001) {
             cnt++;
@@ -150,11 +146,11 @@ bool verify_sensors(uint32_t num_checks)
             dist = VL53L1X_readDistance(&gVL53L1X, false); // false for non-blocking read
         }
 
-        BNO055_ReadAll(&gBNO055);
+        BNO055_ReadAll_Lineal(&gBNO055);
         acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
 
         ///< Print the values
-        // printf("Angle: %.2f deg, Distance: %.3f m, Acce: %.2f m^2\n", angle, dist/1000.0, acce);
+        printf("Angle: %.2f deg, Distance: %.3f m, Acce: %.2f m^2\n", angle, dist/1000.0, acce);
 
         ///< Check if the values are the same
         if (fabs(angle - angle_prev) < 0.001) {
@@ -219,7 +215,9 @@ void sys_timer_cb(void *arg)
         case CHECK_SENSORS:
             // Check if the sensors are calibrated
             if (gSys.is_as5600_calibrated && gSys.is_bno055_calibrated && gSys.is_vl53l1x_calibrated && gSys.is_bldc_calibrated) {
+                // gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
                 gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
+                // ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
                 ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
             }
             break;
@@ -390,13 +388,15 @@ void process_cmd(const char *cmd)
 
         gSys.setpoint_dir = dir; ///< Set the direction of the motor
         if (gSys.setpoint_dir) {
-            gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
-            gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+            gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
+            gSys.setpoint_vel = (float)vel/100; ///< Set the velocity to move (m/s)
         }
         else {
-            gSys.setpoint_dist = (float)dist/100; ///< Set the distance to move (m)
-            gSys.setpoint_vel = vel/100; ///< Set the velocity to move (m/s)
+            gSys.setpoint_dist = -(float)dist/100; ///< Set the distance to move (m)
+            gSys.setpoint_vel = -(float)vel/100; ///< Set the velocity to move (m/s)
         }
+        gSys.setpoint_dist = gSys.setpoint_dist + gSys.dist_enc; ///< Add the distance from the encoder to the setpoint distance
+        printf("Setpoint: dir %d, dist %.3f m, vel %.3f m/s\n", gSys.setpoint_dir, gSys.setpoint_dist, gSys.setpoint_vel);
 
         ///< Init the control experiment
         gSys.STATE = SYS_SAMPLING_CONTROL; ///< Set the state to control the BLDC motor

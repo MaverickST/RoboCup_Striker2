@@ -64,7 +64,8 @@ The system is organized into **seven FreeRTOS tasks**, each with a specific role
 │   │   ├── uart_console/
 │   │   └── led/
 │   ├── platform/
-│   │   └── platform_esp32s3.c/.h
+│   │   ├── platform_esp32s3.c/.h
+│   │   └── platform_wifi_esp32s3.c/.h
 ├── src/
 │   ├── main.c
 │   ├── functions.c/.h
@@ -81,7 +82,7 @@ The system is organized into **seven FreeRTOS tasks**, each with a specific role
 * ESP-IDF framework
 * FreeRTOS (included by default in ESP-IDF)
 * Sensor driver libraries (integrated into `components/drivers/`)
-* HAL files (`platform/`) for porting to other microcontrollers via I2C, UART, ADC abstraction
+* HAL files (`platform/`) for porting to other microcontrollers via I2C, UART, WiFi, ADC abstraction
 
 ## Key Algorithms
 

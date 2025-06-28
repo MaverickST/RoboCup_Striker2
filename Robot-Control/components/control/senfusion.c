@@ -1,56 +1,53 @@
-#include "control_senfusion.h"
+#include "senfusion.h"
 
-void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, float dt)
+void senfusion_init(senfusion_t *senfusion, float dt)
 {
-    ///< ---------------- PID CONTROLLER -----------------
-    ctrl_senfusion->pid = pid; ///< Set the PID controller
-
     ///< ----------------- SENSOR FUSION -----------------
-    ctrl_senfusion->dt = dt;
-    ctrl_senfusion->k = 0;
-    ctrl_senfusion->x[0][0] = 0;
-    ctrl_senfusion->x[1][0] = 0;
-    ctrl_senfusion->z[0][0] = 0;
-    ctrl_senfusion->z[1][0] = 0;
+    senfusion->dt = dt;
+    senfusion->k = 0;
+    senfusion->x[0][0] = 0;
+    senfusion->x[1][0] = 0;
+    senfusion->z[0][0] = 0;
+    senfusion->z[1][0] = 0;
 
     ///< Initialize the process model: x(k+1) = A*x(k) + B*u
-    ctrl_senfusion->A[0][0] = 0.9955;
-    ctrl_senfusion->A[0][1] = 0.00931;
-    ctrl_senfusion->A[1][0] = -0.8805;
-    ctrl_senfusion->A[1][1] = 0.8638;
-    ctrl_senfusion->B[0][0] = 8.81e-05;
-    ctrl_senfusion->B[1][0] = 0.0172;
-    ctrl_senfusion->C[0][0] = 1;
-    ctrl_senfusion->C[0][1] = 0;
-    ctrl_senfusion->C[1][0] = 0;
-    ctrl_senfusion->C[1][1] = 1;
+    senfusion->A[0][0] = 0.9955;
+    senfusion->A[0][1] = 0.00931;
+    senfusion->A[1][0] = -0.8805;
+    senfusion->A[1][1] = 0.8638;
+    senfusion->B[0][0] = 8.81e-05;
+    senfusion->B[1][0] = 0.0172;
+    senfusion->C[0][0] = 1;
+    senfusion->C[0][1] = 0;
+    senfusion->C[1][0] = 0;
+    senfusion->C[1][1] = 1;
 
     ///< Initialize the measurement model: z(k) = H*x(k) + v(k)
-    ctrl_senfusion->H[0][0] = 1; 
-    ctrl_senfusion->H[0][1] = 0;
-    ctrl_senfusion->H[1][0] = 1;
-    ctrl_senfusion->H[1][1] = 0;
-    ctrl_senfusion->H[2][0] = 0;
-    ctrl_senfusion->H[2][1] = 1;
-    ctrl_senfusion->H_T[0][0] = 1;
-    ctrl_senfusion->H_T[0][1] = 1;
-    ctrl_senfusion->H_T[0][2] = 0;
-    ctrl_senfusion->H_T[1][0] = 0;
-    ctrl_senfusion->H_T[1][1] = 0;
-    ctrl_senfusion->H_T[1][2] = 1;
+    senfusion->H[0][0] = 1; 
+    senfusion->H[0][1] = 0;
+    senfusion->H[1][0] = 1;
+    senfusion->H[1][1] = 0;
+    senfusion->H[2][0] = 0;
+    senfusion->H[2][1] = 1;
+    senfusion->H_T[0][0] = 1;
+    senfusion->H_T[0][1] = 1;
+    senfusion->H_T[0][2] = 0;
+    senfusion->H_T[1][0] = 0;
+    senfusion->H_T[1][1] = 0;
+    senfusion->H_T[1][2] = 1;
 
     ///< Initialize the error covariance matrix: diagonal matrix
-    ctrl_senfusion->P[0][0] = 1;
-    ctrl_senfusion->P[0][1] = 0;
-    ctrl_senfusion->P[1][0] = 0;
-    ctrl_senfusion->P[1][1] = 1;
+    senfusion->P[0][0] = 1;
+    senfusion->P[0][1] = 0;
+    senfusion->P[1][0] = 0;
+    senfusion->P[1][1] = 1;
 
     ///< Initialize the process noise covariance matrix: diagonal matrix
     float sigma_a = 1.0;
-    ctrl_senfusion->Q[0][0] = 0.25 * dt * dt * dt * dt * sigma_a;
-    ctrl_senfusion->Q[0][1] = 0.5 * dt * dt * dt * sigma_a;
-    ctrl_senfusion->Q[1][0] = 0.5 * dt * dt * dt * sigma_a;
-    ctrl_senfusion->Q[1][1] = dt * dt * sigma_a;
+    senfusion->Q[0][0] = 0.25 * dt * dt * dt * dt * sigma_a;
+    senfusion->Q[0][1] = 0.5 * dt * dt * dt * sigma_a;
+    senfusion->Q[1][0] = 0.5 * dt * dt * dt * sigma_a;
+    senfusion->Q[1][1] = dt * dt * sigma_a;
 
     ///< Initialize the measurement noise covariance matrix: diagonal matrix
     ///< The covariance for Encoder and Lidar are constant, but the covariance for IMU is time varying
@@ -59,109 +56,84 @@ void ctrl_senfusion_init(ctrl_senfusion_t *ctrl_senfusion, pid_block_t pid, floa
     //< for IMU: sigma_v_imu = sqrt(k) * sigma_a * dt, sigma_a = 0.0148 m/s^2
     float sigma_p_enc = 0.000784; ///< 7.84 um
     float sigma_p_lidar = 0.02; ///< 2 cm
-    float sigma_v_imu = sqrt(ctrl_senfusion->k) * 0.0148 * ctrl_senfusion->dt; ///< sqrt(k) * sigma_a * dt
-    ctrl_senfusion->R[0][0] = sigma_p_enc * sigma_p_enc; ///< Encoder
-    ctrl_senfusion->R[0][1] = 0;
-    ctrl_senfusion->R[1][0] = 0;
-    ctrl_senfusion->R[1][1] = sigma_p_lidar * sigma_p_lidar; ///< Lidar
-    ctrl_senfusion->R[2][0] = 0;
-    ctrl_senfusion->R[2][1] = 0;
-    ctrl_senfusion->R[2][2] = sigma_v_imu * sigma_v_imu; ///< IMU
+    float sigma_v_imu = sqrt(senfusion->k) * 0.0148 * senfusion->dt; ///< sqrt(k) * sigma_a * dt
+    senfusion->R[0][0] = sigma_p_enc * sigma_p_enc; ///< Encoder
+    senfusion->R[0][1] = 0;
+    senfusion->R[1][0] = 0;
+    senfusion->R[1][1] = sigma_p_lidar * sigma_p_lidar; ///< Lidar
+    senfusion->R[2][0] = 0;
+    senfusion->R[2][1] = 0;
+    senfusion->R[2][2] = sigma_v_imu * sigma_v_imu; ///< IMU
 }
 
-void ctrl_senfusion_predict(ctrl_senfusion_t *ctrl_senfusion, float u)
+void senfusion_predict(senfusion_t *senfusion, float u)
 {
     float x_pred[2][1] = {0};
     float P_pred[2][2] = {0};
 
     ///< Predict the next state: x_pred = A * x + B * u
-    matrixMultiplication(2, 2, 1, ctrl_senfusion->A, ctrl_senfusion->x, x_pred); // A * x
-    ctrl_senfusion->x_pred[0][0] = x_pred[0][0] + ctrl_senfusion->B[0][0] * u; 
-    ctrl_senfusion->x_pred[1][0] = x_pred[1][0] + ctrl_senfusion->B[1][0] * u;
+    matrixMultiplication(2, 2, 1, senfusion->A, senfusion->x, x_pred); // A * x
+    senfusion->x_pred[0][0] = x_pred[0][0] + senfusion->B[0][0] * u; 
+    senfusion->x_pred[1][0] = x_pred[1][0] + senfusion->B[1][0] * u;
 
     ///< Predict the next error covariance matrix: P_pred = A * P * Aᵀ + Q
-    matrixMultiplication(2, 2, 2, ctrl_senfusion->A, ctrl_senfusion->P, P_pred); // A * P
+    matrixMultiplication(2, 2, 2, senfusion->A, senfusion->P, P_pred); // A * P
     float A_transpose[2][2] = {0};
-    matrixTranspose(2, 2, ctrl_senfusion->A, A_transpose);
-    matrixMultiplication(2, 2, 2, P_pred, A_transpose, ctrl_senfusion->P_pred); // A * P * Aᵀ
-    matrixAddSub(2, 2, ctrl_senfusion->P_pred, ctrl_senfusion->Q, ctrl_senfusion->P_pred, '+'); // A * P * Aᵀ + Q
+    matrixTranspose(2, 2, senfusion->A, A_transpose);
+    matrixMultiplication(2, 2, 2, P_pred, A_transpose, senfusion->P_pred); // A * P * Aᵀ
+    matrixAddSub(2, 2, senfusion->P_pred, senfusion->Q, senfusion->P_pred, '+'); // A * P * Aᵀ + Q
 
 }
 
-void ctrl_senfusion_update(ctrl_senfusion_t *ctrl_senfusion, float p_enc, float p_lidar, float a_imu, uint32_t k)
+void senfusion_update(senfusion_t *senfusion, float p_enc, float p_lidar, float a_imu, uint32_t k)
 {
     
-    ctrl_senfusion->R[2][2] = sqrt(k) * 0.0148 * ctrl_senfusion->dt; ///< Update the IMU covariance
-    ctrl_senfusion->k = k; ///< Update the sample time
+    senfusion->R[2][2] = sqrt(k) * 0.0148 * senfusion->dt; ///< Update the IMU covariance
+    senfusion->k = k; ///< Update the sample time
 
     ///< Covariance innovation: S = H * Pₖ|ₖ₋₁ * Hᵀ + R
     float S[3][3] = {0};
     float H_P_pred[3][2] = {0};
-    matrixMultiplication(3, 2, 2, ctrl_senfusion->H, ctrl_senfusion->P_pred, H_P_pred); // H * Pₖ|ₖ₋₁
-    matrixMultiplication(3, 2, 3, H_P_pred, ctrl_senfusion->H_T, S); // H * Pₖ|ₖ₋₁ * Hᵀ
-    matrixAddSub(3, 3, S, ctrl_senfusion->R, S, '+'); // H * Pₖ|ₖ₋₁ * Hᵀ + R
+    matrixMultiplication(3, 2, 2, senfusion->H, senfusion->P_pred, H_P_pred); // H * Pₖ|ₖ₋₁
+    matrixMultiplication(3, 2, 3, H_P_pred, senfusion->H_T, S); // H * Pₖ|ₖ₋₁ * Hᵀ
+    matrixAddSub(3, 3, S, senfusion->R, S, '+'); // H * Pₖ|ₖ₋₁ * Hᵀ + R
     // print S
     // printf("S: %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n", S[0][0], S[0][1], S[0][2], S[1][0], S[1][1], S[1][2], S[2][0], S[2][1], S[2][2]);
 
     ///< Kalman gain: K = Pₖ|ₖ₋₁ * Hᵀ * inv(S)  , 2x2 * 2x3 * 3x3 = 2x3
     float K[2][3] = {0};
     float P_pred_H_T[2][3] = {0};
-    matrixMultiplication(2, 2, 3, ctrl_senfusion->P_pred, ctrl_senfusion->H_T, P_pred_H_T); // Pₖ|ₖ₋₁ * Hᵀ
+    matrixMultiplication(2, 2, 3, senfusion->P_pred, senfusion->H_T, P_pred_H_T); // Pₖ|ₖ₋₁ * Hᵀ
     solve_LU_system(S, P_pred_H_T, K); // solve the linear system S * K = Pₖ|ₖ₋₁ * Hᵀ
     // printf("K: %.4f, %.4f, %.4f\n %.4f, %.4f, %.4f\n", K[0][0], K[0][1], K[0][2], K[1][0], K[1][1], K[1][2]);
 
     ///< Innovation (residue): y = z - H * xₖ|ₖ₋₁
-    float v_imu = ctrl_senfusion->v_imu_prev + a_imu * ctrl_senfusion->dt; ///< IMU velocity: v_imu = v_imu_prev + a_imu * dt
+    float v_imu = senfusion->v_imu_prev + a_imu * senfusion->dt; ///< IMU velocity: v_imu = v_imu_prev + a_imu * dt
     float z[3][1] = {{p_enc}, {p_lidar}, {v_imu}}; ///< Measurement vector
     float y[3][1] = {0};
-    matrixMultiplication(3, 2, 2, ctrl_senfusion->H, ctrl_senfusion->x_pred, y); // H * xₖ|ₖ₋₁
+    matrixMultiplication(3, 2, 2, senfusion->H, senfusion->x_pred, y); // H * xₖ|ₖ₋₁
     matrixAddSub(3, 1, z, y, y, '-'); // z - H * xₖ|ₖ₋₁
-    ctrl_senfusion->v_imu_prev = v_imu; ///< Update the IMU velocity for the next iteration
+    senfusion->v_imu_prev = v_imu; ///< Update the IMU velocity for the next iteration
     // printf("y: %.4f, %.4f, %.4f\n", y[0][0], y[1][0], y[2][0]);
 
     ///< Update the state: xₖ = xₖ|ₖ₋₁ + K * y
     float x[2][1] = {0};
     matrixMultiplication(2, 3, 1, K, y, x); // K * y
-    ctrl_senfusion->x[0][0] = ctrl_senfusion->x_pred[0][0] + x[0][0]; // xₖ = xₖ|ₖ₋₁ + K * y
-    ctrl_senfusion->x[1][0] = ctrl_senfusion->x_pred[1][0] + x[1][0]; // xₖ = xₖ|ₖ₋₁ + K * y
+    senfusion->x[0][0] = senfusion->x_pred[0][0] + x[0][0]; // xₖ = xₖ|ₖ₋₁ + K * y
+    senfusion->x[1][0] = senfusion->x_pred[1][0] + x[1][0]; // xₖ = xₖ|ₖ₋₁ + K * y
     // printf("x: %.4f, %.4f\n", x[0][0], x[1][0]);
 
     ///< Update the error covariance matrix: Pₖ = (I - K * H) * Pₖ|ₖ₋₁
     float I_K_H[2][2] = {0};
     float KH[2][2] = {0};
-    matrixMultiplication(2, 3, 2, K, ctrl_senfusion->H, KH); // K * H
+    matrixMultiplication(2, 3, 2, K, senfusion->H, KH); // K * H
     I_K_H[0][0] = 1 - KH[0][0]; // I - K * H
     I_K_H[0][1] = -KH[0][1];
     I_K_H[1][0] = -KH[1][0];
     I_K_H[1][1] = 1 - KH[1][1];
-    matrixMultiplication(2, 2, 2, I_K_H, ctrl_senfusion->P_pred, ctrl_senfusion->P); // (I - K * H) * Pₖ|ₖ₋₁
+    matrixMultiplication(2, 2, 2, I_K_H, senfusion->P_pred, senfusion->P); // (I - K * H) * Pₖ|ₖ₋₁
     // printf("KH: %.4f, %.4f\n %.4f, %.4f\n", KH[0][0], KH[0][1], KH[1][0], KH[1][1]);
-    // printf("P: %.4f, %.4f\n %.4f, %.4f\n", ctrl_senfusion->P[0][0], ctrl_senfusion->P[0][1], ctrl_senfusion->P[1][0], ctrl_senfusion->P[1][1]);
-}
-
-float ctrl_senfusion_calc_pid(ctrl_senfusion_t *ctrl_senfusion, float error)
-{
-    float output = 0;
-    /* Add current error to the integral error */
-    ctrl_senfusion->pid.integral_err += error;
-    /* If the integral error is out of the range, it will be limited */
-    ctrl_senfusion->pid.integral_err = MIN(ctrl_senfusion->pid.integral_err, ctrl_senfusion->pid.max_integral);
-    ctrl_senfusion->pid.integral_err = MAX(ctrl_senfusion->pid.integral_err, ctrl_senfusion->pid.min_integral);
-
-    /* Calculate the pid control value by location formula */
-    /* u(k) = e(k)*Kp + (e(k)-e(k-1))*Kd + integral*Ki */
-    output = error * ctrl_senfusion->pid.Kp +
-             (error - ctrl_senfusion->pid.previous_err1) * ctrl_senfusion->pid.Kd +
-             ctrl_senfusion->pid.integral_err * ctrl_senfusion->pid.Ki;
-
-    /* If the output is out of the range, it will be limited */
-    output = MIN(output, ctrl_senfusion->pid.max_output);
-    output = MAX(output, ctrl_senfusion->pid.min_output);
-
-    /* Update previous error */
-    ctrl_senfusion->pid.previous_err1 = error;
-
-    return output;
+    // printf("P: %.4f, %.4f\n %.4f, %.4f\n", senfusion->P[0][0], senfusion->P[0][1], senfusion->P[1][0], senfusion->P[1][1]);
 }
 
 ///<-------------------------------------------------------------
