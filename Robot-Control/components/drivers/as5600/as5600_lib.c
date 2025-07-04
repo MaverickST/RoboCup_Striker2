@@ -39,9 +39,9 @@ bool AS5600_Calibrate(AS5600_t *as5600, AS5600_config_t conf, uint16_t start_pos
     AS5600_InitI2C(as5600, as5600->i2c_handle.i2c_num, as5600->i2c_handle.gpio_scl, as5600->i2c_handle.gpio_sda);
 
     ///< Set configuration, start and stop positions
-    AS5600_SetConf(as5600, conf);
-    AS5600_SetStartPosition(as5600, start_position); 
-    AS5600_SetStopPosition(as5600, stop_position);
+    // AS5600_SetConf(as5600, conf);
+    // AS5600_SetStartPosition(as5600, start_position); 
+    // AS5600_SetStopPosition(as5600, stop_position);
 
     ///< Read the configuration, start and stop positions to verify
     AS5600_config_t read_conf;
@@ -56,9 +56,9 @@ bool AS5600_Calibrate(AS5600_t *as5600, AS5600_config_t conf, uint16_t start_pos
     assert(start_pos == start_position); ///< Assert that the start position is 0
     assert(stop_pos == stop_position); ///< Assert that the stop position is 4095
 
-    ///< Burn the angle command and settings to the EEPROM
-    AS5600_BurnAngleCommand(as5600);
-    AS5600_BurnSettingCommand(as5600);
+    // ///< Burn the angle command and settings to the EEPROM
+    // AS5600_BurnAngleCommand(as5600);
+    // AS5600_BurnSettingCommand(as5600);
 
     if (read_conf.WORD == conf.WORD && start_pos == start_position && stop_pos == stop_position) {
         as5600->is_calibrated = true; ///< Set the flag to true if the configuration is correct

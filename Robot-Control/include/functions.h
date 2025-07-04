@@ -15,6 +15,7 @@
 #define FUNCTIONS_H
 
 #include "types.h"
+#include "senfusion.h"
 
 /**
  * @brief Initialize drivers like: LED, UART, BLDC, AS5600, BNO055, VL53L1X
@@ -103,6 +104,15 @@ bool is_drivers_ready(void);
  * 
  */
 void stop_robot(void);
+
+/**
+ * @brief Calculate the angular speed of a motor based on the encoder readings.
+ * 
+ * @param kf Pointer to the Kalman filter structure for the motor.
+ * @param midx Index of the motor (0, 1, or 2).
+ * @return float 
+ */
+float calculate_motor_speed(kalman1D_t *kf, int midx);
 
 /**
  * @brief Wrapper function for printf to handle formatted output.

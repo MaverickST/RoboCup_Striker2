@@ -50,6 +50,7 @@ typedef struct
     AS5600_reg_t reg;
     uint8_t out;         ///< GPIO pin connected to the OUT pin of the AS5600 sensor
     float angle; ///< Angle in radians read from the AS5600 sensor
+    float angle_prev; ///< Previous angle in radians read from the AS5600 sensor
     float angle_offset; ///< Angle offset in radians to be subtracted from the angle read from the AS5600 sensor
     bool is_calibrated; ///< Flag to indicate if the AS5600 sensor is calibrated
 

@@ -50,7 +50,7 @@
 #define AS5600_I2C_MASTER_NUM 1         /*!< I2C port number for master dev */
 #define AS5600_N_OUT_GPIO(x) ((x) == 0 ? 6 : \
                                (x) == 1 ? 7 : \
-                               (x) == 2 ? 15 : 0)
+                               (x) == 2 ? 1 : 0)
 
 ///< BNO055 definitions
 #define BNO055_I2C_MASTER_SCL_GPIO 11    /*!< gpio number for I2C master clock */
@@ -76,13 +76,13 @@
                                  (x) == 1 ? 1 : \
                                  (x) == 2 ? 1 : 0)
                                  
-#define MOTOR_N_MCPWM_GPIO(x)   ((x) == 0 ? 16 : \
-                                 (x) == 1 ? 18 : \
-                                 (x) == 2 ? 3 : 0)
+#define MOTOR_N_MCPWM_GPIO(x)   ((x) == 0 ? 17 : \
+                                 (x) == 1 ? 8 : \
+                                 (x) == 2 ? 46 : 0)
 
-#define MOTOR_N_MCPWM_REVERSE_GPIO(x) ((x) == 0 ? 17 : \
-                                       (x) == 1 ? 8 : \
-                                       (x) == 2 ? 46 : 0)
+#define MOTOR_N_MCPWM_REVERSE_GPIO(x) ((x) == 0 ? 18 : \
+                                       (x) == 1 ? 3 : \
+                                       (x) == 2 ? 9 : 0)
 
 ///< System timing definitions
 #define TIME_SAMPLING_S		10		/* 10s sampling data */
@@ -104,9 +104,14 @@
 #define RADIUS_M        0.03
 #define UART_NUM     0 // UART number for the console
 
+///< JSON definitions for the xIMU3 GUI
 #define MAX_JSON_LEN 64
 #define MAX_PARSED_LEN 32
 // #define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
+
+///< Sensor fusion definitions
+#define KALMAN_1D_ENC_Q 0.001f // Process noise covariance for enconders
+#define KALMAN_1D_ENC_R 1.12 // Measurement noise covariance for encoders
 
 // --------------------------------------------------------------------------
 

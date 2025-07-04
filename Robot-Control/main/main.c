@@ -36,6 +36,8 @@ BNO055_t gBNO055;
 
 void app_main(void)
 {   
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
     // if (wifi_sta_init(WIFI_SSID, WIFI_PASS)) {
     //     ESP_LOGI("APP", "Wi-Fi connected successfully");
     // } else {

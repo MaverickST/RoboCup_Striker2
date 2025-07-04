@@ -11,7 +11,9 @@ void init_drivers(void)
         .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
-        .a2 = 0.812, .a1 = - 1.487, .a0 = 0.675, .b2 = 1, .b1 = -2, .b0 = 1,
+        .a2 = 39.95, .a1 = - 77.72, .a0 = 37.77, .b2 = 1, .b1 = -2, .b0 = 1,
+        // .a2 = 19.46, .a1 = - 38.53, .a0 = 19.07, .b2 = 1, .b1 = -2, .b0 = 1,
+        // .a2 = 3.538, .a1 = - 7.012 , .a0 = 3.475, .b2 = 1, .b1 = -2, .b0 = 1,
     };
 
     senfusion_init(&gSenFusion, SAMPLING_PERIOD_S); // 10ms sampling time
@@ -28,10 +30,11 @@ void init_drivers(void)
         bldc_init(&gMotor[i], MOTOR_N_MCPWM_GPIO(i), MOTOR_N_MCPWM_REVERSE_GPIO(i), MOTOR_MCPWM_FREQ_HZ, 1, 
             MOTOR_MCPWM_TIMER_RESOLUTION_HZ, MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY);
 
-        bldc_set_duty(&gMotor[i], MOTOR_PWM_BOTTOM_DUTY); ///< Set the initial duty cycle to 0%
-        bldc_set_duty_motor(&gMotor[i], MOTOR_PWM_BOTTOM_DUTY); ///< Set the initial duty cycle to 0% for the motor
+        bldc_enable(&gMotor[i]);
         // bldc_calibrate(&gMotor[i], MOTOR_PWM_BOTTOM_DUTY, MOTOR_PWM_TOP_DUTY); ///< Calibrate the BLDC motor
+        bldc_set_duty_motor(&gMotor[i], 0); ///< Set the initial duty cycle to 0%
     }
+    vTaskDelay(pdMS_TO_TICKS(3000));
     ESP_LOGI("drivers", "Drivers initialized successfully");
 
 }
@@ -51,6 +54,16 @@ bool setup_as5600(uint32_t num_checks)
         .WD = AS5600_WATCHDOG_OFF, ///< Watchdog off
     };
 
+    // ///< Calibrate the AS5600 sensors
+    // for (int i = 0; i < 1; i++) {
+    //     AS5600_Init(&gAS5600[i], AS5600_I2C_MASTER_NUM, AS5600_I2C_MASTER_SCL_GPIO, AS5600_I2C_MASTER_SDA_GPIO, AS5600_N_OUT_GPIO(i));
+    //     AS5600_Calibrate(&gAS5600[i], conf, 0x000, 0xFFF); ///< Calibrate the AS5600 sensor with the configuration
+    //     if (!gAS5600[i].is_calibrated) {
+    //         wrap_printf("AS5600 sensor %d calibration failed\n", i);
+    //         return false; ///< Return false if calibration fails
+    //     }
+    // }
+
     ///< Initialize the ADC for the AS5600 sensors
     adc_oneshot_unit_handle_t handle;
     if (!adc_create_unit(&handle, AS5600_ADC_UNIT_ID)) {
@@ -65,6 +78,7 @@ bool setup_as5600(uint32_t num_checks)
             continue;
         }
         gAS5600[i].is_calibrated = true;
+        vTaskDelay(pdMS_TO_TICKS(1000));
         gAS5600[i].angle_offset = AS5600_ADC_GetAngle(&gAS5600[i]);
         wrap_printf("AS5600 sensor %d initialized successfully with angle offset: %.2f\n", i, gAS5600[i].angle_offset);
     }
@@ -339,11 +353,17 @@ void motor_identification_all(void)
 
     const int num_motors = 3;
     const int num_samples = TIME_SAMP_MOTOR_S * SAMP_RATE_MOTOR_HZ;
+
+    ///< Kalman filter variables for encoders
+    kalman1D_t kalman_enc[3];
+    for (int i = 0; i < 3; i++) {
+        kalman1D_init(&kalman_enc[i], KALMAN_1D_ENC_Q, KALMAN_1D_ENC_R);
+    }
     
-    ///< Estructura: fila = muestra, columnas = duty, ángulos de motor 1-2-3
+    ///< Structure: row = muestra, columns = duty, velocity (rad/s) of each motor 1-2-3
     typedef struct {
         int duty;
-        float angle[3];  // M1, M2, M3
+        float speed[3];  // M1, M2, M3
     } motor_data_t;
 
     motor_data_t* data = calloc(num_samples, sizeof(motor_data_t));
@@ -400,8 +420,8 @@ void motor_identification_all(void)
                 data[cnt].duty = duty;  // Solo se asigna una vez en la primera ronda
             }
 
-            float angle = AS5600_ADC_GetAngle(as5600) - as5600->angle_offset;
-            data[cnt].angle[motor_index] = angle;
+            float speed = calculate_motor_speed(&kalman_enc[motor_index], motor_index);
+            data[cnt].speed[motor_index] = speed;
         }
 
         ESP_ERROR_CHECK(esp_timer_stop(gSys.timer_bldc));
@@ -410,13 +430,13 @@ void motor_identification_all(void)
 
     ///< Imprimir tabla
     wrap_printf("\n Resultados:\n");
-    wrap_printf("Duty(%%)\tAngle_M1\tAngle_M2\tAngle_M3\n");
+    wrap_printf("Duty(%%)\tASpeed_M1\tSpeed_M2\tSpeed_M3\n");
     for (int i = 0; i < num_samples; i++) {
         wrap_printf("%d\t%.2f\t%.2f\t%.2f\n",
                     data[i].duty,
-                    data[i].angle[0],
-                    data[i].angle[1],
-                    data[i].angle[2]);
+                    data[i].speed[0],
+                    data[i].speed[1],
+                    data[i].speed[2]);
 
         if (i % 100 == 0) {
             vTaskDelay(pdMS_TO_TICKS(100));
@@ -447,7 +467,21 @@ void stop_robot(void)
 {
     for (int i = 0; i < 3; i++) {
         bldc_set_duty_motor(&gMotor[i], 0); ///< Stop the motor
+        control_set_setpoint(&gCtrl[i], 0); ///< Set the setpoint to 0
     }
+}
+
+float calculate_motor_speed(kalman1D_t *kf, int midx)
+{
+    float raw = AS5600_ADC_GetAngle(&gAS5600[midx]) - gAS5600[midx].angle_offset;
+    float delta = raw - gAS5600[midx].angle_prev;
+
+    if      (delta >  M_PI) delta -= 2 * M_PI;
+    else if (delta < -M_PI) delta += 2 * M_PI;
+
+    gAS5600[midx].angle_prev = raw; ///< Update the previous angle    
+
+    return kalman1D_update(kf, delta * SAMP_RATE_MOTOR_HZ);
 }
 
 void wrap_printf(const char *format, ...)
