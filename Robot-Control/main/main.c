@@ -31,18 +31,23 @@ AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
 vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 BNO055_t gBNO055;
 
-#define WIFI_SSID "Jannis"
-#define WIFI_PASS "Krakus3008"
+#define WIFI_SSID "Esp_Test"
+#define WIFI_PASS "12345678"
+esp_ip4_addr_t gIpAddr;
 
 void app_main(void)
 {   
     vTaskDelay(pdMS_TO_TICKS(5000));
 
-    // if (wifi_sta_init(WIFI_SSID, WIFI_PASS)) {
-    //     ESP_LOGI("APP", "Wi-Fi connected successfully");
-    // } else {
-    //     ESP_LOGE("APP", "Wi-Fi connection failed");
-    // }
+    ///< Init wifi
+    wifi_prepare();
+    if (wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
+        ESP_LOGI("APP", "Wi-Fi connected successfully");
+        ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
+        xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
+    } else {
+        ESP_LOGE("APP", "Wi-Fi connection failed");
+    }
     
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
