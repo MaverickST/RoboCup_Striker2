@@ -93,6 +93,21 @@ void senfusion_predict(senfusion_t *senfusion, float u);
 void senfusion_update(senfusion_t *senfusion, float p_enc, float p_lidar, float a_imu, uint32_t k);
 
 /**
+ * @brief Given the velocity body velocity (vbx, vby) and the wheel base (wb), 
+ * this function calculates the inverse kinematics to update the control and sensor fusion structure.
+ * 
+ * [ w1 ]       [  0            -1           d ]     [ v_bx     ]
+ * [ w2 ] = n/r [  cos(delta)   sin(delta)   d ]  *  [ v_by     ]
+ * [ w3 ]       [ -cos(delta)   sin(delta)   d ]     [ omega_b  ]
+ * 
+ * @param senfusion 
+ * @param vbx 
+ * @param vby 
+ * @param wb 
+ */
+void senfusion_calc_invkinematics(senfusion_t *senfusion, float vbx, float vby, float wb);
+
+/**
  * @brief Get the position from the sensor fusion
  * 
  * @param senfusion 
@@ -180,5 +195,38 @@ void backward_substitution(float U[N][N], float y[N], float x[N]);
  * This approach is numerically stable and efficient compared to computing inv(S).
  */
 void solve_LU_system(float A[N][N], float B[M][N], float K[M][N]);
+
+// -------------------------------------------------------------
+// ---------------------- KALMAN FILTER 1D ---------------------
+// -------------------------------------------------------------
+
+/**
+ * @brief Kalman filter 1D structure
+ * 
+ */
+typedef struct {
+    float x;  // estimated value
+    float P;  // estimation error covariance
+    float Q;  // process noise
+    float R;  // measurement noise
+} kalman1D_t;
+
+/**
+ * @brief Initialize the Kalman filter 1D structure
+ * 
+ * @param kf Pointer to the Kalman filter 1D structure
+ * @param Q Process noise covariance
+ * @param R Measurement noise covariance
+ */
+void kalman1D_init(kalman1D_t *kf, float Q, float R);
+
+/**
+ * @brief Update the Kalman filter 1D structure with a new measurement
+ * 
+ * @param kf Pointer to the Kalman filter 1D structure
+ * @param meas Measurement value
+ * @return float Estimated value
+ */
+float kalman1D_update(kalman1D_t *kf, float meas);
 
 #endif // __CONTROL_SENFUSION_H__

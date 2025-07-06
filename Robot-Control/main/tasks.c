@@ -3,7 +3,7 @@
 void create_tasks(void)
 {
     ///< Create a task to handle the UART events
-    xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 1, NULL);
+    xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
 
     ///< Create a task to manage the BNO055 sensor
     xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
@@ -187,45 +187,42 @@ void bldc_control_task(void *pvParameters)
 
     ///< Initialize some variables for the control task
     float duty[3] = {0};
-    float angle[3] = {0}; // in radians [0, 2π]
-    float angle_prev[3] = {0};
     float speed[3] = {0}; // in rad/s
     uint32_t cnt = 0;
+
+    ///< Kalman filter variables for encoders
+    kalman1D_t kalman_enc[3];
+    for (int i = 0; i < 3; i++) {
+        kalman1D_init(&kalman_enc[i], KALMAN_1D_ENC_Q, KALMAN_1D_ENC_R);
+    }
 
     while (true) {
         xSemaphoreTake(gSys.smph_bldc, portMAX_DELAY);
 
         ///< Control variables: get angle and calculate speed
         for (int i = 0; i < 3; i++) {
-            float raw = AS5600_ADC_GetAngle(&gAS5600[i]);
-            float delta = raw - angle_prev[i];
-
-            if      (delta >  M_PI) delta -= 2 * M_PI;
-            else if (delta < -M_PI) delta += 2 * M_PI;
-
-            angle[i] += delta;                         // unwrap directly into angle[i]
-            angle_prev[i] = raw;
-            speed[i] = delta * SAMP_RATE_MOTOR_HZ;
+            speed[i] = calculate_motor_speed(&kalman_enc[i], i);
         }
 
-        ///< Experiment
-        if (cnt%1000 <= 1000) {
-            duty[0] = 8; duty[1] = 8; duty[2] = 8;
-        }else if (cnt%1000 <= 2000) {
-            duty[0] = 16; duty[1] = 16; duty[2] = 16;
-        }else if (cnt%1000 <= 3000) {
-            duty[0] = 24; duty[1] = 24; duty[2] = 24;
-        }else if (cnt%1000 <= 4000) {
-            duty[0] = 32; duty[1] = 32; duty[2] = 32;
-        }else if (cnt%1000 <= 5000) {
-            duty[0] = 50; duty[1] = 50; duty[2] = 50;
-        }
-
-        // ///< Control: calculate the duty cycle for each motor using the PID controller
-        // for (int i = 0; i < 3; i++) {
-        //     ///< Get the duty cycle from the PID controller
-        //     duty[i] = control_calc_pid_z(&gCtrl[i], speed[i]);
+        // ///< Experiment
+        // if (cnt%6000 <= 1000) {
+        //     duty[0] = 8; duty[1] = 8; duty[2] = 8;
+        // }else if (cnt%6000 <= 2000) {
+        //     duty[0] = 10; duty[1] = 10; duty[2] = 10;
+        // }else if (cnt%6000 <= 3000) {
+        //     duty[0] = 15; duty[1] = 15; duty[2] = 15;
+        // }else if (cnt%6000 <= 4000) {
+        //     duty[0] = 20; duty[1] = 20; duty[2] = 20;
+        // }else if (cnt%6000 <= 5000) {
+        //     duty[0] = 25; duty[1] = 25; duty[2] = 25;
         // }
+
+        ///< Get the current setpoints for each motor
+
+        ///< Control: calculate the duty cycle for each motor using the PID controller
+        for (int i = 0; i < 3; i++) {
+            duty[i] = control_calc_pid_z(&gCtrl[i], 1);
+        }
 
         ///< Set the duty cycle of the motors
         xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); 
@@ -236,7 +233,7 @@ void bldc_control_task(void *pvParameters)
 
         ///< Send the data via serial
         wrap_printf("I,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n", cnt*1000,
-                    duty[0], duty[1], duty[2], angle[0], angle[1], angle[2]);
+                    duty[0], duty[1], duty[2], speed[0], speed[1], speed[2]);
         cnt++; ///< Increment the counter
     }
     vTaskDelete(NULL);
