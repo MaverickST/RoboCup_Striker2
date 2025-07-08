@@ -84,5 +84,13 @@ void save_data_task(void *pvParameters);
  */
 void uart_event_task(void *pvParameters);
 
-
+/**
+ * @brief Task to manage the network connection
+ * 
+ * This task is responsible for initializing the Wi-Fi connection and starting the UDP server.
+ * @param pvParameters
+ * 
+ * 
+ */
+void app_network_task(void *pvParameters);
 #endif // TASKS_H

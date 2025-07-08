@@ -32,6 +32,7 @@
 #include "functions.h"
 #include "tasks.h"
 #include "platform_esp32s3.h"
+#include "platform_wifi_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
 #include "VL53L1X.h"
@@ -42,6 +43,15 @@
 // -------------------------------------------------------------------------- 
 // ----------------------------- DEFINITIONS --------------------------------
 // --------------------------------------------------------------------------
+
+
+///< WiFi definitions
+#define WIFI_SSID "Jannis" ///< WiFi SSID
+#define WIFI_PASS "Krakus3008" ///< WiFi Password
+
+// UDP server configuration
+#define UDP_PORT 12345
+#define UDP_RX_BUF_SIZE 128
 
 ///< AS5600 definitions
 #define AS5600_ADC_UNIT_ID  ADC_UNIT_1 ///< ADC unit ID for AS5600 sensors
@@ -188,6 +198,8 @@ static const char* TAG_BNO055_TASK = "bno055_task";
 static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
 static const char* TAG_AS5600_TASK = "as5600_task";
 static const char* TAG_CTRL_TASK = "ctrl_task";
+static const char* TAG_UDP_SERVER = "udp_server";
+
 
 extern bldc_pwm_motor_t gMotor[3]; ///< Array of BLDC motors
 extern control_t gCtrl[3]; ///< Array of control structures
@@ -199,5 +211,5 @@ extern AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
 extern vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 extern BNO055_t gBNO055;
 
-
+extern esp_ip4_addr_t gIpAddr;
 #endif // __TYPES_H__
