@@ -13,8 +13,7 @@
 #include "functions.h"
 #include "tasks.h"
 
-//Test WiFi
-#include "platform_wifi_esp32s3.h"
+
 
 
 // --------------------------------------------------------------------------
@@ -24,6 +23,7 @@
 bldc_pwm_motor_t gMotor[3]; ///< Array of BLDC motors
 control_t gCtrl[3]; ///< Array of control structures
 system_t gSys;
+
 senfusion_t gSenFusion; ///< Sensor fusion structure
 uart_console_t gUc;
 
@@ -31,11 +31,17 @@ AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
 vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 BNO055_t gBNO055;
 
-#define WIFI_SSID "Esp_Test"
-#define WIFI_PASS "12345678"
+
 esp_ip4_addr_t gIpAddr;
 
 void app_main(void)
+<<<<<<< HEAD
+{
+
+    ///<Create the tasks
+    create_tasks();
+    
+=======
 {   
     vTaskDelay(pdMS_TO_TICKS(5000));
 
@@ -48,21 +54,22 @@ void app_main(void)
     } else {
         ESP_LOGE("APP", "Wi-Fi connection failed");
     }
+>>>>>>> 92f2b2870baadd914e93e2cd6f651c451be8b06f
     
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
 
     ///< Kernel objects creation like mutexes, semaphores, and queues
-    if (!create_kernel_objects()){
-        ESP_LOGI("app_main", "Kernel objects not created");
-        return;
-    }
+    //if (!create_kernel_objects()){
+      //  ESP_LOGI("app_main", "Kernel objects not created");
+        //return;
+    //}
 
     ///< Initialize and setup each sensor
-    if (!setup_as5600(100)) { ///< Setup the AS5600 sensor
-        ESP_LOGI("app_main", "AS5600 sensor is not ready");
-        return;
-    }
+    //if (!setup_as5600(100)) { ///< Setup the AS5600 sensor
+      //  ESP_LOGI("app_main", "AS5600 sensor is not ready");
+        //return;
+    //}
 
     // ///< Perform motor identification for all motors
     // motor_identification_all();
