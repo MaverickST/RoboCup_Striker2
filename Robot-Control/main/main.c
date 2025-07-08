@@ -33,16 +33,31 @@ BNO055_t gBNO055;
 
 
 esp_ip4_addr_t gIpAddr;
+
 void app_main(void)
+<<<<<<< HEAD
 {
 
     ///<Create the tasks
     create_tasks();
     
+=======
+{   
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    ///< Init wifi
+    wifi_prepare();
+    if (wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
+        ESP_LOGI("APP", "Wi-Fi connected successfully");
+        ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
+        xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
+    } else {
+        ESP_LOGE("APP", "Wi-Fi connection failed");
+    }
+>>>>>>> 92f2b2870baadd914e93e2cd6f651c451be8b06f
     
-}
     ///< Initialize the drivers: LED, UART, BLDC
-    //init_drivers(); 
+    init_drivers(); 
 
     ///< Kernel objects creation like mutexes, semaphores, and queues
     //if (!create_kernel_objects()){
@@ -78,11 +93,11 @@ void app_main(void)
     //     return;
     // }
     
-    ///< Create the tasks
-    //create_tasks(); 
+    // ///< Create the tasks
+    // create_tasks(); 
 
     // ///< Initialize the system
     // ///< 'System' refers to more general variables and functions that are used to control the project.
     // init_system();
 
-
+}

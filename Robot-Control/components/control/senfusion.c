@@ -252,3 +252,24 @@ void solve_LU_system(float A[N][N], float B[M][N], float X[M][N]) {
         }
     }
 }
+
+void kalman1D_init(kalman1D_t *kf, float Q, float R)
+{
+    kf->x = 0.0f;  // Initial estimated value
+    kf->P = 1.0f;  // Initial estimation error covariance
+    kf->Q = Q;     // Process noise covariance
+    kf->R = R;     // Measurement noise covariance
+}
+
+float kalman1D_update(kalman1D_t *kf, float meas)
+{
+    // Prediction step
+    kf->P += kf->Q;  // Update estimation error covariance
+
+    // Measurement update step
+    float K = kf->P / (kf->P + kf->R);  // Kalman gain
+    kf->x += K * (meas - kf->x);  // Update estimated value
+    kf->P *= (1 - K);  // Update estimation error covariance
+
+    return kf->x;  // Return the estimated value
+}
