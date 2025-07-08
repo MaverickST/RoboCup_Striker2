@@ -4,12 +4,9 @@ void create_tasks(void)
 {   
     ///< Create a task wifi_task to manage the Wi-Fi connection and UDP server maximum priority
     xTaskCreate(app_network_task, "wifi_task", 4*1024, NULL, 15, NULL);
+    
     ///< Create a task to handle the UART events
-<<<<<<< HEAD
-   // xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 1, NULL);
-=======
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
->>>>>>> 92f2b2870baadd914e93e2cd6f651c451be8b06f
 
     ///< Create a task to manage the BNO055 sensor
    // xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
@@ -18,7 +15,7 @@ void create_tasks(void)
     //xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 10, &gSys.task_handle_vl53l1x);
 
     ///< Create the control task
-    //xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
+    xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
     //xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
