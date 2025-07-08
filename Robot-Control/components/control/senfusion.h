@@ -93,21 +93,6 @@ void senfusion_predict(senfusion_t *senfusion, float u);
 void senfusion_update(senfusion_t *senfusion, float p_enc, float p_lidar, float a_imu, uint32_t k);
 
 /**
- * @brief Given the velocity body velocity (vbx, vby) and the wheel base (wb), 
- * this function calculates the inverse kinematics to update the control and sensor fusion structure.
- * 
- * [ w1 ]       [  0            -1           d ]     [ v_bx     ]
- * [ w2 ] = n/r [  cos(delta)   sin(delta)   d ]  *  [ v_by     ]
- * [ w3 ]       [ -cos(delta)   sin(delta)   d ]     [ omega_b  ]
- * 
- * @param senfusion 
- * @param vbx 
- * @param vby 
- * @param wb 
- */
-void senfusion_calc_invkinematics(senfusion_t *senfusion, float vbx, float vby, float wb);
-
-/**
  * @brief Get the position from the sensor fusion
  * 
  * @param senfusion 
@@ -228,5 +213,30 @@ void kalman1D_init(kalman1D_t *kf, float Q, float R);
  * @return float Estimated value
  */
 float kalman1D_update(kalman1D_t *kf, float meas);
+
+///< -------------------------------------------------------------
+///< ------- ROBOT MODEL TRANSFORMATIONS AND FUNTIONS ------------
+///< -------------------------------------------------------------
+
+#define WHEEL_RADIUS 0.03f ///< Wheel radius in meters
+#define DIAMETER 0.18f ///< Robot diameter in meters
+#define DELTA 0.523598  ///< Robot delta angle in radians (1.047198 for 60 degrees) (0.523598 radians for 30 degrees)
+
+/**
+ * @brief Given the velocity body velocity (vbx, vby) and the wheel base (wb), 
+ * this function calculates the inverse kinematics to update the control and sensor fusion structure.
+ * 
+ * [ w1 ]       [ -sin(delta)  -cos(delta)   d ]     [ v_bx     ]
+ * [ w2 ] = n/r [     1            0         d ]  *  [ v_by     ]
+ * [ w3 ]       [ -sin(delta)   cos(delta)   d ]     [ omega_b  ]
+ * 
+ * @param vbx 
+ * @param vby 
+ * @param wb 
+ * @param w1 Pointer to the first wheel speed
+ * @param w2 Pointer to the second wheel speed
+ * @param w3 Pointer to the third wheel speed
+ */
+void calc_invkinematics(float vbx, float vby, float wb, float *w1, float *w2, float *w3);
 
 #endif // __CONTROL_SENFUSION_H__

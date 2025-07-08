@@ -13,8 +13,11 @@ void control_init(control_t *ctrl, float dt, pid_block_t pid)
 }
 
 
-float control_calc_pid(control_t *ctrl, float error)
+float control_calc_pid(control_t *ctrl, float value)
 {
+    
+    float error = ctrl->setpoint - value;
+
     float output = 0;
     /* Add current error to the integral error */
     ctrl->pid.integral_err += error;
@@ -41,30 +44,37 @@ float control_calc_pid(control_t *ctrl, float error)
 float control_calc_pid_z(control_t *ctrl, float value)
 {
     float error = ctrl->setpoint - value;
+    float control = 0.0f;
 
-    float control = (ctrl->pid.a0*ctrl->pid.prev_err2 + ctrl->pid.a1*ctrl->pid.prev_err1 + ctrl->pid.a2*error
-                    -ctrl->pid.b0*ctrl->pid.prev_u2 - ctrl->pid.b1*ctrl->pid.prev_u1)/ctrl->pid.b2;
+    if (ctrl->pid.order == 2)
+    {
+        control = (ctrl->pid.a0 * ctrl->pid.prev_err2 +
+                   ctrl->pid.a1 * ctrl->pid.prev_err1 +
+                   ctrl->pid.a2 * error
+                   - ctrl->pid.b0 * ctrl->pid.prev_u2
+                   - ctrl->pid.b1 * ctrl->pid.prev_u1) / ctrl->pid.b2;
 
-    ///< Update the PID controller state
-    ctrl->pid.prev_err2 = ctrl->pid.prev_err1; // e(k-2) = e(k-1)
-    ctrl->pid.prev_err1 = error; // e(k-1) = e(k)
-    ctrl->pid.prev_u2 = ctrl->pid.prev_u1; // u(k-2) = u(k-1)
-    ctrl->pid.prev_u1 = control; // u(k-1) = u(k)
+        // Update history
+        ctrl->pid.prev_err2 = ctrl->pid.prev_err1;
+        ctrl->pid.prev_err1 = error;
+        ctrl->pid.prev_u2 = ctrl->pid.prev_u1;
+        ctrl->pid.prev_u1 = control;
+    }
+    else if (ctrl->pid.order == 1)
+    {
+        control = (ctrl->pid.a1 * error +
+                   ctrl->pid.a0 * ctrl->pid.prev_err1
+                   - ctrl->pid.b0 * ctrl->pid.prev_u1) / ctrl->pid.b1;
 
-    ///< Limit the control output
+        // Update history
+        ctrl->pid.prev_err1 = error;
+        ctrl->pid.prev_u1 = control;
+    }
+
+    // Clamp control output
     control = MIN(control, ctrl->pid.max_output);
     control = MAX(control, ctrl->pid.min_output);
 
-    return control; ///< Return the control output
+    return control;
 }
 
-
-void control_set_setpoint(control_t *ctrl, float setpoint)
-{
-    ctrl->setpoint = setpoint; ///< Set the setpoint value
-    ctrl->output = 0; ///< Reset the output value
-    ctrl->pid.prev_err1 = 0; ///< Reset the previous error
-    ctrl->pid.prev_err2 = 0; ///< Reset the previous error
-    ctrl->pid.prev_u1 = 0; ///< Reset the previous control output
-    ctrl->pid.prev_u2 = 0; ///< Reset the previous control output
-}
