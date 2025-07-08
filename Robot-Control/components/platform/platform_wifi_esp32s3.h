@@ -18,6 +18,18 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_netif_ip_addr.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "esp_wifi.h"
+#include "esp_netif.h"
+#include "nvs_flash.h"
+#include <string.h>
+#include "functions.h"
+#include <lwip/sockets.h>
+#include <lwip/netdb.h>
+
 
 
 /**
@@ -42,8 +54,6 @@ bool wifi_sta_init(const char *ssid, const char *password, esp_ip4_addr_t *out_i
 void wifi_scan_and_print_networks(void);
 
 
-/* UDP server task */
-void udp_server_task(void *pvParameters);
 
 
 #endif // __HAL_WIFI_ESP32S3__

@@ -1,26 +1,34 @@
 #include "tasks.h"
 
 void create_tasks(void)
-{
+{   
+    ///< Create a task wifi_task to manage the Wi-Fi connection and UDP server maximum priority
+    xTaskCreate(app_network_task, "wifi_task", 4*1024, NULL, 15, NULL);
     ///< Create a task to handle the UART events
+<<<<<<< HEAD
+   // xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 1, NULL);
+=======
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
+>>>>>>> 92f2b2870baadd914e93e2cd6f651c451be8b06f
 
     ///< Create a task to manage the BNO055 sensor
-    xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
+   // xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
 
     ///< Create a task to manage the VL53L1X sensor
-    xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 10, &gSys.task_handle_vl53l1x);
+    //xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 10, &gSys.task_handle_vl53l1x);
 
     ///< Create the control task
-    xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
+    //xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
-    xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
+    //xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
 
     ///< Create the save task
-    xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
+    //xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
 
 }
+
+
 
 bool create_kernel_objects(void)
 {    
@@ -314,5 +322,60 @@ void uart_event_task(void *pvParameters)
             }
         }
     }
+    vTaskDelete(NULL);
+}
+
+void app_network_task(void *pvParameters) {
+    wifi_prepare();
+
+    if (!wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
+        ESP_LOGE("APP", "Wi-Fi connection failed");
+        vTaskDelete(NULL);
+    }
+
+    ESP_LOGI("APP", "Wi-Fi connected successfully");
+    ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
+
+    // ==== Comienza el servidor UDP directamente aquí ====
+    char rx_buffer[UDP_RX_BUF_SIZE];
+    struct sockaddr_in listen_addr = {
+        .sin_addr.s_addr = htonl(INADDR_ANY),
+        .sin_family = AF_INET,
+        .sin_port = htons(UDP_PORT)
+    };
+
+    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+    if (sock < 0) {
+        ESP_LOGE("UDP", "Unable to create socket: errno %d", errno);
+        vTaskDelete(NULL);
+    }
+    ESP_LOGI("UDP", "Socket created");
+
+    if (bind(sock, (struct sockaddr *)&listen_addr, sizeof(listen_addr)) < 0) {
+        ESP_LOGE("UDP", "Socket bind failed: errno %d", errno);
+        close(sock);
+        vTaskDelete(NULL);
+    }
+    ESP_LOGI("UDP", "Socket bound on port %d", UDP_PORT);
+
+    while (true) {
+        struct sockaddr_in source_addr;
+        socklen_t socklen = sizeof(source_addr);
+        int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0,
+                           (struct sockaddr *)&source_addr, &socklen);
+
+        if (len < 0) {
+            ESP_LOGE("UDP", "recvfrom failed: errno %d", errno);
+            break;
+        }
+
+        rx_buffer[len] = 0; // Null-terminate
+        ESP_LOGI("UDP", "Received %d bytes from %s: '%s'",
+                 len, inet_ntoa(source_addr.sin_addr), rx_buffer);
+
+        // Aquí puedes hacer lo que quieras con el mensaje
+    }
+
+    close(sock);
     vTaskDelete(NULL);
 }
