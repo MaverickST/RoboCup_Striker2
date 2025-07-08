@@ -484,6 +484,98 @@ float calculate_motor_speed(kalman1D_t *kf, int midx)
     return kalman1D_update(kf, delta * SAMP_RATE_MOTOR_HZ);
 }
 
+void calculate_motor_setpoints(float *w1, float *w2, float *w3)
+{
+    if (gTraj.ktime >= gTraj.k_duration) {
+        *w1 = 0, *w2 = 0, *w3 = 0;
+        xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); ///< Take the mutex to protect the control variables
+        control_reset_pid(&gCtrl[0]); ///< Reset the controller for motor 1
+        control_reset_pid(&gCtrl[1]); ///< Reset the controller for motor 2
+        control_reset_pid(&gCtrl[2]); ///< Reset the controller for motor 3
+        xSemaphoreGive(gSys.mtx_cntrl); ///< Release the mutex
+        return;
+    }
+    
+    float vbx = 0, vby = 0, wb = 0;
+
+    switch (gTraj.cmd)
+    {
+    case C1_STRAIGHT:
+        vbx = gTraj.speed * cos(gTraj.angle);
+        vby = gTraj.speed * sin(gTraj.angle);
+        wb = 0;
+        calc_invkinematics(vbx, vby, wb, w1, w2, w3);
+        break;
+
+    case C2_ROTATION:
+        vbx = 0;
+        vby = 0;
+        wb = gTraj.omega; ///< Angular velocity for rotation
+        calc_invkinematics(vbx, vby, wb, w1, w2, w3);
+        break;
+
+    case C3_CIRCULAR:
+        vbx = - gTraj.radius * gTraj.omega * sin(gTraj.omega * (float)gTraj.ktime/SAMP_RATE_MOTOR_HZ);
+        vby =   gTraj.radius * gTraj.omega * cos(gTraj.omega * (float)gTraj.ktime/SAMP_RATE_MOTOR_HZ);
+        wb = 0;
+        calc_invkinematics(vbx, vby, wb, w1, w2, w3);
+        break;
+    
+    default:
+        *w1 = 0, *w2 = 0, *w3 = 0; ///< If no command is set, stop the motors
+        break;
+    }
+    gTraj.ktime++;
+}
+
+void calculate_trajectory_params(uint8_t cmd, float angle, float speed, float dist_r, bool dir)
+{
+    gTraj.cmd = cmd; ///< Set the command
+    gTraj.angle = angle; ///< Set the angle
+    gTraj.dir = dir; ///< Set the direction
+
+    switch (cmd)
+    {
+    case 1: ///< C1_STRAIGHT
+        gTraj.cmd = C1_STRAIGHT; ///< Set the command to straight
+        gTraj.speed = speed / 100; ///< Set the speed in m/s
+        gTraj.distance = dist_r / 100; ///< Set the distance in meters
+        gTraj.k_duration = (int)( (dist_r / speed) * SAMP_RATE_MOTOR_HZ); ///< Calculate the duration in samples
+        break;
+
+    case 2: ///< C2_ROTATION
+        gTraj.cmd = C2_ROTATION; ///< Set the command to rotation
+        gTraj.omega = speed;
+        gTraj.k_duration = (int)( (angle / speed) * SAMP_RATE_MOTOR_HZ); ///< Calculate the duration in samples
+        break;
+
+    case 3: ///< C3_CIRCULAR
+        gTraj.cmd = C3_CIRCULAR; ///< Set the command to circular
+        gTraj.speed = speed / 100; 
+        gTraj.radius = dist_r / 100; 
+        gTraj.dir = dir;
+        gTraj.omega = gTraj.speed / gTraj.radius; ///< Calculate the angular velocity
+        gTraj.k_duration = (uint32_t)( (gTraj.angle * gTraj.radius / gTraj.speed) * SAMP_RATE_MOTOR_HZ); ///< Calculate the duration in samples
+        break;
+
+    default:
+        gTraj.cmd = C_NONE;
+        break;
+    }
+    ///< Print the trajectory parameters
+    wrap_printf("Trajectory parameters: cmd: %d, angle: %.2f, speed: %.2f, omega: %.3f, distance: %.2f, radius: %.2f, dir: %d, k_duration: %d\n",
+                gTraj.cmd, gTraj.angle, gTraj.speed, gTraj.omega, gTraj.distance, gTraj.radius, gTraj.dir, gTraj.k_duration);
+    
+    gTraj.ktime = 0; ///< Reset the time counter
+
+    ///< Reset the controllers
+    xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); ///< Take the mutex to protect the control variables
+    for (int i = 0; i < 3; i++) {
+        control_reset_pid(&gCtrl[i]); ///< Reset the controller
+    }
+    xSemaphoreGive(gSys.mtx_cntrl); ///< Release the mutex
+}
+
 void wrap_printf(const char *format, ...)
 {
     va_list args;

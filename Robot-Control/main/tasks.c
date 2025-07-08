@@ -52,6 +52,11 @@ bool create_kernel_objects(void)
         ESP_LOGI("init_system", "Mutex for control not created");
         return false;
     }
+    gSys.mtx_traj = xSemaphoreCreateMutex(); ///< Create a mutex to protect the access to the trajectory variables
+    if (gSys.mtx_traj == NULL) {
+        ESP_LOGI("init_system", "Mutex for trajectory not created");
+        return false;
+    }
     return true; 
 }
 
@@ -184,6 +189,7 @@ void bldc_control_task(void *pvParameters)
     control_set_setpoint(&gCtrl[0], 0);
     control_set_setpoint(&gCtrl[1], 0);
     control_set_setpoint(&gCtrl[2], 0);
+    calculate_trajectory_params(3, M_PI, 30, 50, true); // 120 = 2.0943
 
     ///< Initialize some variables for the control task
     float duty[3] = {0};
@@ -218,22 +224,27 @@ void bldc_control_task(void *pvParameters)
         // }
 
         ///< Get the current setpoints for each motor
+        float w[3] = {0};
+        calculate_motor_setpoints(&w[0], &w[1], &w[2]);
 
         ///< Control: calculate the duty cycle for each motor using the PID controller
-        for (int i = 0; i < 3; i++) {
-            duty[i] = control_calc_pid_z(&gCtrl[i], 1);
-        }
-
-        ///< Set the duty cycle of the motors
         xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); 
         for (int i = 0; i < 3; i++) {
-            bldc_set_duty_motor(&gMotor[i], duty[i]);
+            control_set_setpoint(&gCtrl[i], w[i]); ///< Set the setpoint for each motor
+            duty[i] = control_calc_pid_z(&gCtrl[i], 0);
         }
         xSemaphoreGive(gSys.mtx_cntrl); ///< Give the mutex to protect the access to the control variables
 
+        ///< Set the duty cycle of the motors
+        for (int i = 0; i < 3; i++) {
+            bldc_set_duty_motor(&gMotor[i], duty[i]);
+        }
+
         ///< Send the data via serial
-        wrap_printf("I,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n", cnt*1000,
-                    duty[0], duty[1], duty[2], speed[0], speed[1], speed[2]);
+        if (cnt%100 == 0){
+            wrap_printf("I,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n", cnt*SAMP_RATE_MOTOR_HZ,
+                        duty[0], duty[1], duty[2], w[0], w[1], w[2]);
+        }
         cnt++; ///< Increment the counter
     }
     vTaskDelete(NULL);

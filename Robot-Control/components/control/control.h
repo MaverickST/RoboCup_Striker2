@@ -83,6 +83,25 @@ float control_calc_pid_z(control_t *ctrl, float value);
  * @param ctrl Pointer to the control structure
  * @param setpoint Setpoint value
  */
-void control_set_setpoint(control_t *ctrl, float setpoint);
+static inline void control_set_setpoint(control_t *ctrl, float setpoint)
+{
+    ctrl->setpoint = setpoint; ///< Set the setpoint value
+    ctrl->output = 0; 
+}
+
+/**
+ * @brief Reset the PID controller state
+ * 
+ * @param ctrl 
+ */
+static inline void control_reset_pid(control_t *ctrl)
+{
+    ctrl->pid.prev_err1 = 0; ///< Reset the previous error values
+    ctrl->pid.prev_err2 = 0;
+    ctrl->pid.prev_u1 = 0; ///< Reset the previous output values
+    ctrl->pid.prev_u2 = 0;
+    ctrl->pid.integral_err = 0; ///< Reset the integral error
+    ctrl->pid.last_output = 0; ///< Reset the last output value
+}
 
 #endif // __CONTROL_PID_H__

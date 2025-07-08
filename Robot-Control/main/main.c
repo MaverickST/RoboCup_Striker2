@@ -26,6 +26,7 @@ control_t gCtrl[3]; ///< Array of control structures
 system_t gSys;
 senfusion_t gSenFusion; ///< Sensor fusion structure
 uart_console_t gUc;
+trajectory_t gTraj; ///< Trajectory structure
 
 AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
 vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
@@ -39,15 +40,15 @@ void app_main(void)
 {   
     vTaskDelay(pdMS_TO_TICKS(5000));
 
-    ///< Init wifi
-    wifi_prepare();
-    if (wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
-        ESP_LOGI("APP", "Wi-Fi connected successfully");
-        ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
-        xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
-    } else {
-        ESP_LOGE("APP", "Wi-Fi connection failed");
-    }
+    // ///< Init wifi
+    // wifi_prepare();
+    // if (wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
+    //     ESP_LOGI("APP", "Wi-Fi connected successfully");
+    //     ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
+    //     xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
+    // } else {
+    //     ESP_LOGE("APP", "Wi-Fi connection failed");
+    // }
     
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 

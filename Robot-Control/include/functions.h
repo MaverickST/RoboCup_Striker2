@@ -115,6 +115,25 @@ void stop_robot(void);
 float calculate_motor_speed(kalman1D_t *kf, int midx);
 
 /**
+ * @brief Calculate the setpoints for the motors based on the current time.
+ * 
+ * @param ktime 
+ */
+void calculate_motor_setpoints(float *w1, float *w2, float *w3);
+
+/**
+ * @brief Calculate the trajectory parameters based on the command, angle, speed, distance, and direction.
+ * If a trajectory does not need any parameter, it can be set to 0.
+ * 
+ * @param cmd 1 for straight, 2 for rotation, 3 for circular, 0 for none
+ * @param angle in radians
+ * @param speed it can be cm/s or rad/s depending on the command
+ * @param dist_r it can be the distance in cm for straight or radius in cm for circular
+ * @param dir true for clockwise, false for counter-clockwise
+ */
+void calculate_trajectory_params(uint8_t cmd, float angle, float speed, float dist_r, bool dir);
+
+/**
  * @brief Wrapper function for printf to handle formatted output.
  * 
  * @param format 

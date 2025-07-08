@@ -132,6 +132,10 @@ typedef struct
         SYS_SAMPLING_EXP, ///< The system is running the experiment for the indentification of the BLDC motor
         SYS_SAMPLING_CONTROL, ///< The system is sampling the data for a control command.
         CHECK_SENSORS, ///< Check if the sensors are calibrated
+
+        CTRL_BLDC_C1, ///< Control the BLDC motor with the first command: straight linear movement
+        CTRL_BLDC_C2, ///< Control the BLDC motor with the second command: rotation
+        CTRL_BLDC_C3, ///< Control the BLDC motor with the third command: circular movement
     } STATE;
 
     enum
@@ -159,15 +163,11 @@ typedef struct
     SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
     SemaphoreHandle_t mtx_printf; ///< Mutex to protect the access to the printf function
     SemaphoreHandle_t mtx_cntrl; ///< Mutex to protect the access to the control variables
+    SemaphoreHandle_t mtx_traj; ///< Mutex to protect the access to the trajectory variables
     SemaphoreHandle_t smph_bldc; ///< Semaphore to synchronize the motor identification task
 
-    ///< Values for the sensors
-    float duty; ///< Duty cycle of the BLDC motor
+    ///< Variables for the control of each BLDC motor: setpoint, direction, distance, velocity and time stamp
 
-    ///< Variables for the control of the BLDC motor
-    bool setpoint_dir; ///< Direction of the BLDC motor
-    float setpoint_dist; ///< Setpoint distance for the BLDC motor
-    float setpoint_vel; ///< Setpoint velocity for the BLDC motor
 
     ///< Task handles for the tasks
     TaskHandle_t task_handle_bno055;    ///< Task handle for the BNO055 sensor
@@ -181,6 +181,32 @@ typedef struct
     esp_timer_handle_t timer_bldc;       ///< Timer to control the BLDC motor
 
 }system_t;
+
+
+typedef struct 
+{
+    enum 
+    {
+        C1_STRAIGHT, ///< First command -> straight linear: angle, speed, distance
+        C2_ROTATION, ///< Second command -> rotation: angle, speed
+        C3_CIRCULAR, ///< Third command -> circular movement: angle, speed, radius, direction
+        C_NONE, ///< No command
+    }cmd;
+
+    uint32_t ktime; ///< Actual instant
+    uint32_t k_duration; ///< Duration of the command in milliseconds
+    float omega_sp[3]; ///< Setpoint for the angular velocity of each motor
+    float vbx_sp, vby_sp, wb_sp; ///< Setpoint for the robot body
+
+    ///< Variables needed for each command
+    float angle; ///< Angle of the robot in radians
+    float distance; ///< Distance to move in meters
+    float radius; ///< Radius of the circular movement in meters
+    float speed; ///< Speed of the robot in m/s
+    float omega; ///< Angular velocity of the robot in rad/s
+    bool dir; ///< false: Counter-clockwise, true: Clockwise
+
+}trajectory_t;
 
 
 // --------------------------------------------------------------------------
@@ -199,6 +225,7 @@ extern control_t gCtrl[3]; ///< Array of control structures
 extern system_t gSys;
 extern senfusion_t gSenFusion; ///< Sensor fusion structure
 extern uart_console_t gUc;
+extern trajectory_t gTraj; ///< Trajectory structure
 
 extern AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
 extern vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors

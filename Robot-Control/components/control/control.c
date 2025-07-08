@@ -58,13 +58,3 @@ float control_calc_pid_z(control_t *ctrl, float value)
     return control; ///< Return the control output
 }
 
-
-void control_set_setpoint(control_t *ctrl, float setpoint)
-{
-    ctrl->setpoint = setpoint; ///< Set the setpoint value
-    ctrl->output = 0; ///< Reset the output value
-    ctrl->pid.prev_err1 = 0; ///< Reset the previous error
-    ctrl->pid.prev_err2 = 0; ///< Reset the previous error
-    ctrl->pid.prev_u1 = 0; ///< Reset the previous control output
-    ctrl->pid.prev_u2 = 0; ///< Reset the previous control output
-}
