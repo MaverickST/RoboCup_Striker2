@@ -12,6 +12,9 @@
 #ifndef __CONTROL_PID_H__
 #define __CONTROL_PID_H__
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #define MIN(a,b) ((a)<(b)?(a):(b)) ///< Macro to get the minimum value
 #define MAX(a,b) ((a)>(b)?(a):(b)) ///< Macro to get the maximum value
 
@@ -37,6 +40,8 @@ typedef struct {
     float b2;
     float b1;
     float b0;
+
+    uint8_t order;
 } pid_block_t; ///< PID controller block
 
 /**
@@ -63,10 +68,10 @@ void control_init(control_t *ctrl, float dt, pid_block_t pid);
  * @brief Calculate the PID control value
  * 
  * @param ctrl_senfusion Pointer to the control and sensor fusion structure
- * @param error Error value
+ * @param value Current value to be controlled
  * @return float PID control value
  */
-float control_calc_pid(control_t *ctrl, float error);
+float control_calc_pid(control_t *ctrl, float value);
 
 /**
  * @brief Calculate the PID discrete control value

@@ -4,16 +4,15 @@ void init_drivers(void)
 {
     ///< ---------------- CNTROL + SENFUSION ----------------
     pid_block_t config_pid = {
-        .Kp = 0.8, ///< Proportional gain
-        .Kd = 0.0012, ///< Derivative gain
-        .Ki = 137, ///< Integral gain
+        .Kp = 2.1167, ///< Proportional gain
+        .Ki = 25.0639, ///< Integral gain
+        .Kd = 0, ///< Derivative gain
         .max_output   = 60,
         .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
-        .a2 = 39.95, .a1 = - 77.72, .a0 = 37.77, .b2 = 1, .b1 = -2, .b0 = 1,
-        // .a2 = 19.46, .a1 = - 38.53, .a0 = 19.07, .b2 = 1, .b1 = -2, .b0 = 1,
-        // .a2 = 3.538, .a1 = - 7.012 , .a0 = 3.475, .b2 = 1, .b1 = -2, .b0 = 1,
+        .a1 = 1.53, .a0 = -1.5, .b1 = 1, .b0 = -1,
+        .order = 1,
     };
 
     senfusion_init(&gSenFusion, SAMPLING_PERIOD_S); // 10ms sampling time
@@ -473,7 +472,7 @@ void stop_robot(void)
 
 float calculate_motor_speed(kalman1D_t *kf, int midx)
 {
-    float raw = AS5600_ADC_GetAngle(&gAS5600[midx]) - gAS5600[midx].angle_offset;
+    float raw = gAS5600[midx].angle_offset - AS5600_ADC_GetAngle(&gAS5600[midx]);
     float delta = raw - gAS5600[midx].angle_prev;
 
     if      (delta >  M_PI) delta -= 2 * M_PI;

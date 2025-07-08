@@ -186,10 +186,10 @@ void bldc_control_task(void *pvParameters)
     ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
 
     ///< Initialize the PID controllers for each motor
-    control_set_setpoint(&gCtrl[0], 0);
-    control_set_setpoint(&gCtrl[1], 0);
-    control_set_setpoint(&gCtrl[2], 0);
-    calculate_trajectory_params(3, M_PI, 30, 50, true); // 120 = 2.0943
+    control_set_setpoint(&gCtrl[0], 2);
+    control_set_setpoint(&gCtrl[1], 2);
+    control_set_setpoint(&gCtrl[2], 2);
+    calculate_trajectory_params(1, M_PI/2, 30, 50, true); // 120 = 2.0943
 
     ///< Initialize some variables for the control task
     float duty[3] = {0};
@@ -210,19 +210,6 @@ void bldc_control_task(void *pvParameters)
             speed[i] = calculate_motor_speed(&kalman_enc[i], i);
         }
 
-        // ///< Experiment
-        // if (cnt%6000 <= 1000) {
-        //     duty[0] = 8; duty[1] = 8; duty[2] = 8;
-        // }else if (cnt%6000 <= 2000) {
-        //     duty[0] = 10; duty[1] = 10; duty[2] = 10;
-        // }else if (cnt%6000 <= 3000) {
-        //     duty[0] = 15; duty[1] = 15; duty[2] = 15;
-        // }else if (cnt%6000 <= 4000) {
-        //     duty[0] = 20; duty[1] = 20; duty[2] = 20;
-        // }else if (cnt%6000 <= 5000) {
-        //     duty[0] = 25; duty[1] = 25; duty[2] = 25;
-        // }
-
         ///< Get the current setpoints for each motor
         float w[3] = {0};
         calculate_motor_setpoints(&w[0], &w[1], &w[2]);
@@ -231,19 +218,19 @@ void bldc_control_task(void *pvParameters)
         xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); 
         for (int i = 0; i < 3; i++) {
             control_set_setpoint(&gCtrl[i], w[i]); ///< Set the setpoint for each motor
-            duty[i] = control_calc_pid_z(&gCtrl[i], 0);
+            duty[i] = control_calc_pid_z(&gCtrl[i], speed[i]);
         }
         xSemaphoreGive(gSys.mtx_cntrl); ///< Give the mutex to protect the access to the control variables
 
         ///< Set the duty cycle of the motors
-        for (int i = 0; i < 3; i++) {
+        for (int i = 1; i < 3; i++) {
             bldc_set_duty_motor(&gMotor[i], duty[i]);
         }
 
         ///< Send the data via serial
-        if (cnt%100 == 0){
+        if (cnt%10 == 0){
             wrap_printf("I,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n", cnt*SAMP_RATE_MOTOR_HZ,
-                        duty[0], duty[1], duty[2], w[0], w[1], w[2]);
+                        duty[0], duty[1], duty[2], speed[0], speed[1], speed[2]);
         }
         cnt++; ///< Increment the counter
     }

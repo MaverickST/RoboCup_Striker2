@@ -118,9 +118,9 @@ esp_err_t bldc_set_duty_motor(bldc_pwm_motor_t *motor, float duty)
     }
 
     ///< Checks if reverse is needed
-    float reverse = 30; ///< 40% means not reverse
+    float reverse = 70; ///< 40% means not reverse
     if (duty < 0) {
-        reverse = 70; ///< 70% means reverse
+        reverse = 30; ///< 70% means reverse
         duty = -duty; ///< Set the duty to positive value
     }
 
