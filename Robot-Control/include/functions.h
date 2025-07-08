@@ -134,6 +134,16 @@ void calculate_motor_setpoints(float *w1, float *w2, float *w3);
 void calculate_trajectory_params(uint8_t cmd, float angle, float speed, float dist_r, bool dir);
 
 /**
+ * @brief Parse a command from a string input and update the trajectory structure.
+ * 
+ * @param input 
+ * @param len 
+ * @return true 
+ * @return false 
+ */
+bool parse_command(const char *input, size_t len);
+
+/**
  * @brief Wrapper function for printf to handle formatted output.
  * 
  * @param format 

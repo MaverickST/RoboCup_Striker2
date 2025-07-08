@@ -575,6 +575,106 @@ void calculate_trajectory_params(uint8_t cmd, float angle, float speed, float di
     xSemaphoreGive(gSys.mtx_cntrl); ///< Release the mutex
 }
 
+bool parse_command(const char* input, size_t len)
+{
+    char buffer[128];
+    if (len >= sizeof(buffer)) return false;
+
+    strncpy(buffer, input, len);
+    buffer[len] = '\0';
+
+    char* token = strtok(buffer, ",");
+    if (!token) return false;
+
+    // Local variables to store parsed values
+    float angle = 0.0f;
+    float speed = 0.0f;
+    float dist_or_radius = 0.0f;
+    bool dir = false; // false = CCW, true = CW
+    uint8_t cmd = 0;
+
+    if (strcmp(token, "C1") == 0) 
+    {
+        cmd = 1; // C1_STRAIGHT
+
+        // Angle (degrees)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        angle = atof(token);
+
+        // Speed (cm/s)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        speed = atof(token);
+
+        // Distance (cm)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        dist_or_radius = atof(token);
+
+        printf("C1 -> angle: %.2f deg, speed: %.2f cm/s, distance: %.2f cm\n",
+               angle, speed, dist_or_radius);
+    }
+    else if (strcmp(token, "C2") == 0)
+    {
+        cmd = 2; // C2_ROTATION
+
+        // Angle (degrees)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        angle = atof(token);
+
+        // Speed (rad/s)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        speed = atof(token);
+
+        printf("C2 -> angle: %.2f deg, speed: %.2f rad/s\n",
+               angle, speed);
+    }
+    else if (strcmp(token, "C3") == 0)
+    {
+        cmd = 3; // C3_CIRCULAR
+
+        // Direction
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        if (strcmp(token, "CW") == 0)
+            dir = true;
+        else if (strcmp(token, "CCW") == 0)
+            dir = false;
+        else
+            return false;
+
+        // Radius (cm)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        dist_or_radius = atof(token);
+
+        // Speed (cm/s)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        speed = atof(token);
+
+        // Angle (degrees)
+        token = strtok(NULL, ",");
+        if (!token) return false;
+        angle = atof(token);
+
+        printf("C3 -> direction: %s, radius: %.2f cm, speed: %.2f cm/s, angle: %.2f deg\n",
+               dir ? "CW" : "CCW", dist_or_radius, speed, angle);
+    }
+    else
+    {
+        return false; // Unknown command
+    }
+
+    // Update trajectory parameters
+    calculate_trajectory_params(cmd, angle * M_PI/180, speed, dist_or_radius, dir);
+
+    return true;
+}
+
 void wrap_printf(const char *format, ...)
 {
     va_list args;

@@ -191,9 +191,9 @@ void bldc_control_task(void *pvParameters)
     ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
 
     ///< Initialize the PID controllers for each motor
-    control_set_setpoint(&gCtrl[0], 2);
-    control_set_setpoint(&gCtrl[1], 2);
-    control_set_setpoint(&gCtrl[2], 2);
+    control_set_setpoint(&gCtrl[0], 0);
+    control_set_setpoint(&gCtrl[1], 0);
+    control_set_setpoint(&gCtrl[2], 0);
     calculate_trajectory_params(1, M_PI/2, 30, 50, true); // 120 = 2.0943
 
     ///< Initialize some variables for the control task
@@ -228,7 +228,7 @@ void bldc_control_task(void *pvParameters)
         xSemaphoreGive(gSys.mtx_cntrl); ///< Give the mutex to protect the access to the control variables
 
         ///< Set the duty cycle of the motors
-        for (int i = 1; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             bldc_set_duty_motor(&gMotor[i], duty[i]);
         }
 
@@ -366,11 +366,11 @@ void app_network_task(void *pvParameters) {
             break;
         }
 
-        rx_buffer[len] = 0; // Null-terminate
+        rx_buffer[len] = '\0'; // Null-terminate
         ESP_LOGI("UDP", "Received %d bytes from %s: '%s'",
                  len, inet_ntoa(source_addr.sin_addr), rx_buffer);
 
-        // Aquí puedes hacer lo que quieras con el mensaje
+        parse_command(rx_buffer, len); // Process the received command
     }
 
     close(sock);

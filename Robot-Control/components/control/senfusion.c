@@ -276,7 +276,7 @@ float kalman1D_update(kalman1D_t *kf, float meas)
 
 void calc_invkinematics(float vbx, float vby, float wb, float *w1, float *w2, float *w3)
 {
-    *w1 = (-vbx*sin(DELTA) - vby*cos(DELTA) + DIAMETER*wb) / WHEEL_RADIUS;
-    *w2 = (vbx + DIAMETER * wb) / WHEEL_RADIUS;
-    *w3 = (-vbx*sin(DELTA) + vby*cos(DELTA) + DIAMETER*wb) / WHEEL_RADIUS;
+    *w1 = (-vbx*sin(DELTA) - vby*cos(DELTA) + ROBOT_RADIUS*wb) / WHEEL_RADIUS;
+    *w2 = (vbx + ROBOT_RADIUS * wb) / WHEEL_RADIUS;
+    *w3 = (-vbx*sin(DELTA) + vby*cos(DELTA) + ROBOT_RADIUS*wb) / WHEEL_RADIUS;
 }
