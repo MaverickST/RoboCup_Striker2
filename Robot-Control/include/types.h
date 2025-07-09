@@ -46,8 +46,8 @@
 
 
 ///< WiFi definitions
-#define WIFI_SSID "Jannis" ///< WiFi SSID
-#define WIFI_PASS "Krakus3008" ///< WiFi Password
+#define WIFI_SSID "Howlers - UdeA" ///< WiFi SSID
+#define WIFI_PASS "9876543210" ///< WiFi Password
 
 // UDP server configuration
 #define UDP_PORT 12345
@@ -109,8 +109,8 @@
 #define TIME_SAMP_MOTOR_US  1e6/SAMP_RATE_MOTOR_HZ // 1ms
 #define NUM_SAMP_MOTOR      TIME_SAMP_MOTOR_S*SAMP_RATE_MOTOR_HZ // 10s sampling data
 
-#define RAD_TO_DEG      57.2957795 // Conversion factor from radians to degrees
-#define DEG2RAD         (3.14159265358979323846f / 180.0f)
+#define DEG_TO_RAD(deg) ((deg) * M_PI / 180.0f)
+#define CM_TO_M(cm)     ((cm) / 100.0f)
 #define RADIUS_M        0.03
 #define UART_NUM     0 // UART number for the console
 

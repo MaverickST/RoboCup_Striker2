@@ -4,12 +4,9 @@ void create_tasks(void)
 {   
     ///< Create a task wifi_task to manage the Wi-Fi connection and UDP server maximum priority
     xTaskCreate(app_network_task, "wifi_task", 4*1024, NULL, 15, NULL);
+    
     ///< Create a task to handle the UART events
-<<<<<<< HEAD
-   // xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 1, NULL);
-=======
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
->>>>>>> 92f2b2870baadd914e93e2cd6f651c451be8b06f
 
     ///< Create a task to manage the BNO055 sensor
    // xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
@@ -18,7 +15,7 @@ void create_tasks(void)
     //xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 10, &gSys.task_handle_vl53l1x);
 
     ///< Create the control task
-    //xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
+    xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
     //xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
@@ -194,9 +191,9 @@ void bldc_control_task(void *pvParameters)
     ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.timer_bldc, TIME_SAMP_MOTOR_US));
 
     ///< Initialize the PID controllers for each motor
-    control_set_setpoint(&gCtrl[0], 2);
-    control_set_setpoint(&gCtrl[1], 2);
-    control_set_setpoint(&gCtrl[2], 2);
+    control_set_setpoint(&gCtrl[0], 0);
+    control_set_setpoint(&gCtrl[1], 0);
+    control_set_setpoint(&gCtrl[2], 0);
     calculate_trajectory_params(1, M_PI/2, 30, 50, true); // 120 = 2.0943
 
     ///< Initialize some variables for the control task
@@ -231,7 +228,7 @@ void bldc_control_task(void *pvParameters)
         xSemaphoreGive(gSys.mtx_cntrl); ///< Give the mutex to protect the access to the control variables
 
         ///< Set the duty cycle of the motors
-        for (int i = 1; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             bldc_set_duty_motor(&gMotor[i], duty[i]);
         }
 
@@ -369,11 +366,11 @@ void app_network_task(void *pvParameters) {
             break;
         }
 
-        rx_buffer[len] = 0; // Null-terminate
+        rx_buffer[len] = '\0'; // Null-terminate
         ESP_LOGI("UDP", "Received %d bytes from %s: '%s'",
                  len, inet_ntoa(source_addr.sin_addr), rx_buffer);
 
-        // Aquí puedes hacer lo que quieras con el mensaje
+        parse_command(rx_buffer, len); // Process the received command
     }
 
     close(sock);

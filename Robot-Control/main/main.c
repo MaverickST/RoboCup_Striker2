@@ -32,46 +32,26 @@ AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
 vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 BNO055_t gBNO055;
 
-
 esp_ip4_addr_t gIpAddr;
 
 void app_main(void) 
+{
     vTaskDelay(pdMS_TO_TICKS(5000));
-
-    // ///< Init wifi
-    // wifi_prepare();
-    // if (wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
-    //     ESP_LOGI("APP", "Wi-Fi connected successfully");
-    //     ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
-    //     xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
-    // } else {
-    //     ESP_LOGE("APP", "Wi-Fi connection failed");
-    // }
-
-    ///< Init wifi
-    wifi_prepare();
-    if (wifi_sta_init(WIFI_SSID, WIFI_PASS, &gIpAddr)) {
-        ESP_LOGI("APP", "Wi-Fi connected successfully");
-        ESP_LOGI("APP", "IP Address: " IPSTR, IP2STR(&gIpAddr));
-        xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 5, NULL);
-    } else {
-        ESP_LOGE("APP", "Wi-Fi connection failed");
-    }
     
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
 
     ///< Kernel objects creation like mutexes, semaphores, and queues
-    //if (!create_kernel_objects()){
-      //  ESP_LOGI("app_main", "Kernel objects not created");
-        //return;
-    //}
+    if (!create_kernel_objects()){
+       ESP_LOGI("app_main", "Kernel objects not created");
+        return;
+    }
 
     ///< Initialize and setup each sensor
-    //if (!setup_as5600(100)) { ///< Setup the AS5600 sensor
-      //  ESP_LOGI("app_main", "AS5600 sensor is not ready");
-        //return;
-    //}
+    if (!setup_as5600(100)) { ///< Setup the AS5600 sensor
+       ESP_LOGI("app_main", "AS5600 sensor is not ready");
+        return;
+    }
 
     // ///< Perform motor identification for all motors
     // motor_identification_all();
@@ -95,8 +75,8 @@ void app_main(void)
     //     return;
     // }
     
-    // ///< Create the tasks
-    // create_tasks(); 
+    ///< Create the tasks
+    create_tasks(); 
 
     // ///< Initialize the system
     // ///< 'System' refers to more general variables and functions that are used to control the project.

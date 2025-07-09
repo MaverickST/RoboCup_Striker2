@@ -219,7 +219,7 @@ float kalman1D_update(kalman1D_t *kf, float meas);
 ///< -------------------------------------------------------------
 
 #define WHEEL_RADIUS 0.03f ///< Wheel radius in meters
-#define DIAMETER 0.18f ///< Robot diameter in meters
+#define ROBOT_RADIUS 0.16f ///< Robot diameter in meters
 #define DELTA 0.523598  ///< Robot delta angle in radians (1.047198 for 60 degrees) (0.523598 radians for 30 degrees)
 
 /**
