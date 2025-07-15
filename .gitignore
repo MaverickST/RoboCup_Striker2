@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+**/.vscode/
+**/.devcontainer/
+**/build/
+**/sdkconfig.old
+**/*doxygen*/
+*doxygen*
+
 # User-specific files
 *.rsuser
 *.suo
