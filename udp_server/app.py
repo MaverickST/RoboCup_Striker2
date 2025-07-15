@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # UDP Configuration
 # Replace with your actual UDP server IP and port
-UDP_IP = "192.168.20.7"  
+UDP_IP = "10.0.0.107"  #192.168.20.7
 UDP_PORT = 12345           
 
 @app.route('/')
