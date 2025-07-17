@@ -10,8 +10,8 @@
  * \copyright   Unlicensed
  */
 
-#ifndef __CONTROL_SENFUSION_H__
-#define __CONTROL_SENFUSION_H__
+#ifndef __SENFUSION_H__
+#define __SENFUSION_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -23,95 +23,66 @@
 #define MAX(a,b) ((a)>(b)?(a):(b)) ///< Macro to get the maximum value
 
 /**
- * @brief Sensor Fusion structure
- * 
+ * Configuration struct for initializing the sensor fusion filter.
+ * This filter estimates a single variable using two noisy measurements.
  */
-typedef struct
-{
-    float x_pred[2][1]; ///< Predicted state vector
-    float P_pred[2][2]; ///< Predicted error covariance matrix
-    float x[2][1]; ///< State vector
+typedef struct {
+    float A;    ///< State transition coefficient (e.g. 1.0)
+    float B;    ///< Input coefficient (e.g. dt if input is a·dt, or 0)
+    float Q;    ///< Process noise variance
+    float R1;   ///< Measurement noise variance of sensor 1 (wheel)
+    float R2;   ///< Measurement noise variance of sensor 2 (IMU)
+} senfusion_config_t;
 
-    float a_imu; ///< IMU acceleration
-    float v_imu_prev; ///< IMU velocity
-    float p_enc; ///< Encoder position
-    float p_lidar; ///< Lidar position
-
-    float p_ref[2]; ///< Reference position
-    uint32_t k; ///< Sample time
-    float dt; ///< Time step
-
-    ///< Kalman filter Variables
-    float P[2][2]; ///< Error covariance matrix
-    float Q[2][2]; ///< Process noise covariance matrix
-    float R[3][3]; ///< Measurement noise covariance matrix
-
-    ///< Process model
-    /**
-     * @brief Process model: x(k+1) = A*x(k) + B*u(k)
-     * State vector: x = [x, y]
-    */
-    float u; ///< Control input
-    float A[2][2]; ///< Process model matrix
-    float B[2][1]; ///< Control input matrix
-    float C[2][2]; ///< Process model matrix
-
-    ///< Measurement model
-    /**
-     * @brief Measurement model: z(k) = H*x(k) + v(k)
-     * Measurement vector: z = [p_enc, p_lidar, v_imu]
-    */
-    float z[3][1]; ///< Measurement vector
-    float H[3][2]; ///< Measurement matrix
-    float H_T[2][3]; ///< Transpose of the measurement matrix
-
-    float pos;
-    float vel; ///< Velocity
-
+/**
+ * Internal state of the sensor fusion filter.
+ */
+typedef struct {
+    float x;    ///< Estimated state
+    float P;    ///< Estimate variance
+    float A, B; ///< Model coefficients
+    float Q;    ///< Process noise variance
+    float R1;   ///< Var(sensor1)
+    float R2;   ///< Var(sensor2)
 } senfusion_t;
 
 /**
- * @brief Initialize the control and sensor fusion structure
- * 
- * @param senfusion Pointer to the control and sensor fusion structure
+ * @brief   Initialize the 1D fusion filter.
+ * @param   f   Pointer to filter state
+ * @param   cfg Pointer to configuration
  */
-void senfusion_init(senfusion_t *senfusion, float dt);
+void senfusion_init(senfusion_t *f, const senfusion_config_t *cfg);
 
 /**
- * @brief Predict the next state of the system
- * 
- * @param senfusion Pointer to the control and sensor fusion structure
- * @param u Control input
+ * @brief   Predict step: propagate state with control/input.
+ * @param   f   Pointer to filter state
+ * @param   u   Control input (e.g. a·dt, or 0 if unused)
  */
-void senfusion_predict(senfusion_t *senfusion, float u);
+void senfusion_predict(senfusion_t *f, float u);
 
 /**
- * @brief Update the control and sensor fusion structure
- * 
- * @param senfusion Pointer to the control and sensor fusion structure
+ * @brief   Sequentially fuse two scalar measurements into one state.
+ * @param   f   Pointer to filter state
+ * @param   z1  First measurement (e.g. wheel velocity)
  */
-void senfusion_update(senfusion_t *senfusion, float p_enc, float p_lidar, float a_imu, uint32_t k);
+void senfusion_update1(senfusion_t *f, float z1);
 
 /**
- * @brief Get the position from the sensor fusion
+ * @brief   Sequentially fuse two scalar measurements into one state.
+ * @param   f   Pointer to filter state
+ * @param   z2  Second measurement (e.g. IMU-derived velocity)
+ */
+void senfusion_update2(senfusion_t *f, float z2);
+
+/**
+ * @brief Get the current estimated value from the sensor fusion filter.
  * 
  * @param senfusion 
  * @return float 
  */
-static inline float senfusion_get_pos(senfusion_t *senfusion)
+static inline float senfusion_get_state(senfusion_t *senfusion)
 {
-    return senfusion->x[0][0]; ///< Get the position from the sensor fusion
-}
-
-/**
- * @brief Get the velocity from the sensor fusion
- * 
- * @param senfusion 
- * @return float 
- */
-static inline float senfusion_get_vel(senfusion_t *senfusion)
-{
-    return senfusion->x[1][0]; ///< Get the velocity from the sensor fusion
+    return senfusion->x;
 }
 
 ///<-------------------------------------------------------------
@@ -239,4 +210,4 @@ float kalman1D_update(kalman1D_t *kf, float meas);
  */
 void calc_invkinematics(float vbx, float vby, float wb, float *w1, float *w2, float *w3);
 
-#endif // __CONTROL_SENFUSION_H__
+#endif // __ENFUSION_H__
