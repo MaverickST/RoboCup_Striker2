@@ -35,7 +35,6 @@
 #include "platform_wifi_esp32s3.h"
 #include "bldc_pwm.h"
 #include "as5600_lib.h"
-#include "VL53L1X.h"
 #include "bno055.h"
 #include "senfusion.h"
 #include "control.h"
@@ -99,7 +98,7 @@
 #define SAMPLING_RATE_HZ	100 	/* 10ms between each data saved */
 #define SAMPLING_PERIOD_S        1.0/SAMPLING_RATE_HZ // 10ms
 #define NUM_SAMPLES			TIME_SAMPLING_S*SAMPLING_RATE_HZ
-#define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 1ms
+#define TIME_SAMPLING_US    1e6/SAMPLING_RATE_HZ // 10ms
 #define NUM_SAMPLES_CONTROL        5*SAMPLING_RATE_HZ /* 5s sampling data */
 
 ///< Motor control timing definitions
@@ -122,6 +121,9 @@
 ///< Sensor fusion definitions
 #define KALMAN_1D_ENC_Q 0.001f // Process noise covariance for enconders
 #define KALMAN_1D_ENC_R 1.12 // Measurement noise covariance for encoders
+
+#define KALMAN_1D_BNO055_Q 0.001f // Process noise covariance for BNO055
+#define KALMAN_1D_BNO055_R 0.04f // Measurement noise covariance for BNO055
 
 // --------------------------------------------------------------------------
 
@@ -168,7 +170,6 @@ typedef struct
     // int8_t buffer[1*SAMPLING_RATE_HZ][5*4];
 
     gpio_t rst_pin; ///< GPIO pin for the reset of the ESP32S3
-    uint16_t raw_angle; ///< Raw angle readed from the AS5600 sensor
     QueueHandle_t queue; ///< Queue to send the data to the save task
     SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
     SemaphoreHandle_t mtx_printf; ///< Mutex to protect the access to the printf function
@@ -181,10 +182,8 @@ typedef struct
 
     ///< Task handles for the tasks
     TaskHandle_t task_handle_bno055;    ///< Task handle for the BNO055 sensor
-    TaskHandle_t task_handle_vl53l1x;   ///< Task handle for the VL53L1X sensor
     TaskHandle_t task_handle_bldc_ctrl;      ///< Task handle for the control task
     TaskHandle_t task_handle_robot_ctrl;      ///< Task handle for the robot control task
-    TaskHandle_t task_handle_trigger;    ///< Task handle for the trigger task
     TaskHandle_t task_handle_save;      ///< Task handle for the save task
 
     esp_timer_handle_t oneshot_timer;    ///< Timer to control the system
@@ -226,7 +225,6 @@ typedef struct
 static const char* TAG_UART_TASK = "uart_task";
 static const char* TAG_CMD = "cmd";
 static const char* TAG_BNO055_TASK = "bno055_task";
-static const char* TAG_VL53L1X_TASK = "vl53l1x_task";
 static const char* TAG_AS5600_TASK = "as5600_task";
 static const char* TAG_CTRL_TASK = "ctrl_task";
 static const char* TAG_UDP_SERVER = "udp_server";
@@ -235,12 +233,9 @@ static const char* TAG_UDP_SERVER = "udp_server";
 extern bldc_pwm_motor_t gMotor[3]; ///< Array of BLDC motors
 extern control_t gCtrl[3]; ///< Array of control structures
 extern system_t gSys;
-extern senfusion_t gSenFusion; ///< Sensor fusion structure
 extern uart_console_t gUc;
-extern trajectory_t gTraj; ///< Trajectory structure
 
 extern AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
-extern vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 extern BNO055_t gBNO055;
 
 extern esp_ip4_addr_t gIpAddr;

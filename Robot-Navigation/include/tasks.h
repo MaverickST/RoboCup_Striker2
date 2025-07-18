@@ -28,13 +28,6 @@ void create_tasks(void);
 bool create_kernel_objects(void);
 
 /**
- * @brief Task to trigger the flow of the tasks
- * 
- * @param pvParameters 
- */
-void trigger_task(void *pvParameters);
-
-/**
  * @brief Task to manage the BNO055 sensor
  * 
  * @param pvParameters 
@@ -42,25 +35,11 @@ void trigger_task(void *pvParameters);
 void bno055_task(void *pvParameters);
 
 /**
- * @brief Task to manage the VL53L1X sensor
- * 
- * @param pvParameters 
- */
-void vl53l1x_task(void *pvParameters);
-
-/**
- * @brief Task to manage the AS5600 sensor
- * 
- * @param pvParameters 
- */
-void as5600_task(void *pvParameters);
-
-/**
  * @brief Task to control the BLDC motor
  * 
  * @param pvParameters 
  */
-void control_task(void *pvParameters);
+void robot_control_task(void *pvParameters);
 
 /**
  * @brief Task for the control of each BLDC motor. 

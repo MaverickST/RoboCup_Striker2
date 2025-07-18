@@ -9,16 +9,13 @@ void create_tasks(void)
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
 
     ///< Create a task to manage the BNO055 sensor
-   // xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
-
-    ///< Create a task to manage the VL53L1X sensor
-    //xTaskCreate(vl53l1x_task, "vl53l1x_task", 4*1024, NULL, 10, &gSys.task_handle_vl53l1x);
+    xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
 
     ///< Create the control task
-    xTaskCreate(bldc_control_task, "control_bldc_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
+    xTaskCreate(bldc_control_task, "bldc_control_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
-    //xTaskCreate(trigger_task, "trigger_task", 3*1024, NULL, 11, &gSys.task_handle_trigger);
+    xTaskCreate(robot_control_task, "robot_control_task", 8*1024, NULL, 11, &gSys.task_handle_robot_ctrl);
 
     ///< Create the save task
     //xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
@@ -65,23 +62,14 @@ bool create_kernel_objects(void)
     return true; 
 }
 
-void trigger_task(void *pvParameters)
-{
-    while (true) {
-        ///< Wait for the notification from the timer
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-        // Notify the each sensor task to read the data from the sensor
-        xTaskNotifyGive(gSys.task_handle_bno055);
-        xTaskNotifyGive(gSys.task_handle_vl53l1x);
-    }
-    vTaskDelete(NULL);
-}
-
 void bno055_task(void *pvParameters)
 {
     float ax, ay;
-    float acce_prev = 0;
+    float ax_prev = 0, ay_prev = 0;
+
+    ///< Create kalman filter for the BNO055 sensor
+    kalman1D_t kf_bno055;
+    kalman1D_init(&kf_bno055, KALMAN_1D_BNO055_Q, KALMAN_1D_BNO055_R);
 
     while (true) {
         ///< Wait for the notification from the timer
@@ -90,22 +78,20 @@ void bno055_task(void *pvParameters)
       
         ///< Read All data from BNO055 sensor
         if (BNO055_ReadAll(&gBNO055)) { // error reading data 
-            acceleration = acce_prev; ///< Set the acceleration to the previous value  
+            ax = ax_prev;
+            ay = ay_prev;
 
         }else {
             ///< Data from the BNO055 sensor
-            ///< acceleration m/s^2 in x, y, z axis
-            ax = gBNO055.ax;
-            ay = gBNO055.ay;
-
-            ///< From ax and ay we can calculate the accelation in the plane
-            acceleration = sqrt(ax*ax + ay*ay);
-            float dir = atan2(ay, ax); ///< Get the direction of the acceleration in radians
+            ax = kalman1D_update(&kf_bno055, gBNO055.ax);
+            ay = kalman1D_update(&kf_bno055, gBNO055.ay);
 
             ///< Update
-            acce_prev = acceleration;
+            ax = gBNO055.ax;
+            ay = gBNO055.ay;
         }
-        gBNO055.accel = acceleration;
+        gBNO055.ax = ax;
+        gBNO055.ay = ay;
 
         ///< Notify the control task to process the data
         xTaskNotifyGiveIndexed(gSys.task_handle_robot_ctrl, 1); ///< Notify the control task to process the data
@@ -113,64 +99,14 @@ void bno055_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void vl53l1x_task(void *pvParameters)
-{
-    ///< Distances in mm for each lidar
-    uint16_t dist_mm[3] = {0};
-    uint16_t prev_dist_mm[3] = {0}; ///< Distance in mm for the VL53L1X sensor
-    while (true) {
-        ///< Wait for the notification from the timer
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        
-        ///< Read the distance from the VL53L1X sensors
-        for (int i = 0; i < 3; i++) {
-            if (VL53L1X_dataReady(&gVL53L1X[i])) { ///< Check if the data is ready
-                dist_mm[i] = VL53L1X_readDistance(&gVL53L1X[i], false); ///< Read the distance in mm
-            } else {
-                dist_mm[i] = prev_dist_mm[i]; ///< If the data is not ready, use the previous value
-            }
-        }
-
-        ///< Notify the control task to process the data
-        xTaskNotifyGiveIndexed(gSys.task_handle_robot_ctrl, 2);
-    }
-    vTaskDelete(NULL);
-}
-
-void control_task(void *pvParameters)
+void robot_control_task(void *pvParameters)
 {
     float pos_prev = 0; ///< Previous position
     float vel_prev = 0; ///< Previous velocity
 
     while (true) {
         ///< Wait for the notification from all task sensors. configTASK_NOTIFICATION_ARRAY_ENTRIES
-        ulTaskNotifyTakeIndexed(1, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the BNO055 task
-        ulTaskNotifyTakeIndexed(2, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the VL53L1X task
-        ulTaskNotifyTakeIndexed(3, pdFALSE, portMAX_DELAY); ///< Wait for the notification from the AS5600 task
-
-        ///< Process the data from the sensors and control the BLDC motor
-        if (gSys.STATE == SYS_SAMPLING_EXP) {
-        }
-
-        ///< Safety check to stop the robot if the distance is less than 10cm
-        if (gVL53L1X[0].dist_mm < 100 || gVL53L1X[1].dist_mm < 100 || gVL53L1X[2].dist_mm < 100) {
-            stop_robot();
-            esp_timer_stop(gSys.oneshot_timer); ///< Stop the timer to stop the sampling
-            gSys.STATE = NONE;
-            printf("Safety check triggered. Position: %.2f m, Velocity: %.2f m/s\n", gSenFusion.pos, gSenFusion.vel);
-        }
-
-        ///< Calculate the PID control if the system is in the control state
-        if (gSys.STATE == SYS_SAMPLING_CONTROL) {
-        }
-
-        ///< Send the sensor data to the queue
-        if (gSys.cnt_sample <= 10*SAMPLING_RATE_HZ) {
-            uint8_t length = snprintf(NULL, 0, "%.4f\t \n", gBNO055.accel); 
-            char str[length + 1];
-            snprintf(str, length + 1, "%.4f\t \n", gBNO055.accel);
-            xQueueSendToBack(gSys.queue, (void *)str, (TickType_t)0); ///< Send the data to the queue to be processed by the save task
-        }
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         if (gSys.STATE == NONE) stop_robot();
     }
@@ -194,7 +130,6 @@ void bldc_control_task(void *pvParameters)
     control_set_setpoint(&gCtrl[0], 0);
     control_set_setpoint(&gCtrl[1], 0);
     control_set_setpoint(&gCtrl[2], 0);
-    calculate_trajectory_params(1, M_PI/2, 30, 50, true); // 120 = 2.0943
 
     ///< Initialize some variables for the control task
     float duty[3] = {0};
@@ -217,7 +152,7 @@ void bldc_control_task(void *pvParameters)
 
         ///< Get the current setpoints for each motor
         float w[3] = {0};
-        calculate_motor_setpoints(&w[0], &w[1], &w[2]);
+        // calculate_motor_setpoints(&w[0], &w[1], &w[2]);
 
         ///< Control: calculate the duty cycle for each motor using the PID controller
         xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); 
@@ -370,7 +305,7 @@ void app_network_task(void *pvParameters) {
         ESP_LOGI("UDP", "Received %d bytes from %s: '%s'",
                  len, inet_ntoa(source_addr.sin_addr), rx_buffer);
 
-        parse_command(rx_buffer, len); // Process the received command
+        // parse_command(rx_buffer, len); // Process the received command
     }
 
     close(sock);
