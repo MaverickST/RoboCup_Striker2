@@ -3,7 +3,7 @@
 void create_tasks(void)
 {   
     ///< Create a task wifi_task to manage the Wi-Fi connection and UDP server maximum priority
-    xTaskCreate(app_network_task, "wifi_task", 4*1024, NULL, 15, NULL);
+    xTaskCreate(app_network_task, "wifi_task", 10*1024, NULL, 24, NULL);
     
     ///< Create a task to handle the UART events
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
@@ -12,10 +12,10 @@ void create_tasks(void)
     xTaskCreate(bno055_task, "bno055_task", 4*1024, NULL, 9, &gSys.task_handle_bno055);
 
     ///< Create the control task
-    xTaskCreate(bldc_control_task, "bldc_control_task", 8*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
+    xTaskCreate(bldc_control_task, "bldc_control_task", 6*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
-    xTaskCreate(robot_control_task, "robot_control_task", 8*1024, NULL, 11, &gSys.task_handle_robot_ctrl);
+    xTaskCreate(robot_control_task, "robot_control_task", 6*1024, NULL, 11, &gSys.task_handle_robot_ctrl);
 
     ///< Create the save task
     //xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);

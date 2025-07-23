@@ -55,11 +55,12 @@ void app_main(void)
     // ///< Perform motor identification for all motors
     // motor_identification_all();
 
-    // while (!setup_bno055(100)) { ///< Setup the BNO055 sensor
-    //     ESP_LOGI("app_main", "BNO055 sensor is not ready. Resetting...");
-    //     BNO055_Reset(&gBNO055); ///< Reset the BNO055 sensor
-    //     vTaskDelay(pdMS_TO_TICKS(1000)); ///< Wait 1 second before retrying
-    // }
+    ///< Initialize the IMU sensor
+    while (!setup_bno055(100)) { ///< Setup the BNO055 sensor
+        ESP_LOGI("app_main", "BNO055 sensor is not ready. Resetting...");
+        BNO055_Reset(&gBNO055); ///< Reset the BNO055 sensor
+        vTaskDelay(pdMS_TO_TICKS(1000)); ///< Wait 1 second before retrying
+    }
 
     // ///< Verify the sensors together
     // if (verify_sensors(100)) { 
