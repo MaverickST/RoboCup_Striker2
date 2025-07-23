@@ -191,3 +191,55 @@ void calc_invkinematics(float vbx, float vby, float wb, float *w1, float *w2, fl
     *w2 = (vbx + ROBOT_RADIUS * wb) / WHEEL_RADIUS;
     *w3 = (-vbx*sin(DELTA) + vby*cos(DELTA) + ROBOT_RADIUS*wb) / WHEEL_RADIUS;
 }
+
+void calc_fordwkinematics(float w1, float w2, float w3, float *vbx, float *vby, float *wb)
+{
+    // Precompute trigonometric terms
+    float s = sinf(DELTA);
+    float c = cosf(DELTA);
+    float denom_xy = 2.0f * (1.0f + s);
+
+    // Linear velocity in body x-direction
+    *vbx = WHEEL_RADIUS * (-w1 + 2.0f * w2 - w3) / denom_xy;
+
+    // Linear velocity in body y-direction
+    *vby = WHEEL_RADIUS * (-w1 + w3) / (2.0f * c);
+
+    // Angular velocity about body center (positive CCW)
+    *wb  = WHEEL_RADIUS * (w1 + 2.0f * s * w2 + w3) / (2.0f * ROBOT_RADIUS * (1.0f + s));
+}
+
+void test_forward_kinematics(int num_tests)
+{
+    srand((unsigned)time(NULL));
+    int failures = 0;
+
+    for (int i = 0; i < num_tests; ++i) {
+        // Random velocities in some suitable range, e.g. [-1, 1]
+        float vbx = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+        float vby = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+        float wb  = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+
+        float w1, w2, w3;
+        calc_invkinematics(vbx, vby, wb, &w1, &w2, &w3);
+
+        float vbx_r, vby_r, wb_r;
+        calc_fordwkinematics(w1, w2, w3, &vbx_r, &vby_r, &wb_r);
+
+        if (fabsf(vbx - vbx_r) > TOLERANCE ||
+            fabsf(vby - vby_r) > TOLERANCE ||
+            fabsf(wb  - wb_r) > TOLERANCE) {
+            failures++;
+            printf("Test %d failed:\n"
+                   "  Original: vbx=%.6f, vby=%.6f, wb=%.6f\n"
+                   "  Recovered: vbx=%.6f, vby=%.6f, wb=%.6f\n",
+                   i, vbx, vby, wb, vbx_r, vby_r, wb_r);
+        }
+    }
+
+    if (failures == 0) {
+        printf("All %d forward-kinematics tests passed.\n", num_tests);
+    } else {
+        printf("%d out of %d tests failed.\n", failures, num_tests);
+    }
+}

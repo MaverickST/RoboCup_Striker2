@@ -105,7 +105,7 @@ void robot_control_task(void *pvParameters)
     float vel_prev = 0; ///< Previous velocity
 
     while (true) {
-        ///< Wait for the notification from all task sensors. configTASK_NOTIFICATION_ARRAY_ENTRIES
+        ///< Wait for the notification from the timer
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         if (gSys.STATE == NONE) stop_robot();

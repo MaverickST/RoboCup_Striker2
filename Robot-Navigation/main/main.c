@@ -61,15 +61,6 @@ void app_main(void)
         BNO055_Reset(&gBNO055); ///< Reset the BNO055 sensor
         vTaskDelay(pdMS_TO_TICKS(1000)); ///< Wait 1 second before retrying
     }
-
-    // ///< Verify the sensors together
-    // if (verify_sensors(100)) { 
-    //     ESP_LOGI("app_main", "Sensors are ready");
-    // }
-    // else {
-    //     ESP_LOGI("app_main", "Sensors are not ready");
-    //     return;
-    // }
     
     ///< Create the tasks
     create_tasks(); 

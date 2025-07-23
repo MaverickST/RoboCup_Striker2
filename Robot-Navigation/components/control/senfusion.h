@@ -188,10 +188,24 @@ float kalman1D_update(kalman1D_t *kf, float meas);
 ///< -------------------------------------------------------------
 ///< ------- ROBOT MODEL TRANSFORMATIONS AND FUNTIONS ------------
 ///< -------------------------------------------------------------
+#include <time.h>
+
+/**
+ * This module provides functions to convert between body-frame velocities
+ * (vbx, vby, wb) and individual wheel angular velocities (w1, w2, w3),
+ * along with a test routine to validate the forward kinematics inversion.
+ *
+ * Coordinate conventions:
+ *  - vbx: linear velocity along the robot's x-axis (forward)
+ *  - vby: linear velocity along the robot's y-axis (sideways)
+ *  - wb:  angular velocity about the robot's center (positive CCW)
+ *  - wi:  angular velocity of wheel i (positive CW rotation)
+ */
 
 #define WHEEL_RADIUS 0.03f ///< Wheel radius in meters
 #define ROBOT_RADIUS 0.16f ///< Robot diameter in meters
 #define DELTA 0.523598  ///< Robot delta angle in radians (1.047198 for 60 degrees) (0.523598 radians for 30 degrees)
+#define TOLERANCE 1e-5f
 
 /**
  * @brief Given the velocity body velocity (vbx, vby) and the wheel base (wb), 
@@ -209,5 +223,38 @@ float kalman1D_update(kalman1D_t *kf, float meas);
  * @param w3 Pointer to the third wheel speed
  */
 void calc_invkinematics(float vbx, float vby, float wb, float *w1, float *w2, float *w3);
+
+/**
+ * @brief Compute forward kinematics: wheel speeds to body velocities.
+ *
+ * This function inverts the inverse-kinematics mapping to recover the robot's
+ * body-frame linear and angular velocities from the three wheel angular speeds.
+ *
+ * The derivation uses the inverse of the 3x3 matrix relating [vbx, vby, wb]^T
+ * to [w1, w2, w3]^T, scaled by the wheel radius.
+ *
+ * Mathematical expressions:
+ *   vbx = r * (-w1 + 2*w2 - w3) / (2*(1 + sin(δ)))
+ *   vby = r * (-w1 + w3) / (2*cos(δ))
+ *   wb  = r * (w1 + 2*sin(δ)*w2 + w3) / (2*R*(1 + sin(δ)))
+ *
+ * @param w1    Angular velocity of wheel 1.
+ * @param w2    Angular velocity of wheel 2.
+ * @param w3    Angular velocity of wheel 3.
+ * @param vbx   Pointer to store resulting linear velocity in x-direction.
+ * @param vby   Pointer to store resulting linear velocity in y-direction.
+ * @param wb    Pointer to store resulting angular velocity about robot center.
+ */
+void calc_fordwkinematics(float w1, float w2, float w3, float *vbx, float *vby, float *wb);
+
+/**
+ * @brief Test forward kinematics by round-trip inversion.
+ *
+ * Generates random body velocities, computes wheel speeds via inverse kinematics,
+ * then recovers body velocities via forward kinematics and verifies accuracy.
+ *
+ * @param num_tests Number of random trials to perform.
+ */
+void test_forward_kinematics(int num_tests);
 
 #endif // __ENFUSION_H__
