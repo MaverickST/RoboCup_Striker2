@@ -1,3 +1,4 @@
+from app import *
 import math
 
 # Define the value of the external macro
@@ -47,29 +48,37 @@ def check_distances(omni_robot, obstacles, ball):
 def Obstacle_Avoidance_Control(omni_robot, obj_obstacle):
     """
     Prototype function for obstacle avoidance control.
-    Returns: VbX, VbY, Vomega (velocities in the robot's body frame)
+    Returns: [VbX, VbY, Vomega] (velocities in the robot's body frame)
     """
     # Obstacle avoidance logic here
     VbX = 0.0
     VbY = 0.0
     Vomega = 0.0
-    return VbX, VbY, Vomega
+    return [VbX, VbY, Vomega]
 
 def Trajectory_Control(desired_position_omnirobot, actual_position_omnirobot):
     """
     Prototype function for trajectory control.
-    Returns: VbX, VbY, Vomega (velocities in the robot's body frame)
+    Returns: [VbX, VbY, Vomega] (velocities in the robot's body frame)
     """
     # Trajectory control logic here
     VbX = 0.0
     VbY = 0.0
     Vomega = 0.0
-    return VbX, VbY, Vomega
+    return [VbX, VbY, Vomega]
 
 def OmniRobot_Send_Velocity_Setpoints(velocity_body_setpoints):
     """
-    Prototype function to send velocity setpoints to the robot.
-    velocity_body_setpoints: tuple or list with (VbX, VbY, Vomega)
-    Returns nothing.
+    Envía los setpoints de velocidad al robot usando la función de app.py.
+    velocity_body_setpoints: lista o tupla con (VbX, VbY, Vomega)
+    Retorna el mensaje de éxito o error de la función de envío.
     """
-    # Here would go the logic to send the commands
+    # Validación de datos
+    if not isinstance(velocity_body_setpoints, (list, tuple)):
+        return "Error: velocity_body_setpoints debe ser una lista o tupla."
+    if len(velocity_body_setpoints) != 3:
+        return "Error: velocity_body_setpoints debe tener exactamente 3 elementos."
+    if not all(isinstance(v, (int, float)) for v in velocity_body_setpoints):
+        return "Error: Todos los elementos de velocity_body_setpoints deben ser numéricos."
+
+    return send_velocity_to_robot(velocity_body_setpoints)

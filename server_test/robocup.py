@@ -1,5 +1,6 @@
 from obj_def import *
 from trajectory_functions import *
+from app import *
 import time
 
 def init_objects():
