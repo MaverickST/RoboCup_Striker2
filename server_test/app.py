@@ -41,71 +41,44 @@ def send_velocity_to_robot(velocity_body_setpoints):
 
 @app.route('/send', methods=['POST'])
 def send():
-    command = request.form['command']
-    # Expects command type: POS,x,y,angle o trama extendida
-    if command.startswith('POS'):
-        try:
-            # 
-            # _, x, y, angle = command.split(',')
-            # # Update robot and ball state
-            # omni_robot.PosX = float(omni_robot.PosX)
-            # omni_robot.PosY = float(omni_robot.PosY)
-            # omni_robot.Angle = float(angle)
-            # ball.PosX = float(x)
-            # ball.PosY = float(y)
-            # # Process control logic
-            # is_ball_close, is_obstacle_close, obj_obstacle = check_distances(omni_robot, obstacles, ball)
-            # desired_position_omnirobot = [ball.PosX, ball.PosY]
-            # actual_position_omnirobot = [omni_robot.PosX, omni_robot.PosY]
-            # if is_obstacle_close:
-            #     velocity_body_setpoints = Obstacle_Avoidance_Control(omni_robot, obj_obstacle)
-            # else:
-            #     velocity_body_setpoints = Trajectory_Control(desired_position_omnirobot, actual_position_omnirobot) 
-            #
-            # Nueva lógica: escribir en variables globales
-            global robot_info, ball_info, obstacles_matrix
-            data = command.split(',')
-            if len(data) == 4:
-                # Solo robot y ball (ball = robot x,y)
-                _, x, y, angle = data
-                robot_info[0] = float(x)
-                robot_info[1] = float(y)
-                robot_info[2] = float(angle)
-                ball_info[0] = float(x)
-                ball_info[1] = float(y)
-                # Obstáculos vacíos
-                obstacles_matrix[0] = []
-                obstacles_matrix[1] = []
-            elif len(data) >= 5:
-                # robot x,y,angle, ball x,y, [obs1x, obs1y, ...]
-                robot_info[0] = float(data[0])
-                robot_info[1] = float(data[1])
-                robot_info[2] = float(data[2])
-                ball_info[0] = float(data[3])
-                ball_info[1] = float(data[4])
-                obs_data = data[5:]
-                if len(obs_data) % 2 != 0:
-                    return "Error: La cantidad de datos de obstáculos debe ser par (x,y por cada obstáculo)."
-                num_obs = len(obs_data) // 2
-                obstacles_matrix[0] = [float(obs_data[i*2]) for i in range(num_obs)]
-                obstacles_matrix[1] = [float(obs_data[i*2+1]) for i in range(num_obs)]
-            else:
-                return "Error: Se requieren al menos 4 valores para POS o 5+ para trama extendida."
-            return (
-                f"Datos escritos: robot_info={robot_info}, "
-                f"ball_info={ball_info}, "
-                f"obstacles_matrix={obstacles_matrix}"
-            )
-        except Exception as e:
-            return f"Error procesando comando: {str(e)}"
-    else:
-        # If not a POS command, forward as is
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.sendto(command.encode(), (UDP_IP, UDP_PORT))
-            return f"Command sent: {command}"
-        except Exception as e:
-            return f"Error sending command: {str(e)}"
+    global robot_info, ball_info, obstacles_matrix
+    # Solo acepta JSON
+    data = request.get_json()
+    try:
+        robot = data['robot']
+        ball = data['ball']
+        dummies = data.get('dummies', [])
+
+
+        robot_info[0] = float(robot['x'])
+        robot_info[1] = float(robot['y'])
+        robot_info[2] = float(robot['theta'])
+
+        ball_info[0] = float(ball['x'])
+        ball_info[1] = float(ball['y'])
+
+        obstacles_matrix[0] = [float(d['x']) for d in dummies]
+        obstacles_matrix[1] = [float(d['y']) for d in dummies]
+
+        print(f"robot_info almacenado: {robot_info}")
+        print(f"ball_info almacenado: {ball_info}")
+        print(f"obstacles_matrix almacenado: {obstacles_matrix}")
+
+        # Enviar comando UDP usando send_velocity_to_robot
+        # Puedes ajustar los valores enviados según tu lógica de control
+        # Aquí se envía la velocidad como ejemplo, puedes cambiarlo por lo que necesites
+        # Ejemplo: enviar [vx, vy, omega] = [0, 0, 0] (modifica según tu lógica)
+        velocity_body_setpoints = data.get('velocity', [0.0, 0.0, 0.0])
+        udp_result = send_velocity_to_robot(velocity_body_setpoints)
+
+        return (
+            f"Datos escritos: robot_info={robot_info}, "
+            f"ball_info={ball_info}, "
+            f"obstacles_matrix={obstacles_matrix}, "
+            f"UDP: {udp_result}"
+        )
+    except Exception as e:
+        return f"Error procesando JSON: {str(e)}", 400
 
 def get_current_vision_data():
     """
@@ -113,7 +86,3 @@ def get_current_vision_data():
     """
     return robot_info, ball_info, obstacles_matrix
 
-if __name__ == '__main__':
-    print("Starting Flask server...")
-    app.run(host='0.0.0.0', port=5000, debug=True)
-    print("Flask server started at http://localhost:5000/")

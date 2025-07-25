@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UDP Position Command</title>
+  <title>Vision System Simulation</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -35,6 +35,15 @@
       border-radius: 10px;
     }
 
+    .section-title {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #111827;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+
     label {
       display: block;
       margin: 10px 0 5px;
@@ -51,7 +60,7 @@
     }
 
     button {
-      margin-top: 15px;
+      margin-top: 20px;
       padding: 10px 16px;
       background-color: #2563eb;
       color: white;
@@ -70,66 +79,87 @@
       text-align: center;
       font-weight: bold;
       margin-top: 20px;
-      color: green;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Send Target Position</h2>
+    <h2>Vision System Simulation</h2>
 
     <div class="block">
-      <label>X Position (cm)</label>
-      <input type="number" id="posX" step="any">
+      <div class="section-title">Robot</div>
+      <label>X</label>
+      <input type="number" id="robotX" step="any">
+      <label>Y</label>
+      <input type="number" id="robotY" step="any">
+      <label>Theta (Angle)</label>
+      <input type="number" id="robotTheta" step="any">
 
-      <label>Y Position (cm)</label>
-      <input type="number" id="posY" step="any">
+      <div class="section-title">Ball</div>
+      <label>X</label>
+      <input type="number" id="ballX" step="any">
+      <label>Y</label>
+      <input type="number" id="ballY" step="any">
 
-      <label>Orientation (°)</label>
-      <input type="number" id="angle" step="any">
+      <div class="section-title">Dummies</div>
+      <label>Dummy 1 - X</label>
+      <input type="number" id="dummy1X" step="any">
+      <label>Dummy 1 - Y</label>
+      <input type="number" id="dummy1Y" step="any">
 
-      <button onclick="sendPosition()">Send Position</button>
-      <hr style="margin:20px 0;">
-      <label>Test Commands</label>
-      <button onclick="sendTest('POS,100,100,0')">Test POS 100,100,0</button>
-      <button onclick="sendTest('POS,0,0,90')">Test POS 0,0,90</button>
-      <button onclick="sendTest('POS,50,150,45')">Test POS 50,150,45</button>
-      <button onclick="sendTest('CUSTOM,HELLO')">Test CUSTOM Command</button>
+      <label>Dummy 2 - X</label>
+      <input type="number" id="dummy2X" step="any">
+      <label>Dummy 2 - Y</label>
+      <input type="number" id="dummy2Y" step="any">
+
+      <label>Dummy 3 - X</label>
+      <input type="number" id="dummy3X" step="any">
+      <label>Dummy 3 - Y</label>
+      <input type="number" id="dummy3Y" step="any">
+
+      <button onclick="sendJson()">Send JSON Data</button>
     </div>
 
     <p id="response"></p>
   </div>
 
   <script>
-    async function sendCommand(message) {
-      const formData = new FormData();
-      formData.append("command", message);
+    async function sendJson() {
+      const data = {
+        robot: {
+          x: parseFloat(document.getElementById("robotX").value),
+          y: parseFloat(document.getElementById("robotY").value),
+          theta: parseFloat(document.getElementById("robotTheta").value)  // Add theta
+        },
+        ball: {
+          x: parseFloat(document.getElementById("ballX").value),
+          y: parseFloat(document.getElementById("ballY").value)
+        },
+        dummies: [
+          { x: parseFloat(document.getElementById("dummy1X").value), y: parseFloat(document.getElementById("dummy1Y").value) },
+          { x: parseFloat(document.getElementById("dummy2X").value), y: parseFloat(document.getElementById("dummy2Y").value) },
+          { x: parseFloat(document.getElementById("dummy3X").value), y: parseFloat(document.getElementById("dummy3Y").value) }
+        ]
+      };
+
       try {
-        const res = await fetch("/send", { method: "POST", body: formData });
+        const res = await fetch("/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
         const text = await res.text();
         const r = document.getElementById("response");
         r.style.color = "green";
-        r.textContent = text;
-      } catch {
+        r.textContent = "✅ Sent successfully: " + text;
+      } catch (error) {
         const r = document.getElementById("response");
-        r.textContent = "Error sending command.";
         r.style.color = "red";
+        r.textContent = "❌ Error sending data.";
       }
-    }
-
-    function sendPosition() {
-      const x = document.getElementById("posX").value;
-      const y = document.getElementById("posY").value;
-      const angle = document.getElementById("angle").value;
-      const message = `POS,${x},${y},${angle}`;
-      sendCommand(message);
-      document.getElementById("posX").value = "";
-      document.getElementById("posY").value = "";
-      document.getElementById("angle").value = "";
-    }
-
-    function sendTest(cmd) {
-      sendCommand(cmd);
     }
   </script>
 </body>

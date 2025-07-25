@@ -36,9 +36,23 @@ def periodic_thread(omni_robot, obstacles, vision_data, ball):
     OmniRobot_Send_Velocity_Setpoints(velocity_body_setpoints)
 
 
-# Object initialization
-omni_robot, obstacles, vision_data, ball = init_objects()
 
-while True:
-    periodic_thread(omni_robot, obstacles, vision_data, ball)
-    time.sleep(0.1) # change for an exact cycle time measurement if necessary
+
+import threading
+from app import app
+
+def run_flask():
+    print("Starting Flask server...")
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+    print("Flask server started at http://localhost:5000/")
+
+if __name__ == '__main__':
+    # Iniciar Flask en un hilo separado
+    flask_thread = threading.Thread(target=run_flask, daemon=True)
+    flask_thread.start()
+
+    # Object initialization
+    omni_robot, obstacles, vision_data, ball = init_objects()
+    while True:
+        periodic_thread(omni_robot, obstacles, vision_data, ball)
+        time.sleep(0.1) # change for an exact cycle time measurement if necessary
