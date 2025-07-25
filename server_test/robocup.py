@@ -53,6 +53,20 @@ if __name__ == '__main__':
 
     # Object initialization
     omni_robot, obstacles, vision_data, ball = init_objects()
+    
+    # Control de tiempo preciso para 100ms (10 Hz)
+    target_period = 0.1  # 100ms
+    
     while True:
+        start_time = time.perf_counter()
+        
         periodic_thread(omni_robot, obstacles, vision_data, ball)
-        time.sleep(0.1) # change for an exact cycle time measurement if necessary
+        
+        # Calcular tiempo transcurrido y ajustar la espera
+        elapsed_time = time.perf_counter() - start_time
+        remaining_time = target_period - elapsed_time
+        
+        if remaining_time > 0:
+            # espera el tiempo restante para completar los 100ms
+            time.sleep(remaining_time)
+        # Si el procesamiento toma más de 100ms, no esperamos (ejecutamos inmediatamente)
