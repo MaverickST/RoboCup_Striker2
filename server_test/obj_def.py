@@ -1,3 +1,5 @@
+from app import get_current_vision_data
+
 class OmniRobot:
     def __init__(self):
         self.PosX = 0.0
@@ -67,7 +69,8 @@ class VisionData:
         # Add more attributes as needed
 
     def Vision_Processing(self):
-        # Works as an update where attributes are stored
-        # with data received from the vision system
-        # Template: does nothing
-        pass
+        # Actualiza los datos usando get_current_vision_data de app.py
+        robot, ball, obstacles = get_current_vision_data()
+        self.robot_info = list(robot)
+        self.ball_info = list(ball)
+        self.obstacles_matrix = [list(obstacles[0]), list(obstacles[1])]
