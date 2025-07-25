@@ -92,6 +92,8 @@
       <input type="number" id="robotX" step="any">
       <label>Y</label>
       <input type="number" id="robotY" step="any">
+      <label>Theta (Angle)</label>
+      <input type="number" id="robotTheta" step="any">
 
       <div class="section-title">Ball</div>
       <label>X</label>
@@ -126,7 +128,8 @@
       const data = {
         robot: {
           x: parseFloat(document.getElementById("robotX").value),
-          y: parseFloat(document.getElementById("robotY").value)
+          y: parseFloat(document.getElementById("robotY").value),
+          theta: parseFloat(document.getElementById("robotTheta").value)  // Add theta
         },
         ball: {
           x: parseFloat(document.getElementById("ballX").value),
@@ -140,7 +143,7 @@
       };
 
       try {
-        const res = await fetch("/vision-data", {
+        const res = await fetch("/send", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
