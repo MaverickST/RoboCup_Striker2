@@ -34,9 +34,18 @@ BNO055_t gBNO055;
 
 esp_ip4_addr_t gIpAddr;
 
+<<<<<<< HEAD
+void app_main(void)
+{
+
+    ///<Create the tasks
+    create_tasks();
+    
+=======
 void app_main(void) 
 {
     vTaskDelay(pdMS_TO_TICKS(5000));
+>>>>>>> 8dc43908859b78a722d8c7adda48e5c00fe174b6
     
     ///< Initialize the drivers: LED, UART, BLDC
     init_drivers(); 
