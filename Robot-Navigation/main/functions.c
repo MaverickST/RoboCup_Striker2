@@ -11,7 +11,7 @@ void init_drivers(void)
         .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
-        .a1 = 1.53, .a0 = -1.5, .b1 = 1, .b0 = -1,
+        .a1 = 1.5296, .a0 = -1.5236, .b1 = 1, .b0 = -1,
         .order = 1,
     };
 
@@ -189,7 +189,7 @@ void init_system(void)
 {
     ///< Initialize the system variables
     gSys.cnt_sample = 0; ///< Initialize the number of samples readed from all the sensors
-    gSys.STATE = CHECK_SENSORS; ///< Initialize the state machine: initialize the BLDC motor
+    gSys.STATE = SYS_SAMPLING_CONTROL; ///< Initialize the state machine: initialize the BLDC motor
 
     // Create a one-shot timer to control the sequence
     const esp_timer_create_args_t oneshot_timer_args = {
@@ -208,16 +208,6 @@ void sys_timer_cb(void *arg)
 {
     switch(gSys.STATE)
     {
-        case CHECK_SENSORS:
-            // Check if the sensors are calibrated
-            if (is_drivers_ready()) {
-                gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
-                // gSys.STATE = NONE; ///< Set the state to NONE
-                // ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
-                ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
-            }
-            break;
-
         case SYS_SAMPLING_EXP:
             BaseType_t mustYield = pdFALSE;
             vTaskNotifyGiveFromISR(gSys.task_handle_bno055, &mustYield);
@@ -237,17 +227,9 @@ void sys_timer_cb(void *arg)
         case SYS_SAMPLING_CONTROL:
             mustYield = pdFALSE;
             vTaskNotifyGiveFromISR(gSys.task_handle_bno055, &mustYield);
+            // float acc[3] = {0.01, 0.9, 0.001};
+            // xQueueSendFromISR(gSys.queue_bno055, (void*)&acc, &mustYield); 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
-
-            gSys.cnt_smp_control++; ///< Increment the number of samples readed from all the sensors for control
-            gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
-            if (gSys.cnt_smp_control >= NUM_SAMPLES_CONTROL) {
-                ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
-                // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
-                stop_robot();
-                ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_smp_control);
-                gSys.STATE = NONE; ///< Set the state to NONE to stop the system
-            }
             break;
 
         default:
@@ -323,7 +305,7 @@ void motor_identification_all(void)
                 break;
             }
 
-            bldc_set_duty_motor(motor, (float)duty);
+            bldc_set_duty_motor(&gMotor[motor_index], (float)duty);
 
             if (motor_index == 0) {
                 data[cnt].duty = duty;  // Solo se asigna una vez en la primera ronda

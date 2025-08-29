@@ -119,11 +119,40 @@
 // #define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
 
 ///< Sensor fusion definitions
-#define KALMAN_1D_ENC_Q 0.001f // Process noise covariance for enconders
-#define KALMAN_1D_ENC_R 1.12 // Measurement noise covariance for encoders
+#define KALMAN_1D_ENC_Q 0.001f // Process noise variance for enconders
+#define KALMAN_1D_ENC_R 1.12 // Measurement noise variance for encoders
 
-#define KALMAN_1D_BNO055_Q 0.001f // Process noise covariance for BNO055
-#define KALMAN_1D_BNO055_R 0.04f // Measurement noise covariance for BNO055
+#define KALMAN_1D_BNO055_Q 0.001f // Process noise variance for BNO055
+#define KALMAN_1D_BNO055_R 0.04f // Measurement noise variance for BNO055
+
+/**
+ * @brief Process noise variance for the 1D sensor fusion.
+ * “OUTPUT SIGNAL ACCELEROMETER” (pag. 15):
+ * Output Noise Density nrms: 
+ *          Typ = 150 µg/√Hz, Max = 190 µg/√BW
+ *          Normal mode -> BW = 62.5 Hz
+ * 
+ * Q=(σ_Δv)^2 = (σ_a ⋅ dt)^2 = 
+ * 
+ */
+#define SENFUSION_1D_Q 1.35e-8
+
+/**
+ * @brief Measurement noise variance for the first measurement (body speed).
+ * It is the variance propagated from the encoders noise variance.
+ * 
+ */
+#define SENFUSION_1D_R1 0.0131 // Measurement noise variance the first measurement (body speed)
+
+/**
+ * @brief Measurement noise variance for the second measurement (IMU, angular speed - gz).
+ * “OUTPUT NOISE (Gyro only mode)” (pag. 16):
+ * Output Noise nᵣₘₛ, rms, BW=47 Hz: 
+ *          Typ = 0.1 °/s 
+ *          Max = 0.3 °/s
+ * 
+ */
+#define SENFUSION_1D_R2 4.06e-6
 
 // --------------------------------------------------------------------------
 
@@ -171,6 +200,10 @@ typedef struct
 
     gpio_t rst_pin; ///< GPIO pin for the reset of the ESP32S3
     QueueHandle_t queue; ///< Queue to send the data to the save task
+    QueueHandle_t queue_bldc; ///< Queue to send the data to the BLDC control task
+    QueueHandle_t queue_robot; ///< Queue to send the data to the robot control task
+    QueueHandle_t queue_wifi; ///< Queue to receive the data from the WiFi task
+    QueueHandle_t queue_bno055; ///< Queue to receive the data from the BNO055 task
     SemaphoreHandle_t mutex; ///< Mutex to protect the access to the global variables
     SemaphoreHandle_t mtx_printf; ///< Mutex to protect the access to the printf function
     SemaphoreHandle_t mtx_cntrl; ///< Mutex to protect the access to the control variables

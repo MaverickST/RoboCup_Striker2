@@ -65,8 +65,8 @@ void app_main(void)
     ///< Create the tasks
     create_tasks(); 
 
-    // ///< Initialize the system
-    // ///< 'System' refers to more general variables and functions that are used to control the project.
-    // init_system();
+    ///< Initialize the system
+    ///< 'System' refers to more general variables and functions that are used to control the project.
+    init_system(); 
 
 }
