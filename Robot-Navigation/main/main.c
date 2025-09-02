@@ -29,7 +29,6 @@ uart_console_t gUc;
 trajectory_t gTraj; ///< Trajectory structure
 
 AS5600_t gAS5600[3]; ///< Array of AS5600 sensors
-vl53l1x_t gVL53L1X[3]; ///< Array of VL53L1X sensors
 BNO055_t gBNO055;
 
 esp_ip4_addr_t gIpAddr;
@@ -56,30 +55,18 @@ void app_main(void)
     // ///< Perform motor identification for all motors
     // motor_identification_all();
 
-    // while (!setup_bno055(100)) { ///< Setup the BNO055 sensor
-    //     ESP_LOGI("app_main", "BNO055 sensor is not ready. Resetting...");
-    //     BNO055_Reset(&gBNO055); ///< Reset the BNO055 sensor
-    //     vTaskDelay(pdMS_TO_TICKS(1000)); ///< Wait 1 second before retrying
-    // }
-    // if (!setup_vl53l1x(100)) { ///< Setup the VL53L1X sensor
-    //     ESP_LOGI("app_main", "VL53L1X sensor is not ready");
-    //     return;
-    // }
-
-    // ///< Verify the sensors together
-    // if (verify_sensors(100)) { 
-    //     ESP_LOGI("app_main", "Sensors are ready");
-    // }
-    // else {
-    //     ESP_LOGI("app_main", "Sensors are not ready");
-    //     return;
-    // }
+    ///< Initialize the IMU sensor
+    while (!setup_bno055(100)) { ///< Setup the BNO055 sensor
+        ESP_LOGI("app_main", "BNO055 sensor is not ready. Resetting...");
+        BNO055_Reset(&gBNO055); ///< Reset the BNO055 sensor
+        vTaskDelay(pdMS_TO_TICKS(1000)); ///< Wait 1 second before retrying
+    }
     
     ///< Create the tasks
     create_tasks(); 
 
-    // ///< Initialize the system
-    // ///< 'System' refers to more general variables and functions that are used to control the project.
-    // init_system();
+    ///< Initialize the system
+    ///< 'System' refers to more general variables and functions that are used to control the project.
+    init_system(); 
 
 }

@@ -10,8 +10,8 @@
  * \copyright   Unlicensed
  */
 
-#ifndef __CONTROL_SENFUSION_H__
-#define __CONTROL_SENFUSION_H__
+#ifndef __SENFUSION_H__
+#define __SENFUSION_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -23,95 +23,66 @@
 #define MAX(a,b) ((a)>(b)?(a):(b)) ///< Macro to get the maximum value
 
 /**
- * @brief Sensor Fusion structure
- * 
+ * Configuration struct for initializing the sensor fusion filter.
+ * This filter estimates a single variable using two noisy measurements.
  */
-typedef struct
-{
-    float x_pred[2][1]; ///< Predicted state vector
-    float P_pred[2][2]; ///< Predicted error covariance matrix
-    float x[2][1]; ///< State vector
+typedef struct {
+    float A;    ///< State transition coefficient (e.g. 1.0)
+    float B;    ///< Input coefficient (e.g. dt if input is a·dt, or 0)
+    float Q;    ///< Process noise variance
+    float R1;   ///< Measurement noise variance of sensor 1 (wheel)
+    float R2;   ///< Measurement noise variance of sensor 2 (IMU)
+} senfusion_config_t;
 
-    float a_imu; ///< IMU acceleration
-    float v_imu_prev; ///< IMU velocity
-    float p_enc; ///< Encoder position
-    float p_lidar; ///< Lidar position
-
-    float p_ref[2]; ///< Reference position
-    uint32_t k; ///< Sample time
-    float dt; ///< Time step
-
-    ///< Kalman filter Variables
-    float P[2][2]; ///< Error covariance matrix
-    float Q[2][2]; ///< Process noise covariance matrix
-    float R[3][3]; ///< Measurement noise covariance matrix
-
-    ///< Process model
-    /**
-     * @brief Process model: x(k+1) = A*x(k) + B*u(k)
-     * State vector: x = [x, y]
-    */
-    float u; ///< Control input
-    float A[2][2]; ///< Process model matrix
-    float B[2][1]; ///< Control input matrix
-    float C[2][2]; ///< Process model matrix
-
-    ///< Measurement model
-    /**
-     * @brief Measurement model: z(k) = H*x(k) + v(k)
-     * Measurement vector: z = [p_enc, p_lidar, v_imu]
-    */
-    float z[3][1]; ///< Measurement vector
-    float H[3][2]; ///< Measurement matrix
-    float H_T[2][3]; ///< Transpose of the measurement matrix
-
-    float pos;
-    float vel; ///< Velocity
-
+/**
+ * Internal state of the sensor fusion filter.
+ */
+typedef struct {
+    float x;    ///< Estimated state
+    float P;    ///< Estimate variance
+    float A, B; ///< Model coefficients
+    float Q;    ///< Process noise variance
+    float R1;   ///< Var(sensor1)
+    float R2;   ///< Var(sensor2)
 } senfusion_t;
 
 /**
- * @brief Initialize the control and sensor fusion structure
- * 
- * @param senfusion Pointer to the control and sensor fusion structure
+ * @brief   Initialize the 1D fusion filter.
+ * @param   f   Pointer to filter state
+ * @param   cfg Pointer to configuration
  */
-void senfusion_init(senfusion_t *senfusion, float dt);
+void senfusion_init(senfusion_t *f, const senfusion_config_t *cfg);
 
 /**
- * @brief Predict the next state of the system
- * 
- * @param senfusion Pointer to the control and sensor fusion structure
- * @param u Control input
+ * @brief   Predict step: propagate state with control/input.
+ * @param   f   Pointer to filter state
+ * @param   u   Control input (e.g. a·dt, or 0 if unused)
  */
-void senfusion_predict(senfusion_t *senfusion, float u);
+void senfusion_predict(senfusion_t *f, float u);
 
 /**
- * @brief Update the control and sensor fusion structure
- * 
- * @param senfusion Pointer to the control and sensor fusion structure
+ * @brief   Sequentially fuse two scalar measurements into one state.
+ * @param   f   Pointer to filter state
+ * @param   z1  First measurement (e.g. wheel velocity)
  */
-void senfusion_update(senfusion_t *senfusion, float p_enc, float p_lidar, float a_imu, uint32_t k);
+void senfusion_update1(senfusion_t *f, float z1);
 
 /**
- * @brief Get the position from the sensor fusion
+ * @brief   Sequentially fuse two scalar measurements into one state.
+ * @param   f   Pointer to filter state
+ * @param   z2  Second measurement (e.g. IMU-derived velocity)
+ */
+void senfusion_update2(senfusion_t *f, float z2);
+
+/**
+ * @brief Get the current estimated value from the sensor fusion filter.
  * 
  * @param senfusion 
  * @return float 
  */
-static inline float senfusion_get_pos(senfusion_t *senfusion)
+static inline float senfusion_get_state(senfusion_t *senfusion)
 {
-    return senfusion->x[0][0]; ///< Get the position from the sensor fusion
-}
-
-/**
- * @brief Get the velocity from the sensor fusion
- * 
- * @param senfusion 
- * @return float 
- */
-static inline float senfusion_get_vel(senfusion_t *senfusion)
-{
-    return senfusion->x[1][0]; ///< Get the velocity from the sensor fusion
+    return senfusion->x;
 }
 
 ///<-------------------------------------------------------------
@@ -217,10 +188,24 @@ float kalman1D_update(kalman1D_t *kf, float meas);
 ///< -------------------------------------------------------------
 ///< ------- ROBOT MODEL TRANSFORMATIONS AND FUNTIONS ------------
 ///< -------------------------------------------------------------
+#include <time.h>
+
+/**
+ * This module provides functions to convert between body-frame velocities
+ * (vbx, vby, wb) and individual wheel angular velocities (w1, w2, w3),
+ * along with a test routine to validate the forward kinematics inversion.
+ *
+ * Coordinate conventions:
+ *  - vbx: linear velocity along the robot's x-axis (forward)
+ *  - vby: linear velocity along the robot's y-axis (sideways)
+ *  - wb:  angular velocity about the robot's center (positive CCW)
+ *  - wi:  angular velocity of wheel i (positive CW rotation)
+ */
 
 #define WHEEL_RADIUS 0.03f ///< Wheel radius in meters
 #define ROBOT_RADIUS 0.16f ///< Robot diameter in meters
 #define DELTA 0.523598  ///< Robot delta angle in radians (1.047198 for 60 degrees) (0.523598 radians for 30 degrees)
+#define TOLERANCE 1e-5f
 
 /**
  * @brief Given the velocity body velocity (vbx, vby) and the wheel base (wb), 
@@ -239,4 +224,37 @@ float kalman1D_update(kalman1D_t *kf, float meas);
  */
 void calc_invkinematics(float vbx, float vby, float wb, float *w1, float *w2, float *w3);
 
-#endif // __CONTROL_SENFUSION_H__
+/**
+ * @brief Compute forward kinematics: wheel speeds to body velocities.
+ *
+ * This function inverts the inverse-kinematics mapping to recover the robot's
+ * body-frame linear and angular velocities from the three wheel angular speeds.
+ *
+ * The derivation uses the inverse of the 3x3 matrix relating [vbx, vby, wb]^T
+ * to [w1, w2, w3]^T, scaled by the wheel radius.
+ *
+ * Mathematical expressions:
+ *   vbx = r * (-w1 + 2*w2 - w3) / (2*(1 + sin(δ)))
+ *   vby = r * (-w1 + w3) / (2*cos(δ))
+ *   wb  = r * (w1 + 2*sin(δ)*w2 + w3) / (2*R*(1 + sin(δ)))
+ *
+ * @param w1    Angular velocity of wheel 1.
+ * @param w2    Angular velocity of wheel 2.
+ * @param w3    Angular velocity of wheel 3.
+ * @param vbx   Pointer to store resulting linear velocity in x-direction.
+ * @param vby   Pointer to store resulting linear velocity in y-direction.
+ * @param wb    Pointer to store resulting angular velocity about robot center.
+ */
+void calc_fordwkinematics(float w1, float w2, float w3, float *vbx, float *vby, float *wb);
+
+/**
+ * @brief Test forward kinematics by round-trip inversion.
+ *
+ * Generates random body velocities, computes wheel speeds via inverse kinematics,
+ * then recovers body velocities via forward kinematics and verifies accuracy.
+ *
+ * @param num_tests Number of random trials to perform.
+ */
+void test_forward_kinematics(int num_tests);
+
+#endif // __ENFUSION_H__

@@ -11,11 +11,10 @@ void init_drivers(void)
         .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
-        .a1 = 1.53, .a0 = -1.5, .b1 = 1, .b0 = -1,
+        .a1 = 1.5296, .a0 = -1.5236, .b1 = 1, .b0 = -1,
         .order = 1,
     };
 
-    senfusion_init(&gSenFusion, SAMPLING_PERIOD_S); // 10ms sampling time
     for (int i = 0; i < 3; i++) {
         control_init(&gCtrl[i], SAMPLING_PERIOD_S/10, config_pid); ///< Initialize the control structure
     }
@@ -34,8 +33,13 @@ void init_drivers(void)
         bldc_set_duty_motor(&gMotor[i], 0); ///< Set the initial duty cycle to 0%
     }
     vTaskDelay(pdMS_TO_TICKS(3000));
-    ESP_LOGI("drivers", "Drivers initialized successfully");
 
+    gSys.STATE = CHECK_SENSORS;
+    for (int i = 0; i < 3; i++) {
+        gMotor[i].is_calibrated = true;
+    }
+
+    ESP_LOGI("drivers", "Drivers initialized successfully");
 }
 
 bool setup_as5600(uint32_t num_checks)
@@ -130,45 +134,16 @@ bool setup_bno055(uint32_t num_checks)
     return true;
 }
 
-bool setup_vl53l1x(uint32_t num_checks)
-{
-    ///< Initialize the VL53L1X sensors and set the parameters
-    ESP_LOGI(TAG_VL53L1X_TASK, "Initializing VL53L1X sensor\n");
-
-    // // ///< Create I2C bus and add the devices
-    // // i2c_init_new_bus(&gVL53L1X[0].i2c_handle, VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO);
-    // // gVL53L1X[1].i2c_handle.bus_handle = gVL53L1X[0].i2c_handle.bus_handle;
-    // // gVL53L1X[2].i2c_handle.bus_handle = gVL53L1X[0].i2c_handle.bus_handle;
-    // // for (int i = 0; i < 3; i++) {
-    // //     i2c_init_new_device(&gVL53L1X[i].i2c_handle, VL53L1X_I2C_MASTER_NUM, VL53L1X_SENSOR_ADDR, I2C_MASTER_FREQ_HZ);
-    // // }
-
-    for (int i = 0; i < 3; i++) {
-        if (!VL53L1X_init(&gVL53L1X[i], VL53L1X_I2C_MASTER_NUM, VL53L1X_I2C_MASTER_SCL_GPIO, VL53L1X_I2C_MASTER_SDA_GPIO, false)) {
-            ESP_LOGE(TAG_VL53L1X_TASK, "VL53L1X sensor %d initialization failed\n", i);
-            continue;
-        }
-        // VL53L1X_setAddress(&gVL53L1X[i], VL53L1X_SENSOR_ADDR + i + 1); ///< Set the address of the sensor
-        VL53L1X_startContinuous(&gVL53L1X[i], 10); ///< Start continuous mode with a period of 10ms
-        gVL53L1X[i].is_calibrated = true; ///< Set the flag to true to indicate that the sensor is calibrated
-    }
-
-    return true;
-}
-
 bool verify_sensors(uint32_t num_checks)
 {
     ///< Count the number of times the sensors are sensing the same value
     int cnt_as5600[3] = {0};
-    int cnt_vl53l1x[3] = {0};
     int cnt_bno055 = 0;
 
     float angle_prev[3] = {0};
-    float dist_prev[3] = {0};
     float acce_prev = 0;
 
     float angle[3] = {0};
-    float dist[3] = {0};
     float acce = 0;
 
     for (uint8_t i = 0; i < num_checks; i++) {
@@ -177,27 +152,16 @@ bool verify_sensors(uint32_t num_checks)
             angle[j] = AS5600_ADC_GetAngle(&gAS5600[j]); ///< Get the angle from the AS5600 sensor
         }
 
-        for (int j = 0; j < 3; j++) {
-            if (VL53L1X_dataReady(&gVL53L1X[j])) {            
-                dist[j] = VL53L1X_readDistance(&gVL53L1X[j], false); // false for non-blocking read
-            } else {
-                dist[j] = dist_prev[j]; ///< If the data is not ready, use the previous value
-            }
-        }
-
         BNO055_ReadAll_Lineal(&gBNO055);
         acce = sqrt(gBNO055.ax*gBNO055.ax + gBNO055.ay*gBNO055.ay);
 
         ///< Print the values
-        // wrap_printf("Angle: %.2f deg, Distance: %.3f m, Acce: %.2f m^2\n", angle, dist/1000.0, acce);
+        // wrap_printf("Angle: %.2f deg, Acce: %.2f m^2\n", angle, acce);
 
         ///< Check if the values are the same
         for (int j = 0; j < 3; j++) {
             if (fabs(angle[j] - angle_prev[j]) < 0.001) {
                 cnt_as5600[j]++;
-            }
-            if (fabs(dist[j] - dist_prev[j]) < 0.001) {
-                cnt_vl53l1x[j]++;
             }
         }
         if (fabs(acce - acce_prev) < 0.001) {
@@ -207,15 +171,14 @@ bool verify_sensors(uint32_t num_checks)
         ///< Update the previous values
         for (int j = 0; j < 3; j++) {
             angle_prev[j] = angle[j];
-            dist_prev[j] = dist[j];
         }
         acce_prev = acce;
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
-    // ESP_LOGI("verify_sensors", "AS5600: %d, VL53L1X: %d, BNO055: %d", cnt_as5600, cnt_vl53l1x, cnt_bno055);
+    // ESP_LOGI("verify_sensors", "AS5600: %d, BNO055: %d", cnt_as5600, cnt_bno055);
 
-    // if (cnt_as5600 > num_checks/2 && cnt_vl53l1x > num_checks/2 && cnt_bno055 > num_checks/2) {
+    // if (cnt_as5600 > num_checks/2 && cnt_bno055 > num_checks/2) {
     //     return false;
     // }
 
@@ -226,7 +189,7 @@ void init_system(void)
 {
     ///< Initialize the system variables
     gSys.cnt_sample = 0; ///< Initialize the number of samples readed from all the sensors
-    gSys.STATE = INIT_BLDC_STEP_1; ///< Initialize the state machine: initialize the BLDC motor
+    gSys.STATE = SYS_SAMPLING_CONTROL; ///< Initialize the state machine: initialize the BLDC motor
 
     // Create a one-shot timer to control the sequence
     const esp_timer_create_args_t oneshot_timer_args = {
@@ -237,7 +200,7 @@ void init_system(void)
     esp_timer_handle_t oneshot_timer_s;
     ESP_ERROR_CHECK(esp_timer_create(&oneshot_timer_args, &oneshot_timer_s));
     gSys.oneshot_timer = oneshot_timer_s;
-    ESP_ERROR_CHECK(esp_timer_start_once(gSys.oneshot_timer, NONE_TO_STEPS_US));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
 
 }
 
@@ -245,32 +208,9 @@ void sys_timer_cb(void *arg)
 {
     switch(gSys.STATE)
     {
-        case INIT_BLDC_STEP_1:
-            ESP_LOGI("sys_timer_cb", "INIT_PWM_BLDC_STEP_1");
-            stop_robot();
-
-            ///< Use the time for the sensor sampling and control the BLDC motor
-            gSys.STATE = CHECK_SENSORS;
-            for (int i = 0; i < 3; i++) {
-                gMotor[i].is_calibrated = true;
-            }
-
-            ESP_ERROR_CHECK(esp_timer_start_periodic(gSys.oneshot_timer, TIME_SAMPLING_US));
-            break;
-
-        case CHECK_SENSORS:
-            // Check if the sensors are calibrated
-            if (is_drivers_ready()) {
-                gSys.STATE = SYS_SAMPLING_EXP; ///< Set the state to sampling
-                // gSys.STATE = NONE; ///< Set the state to NONE
-                // ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
-                ESP_LOGI("sys_timer_cb", "Sensors calibrated. Starting the system.");
-            }
-            break;
-
         case SYS_SAMPLING_EXP:
             BaseType_t mustYield = pdFALSE;
-            vTaskNotifyGiveFromISR(gSys.task_handle_trigger, &mustYield);
+            vTaskNotifyGiveFromISR(gSys.task_handle_bno055, &mustYield);
 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
             gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
@@ -286,63 +226,15 @@ void sys_timer_cb(void *arg)
 
         case SYS_SAMPLING_CONTROL:
             mustYield = pdFALSE;
-            vTaskNotifyGiveFromISR(gSys.task_handle_trigger, &mustYield);
+            vTaskNotifyGiveFromISR(gSys.task_handle_bno055, &mustYield);
+            // float acc[3] = {0.01, 0.9, 0.001};
+            // xQueueSendFromISR(gSys.queue_bno055, (void*)&acc, &mustYield); 
             // portYIELD_FROM_ISR(mustYield); ///< Yield the task to allow the other tasks to run
-
-            gSys.cnt_smp_control++; ///< Increment the number of samples readed from all the sensors for control
-            gSys.cnt_sample++; ///< Increment the number of samples readed from all the sensors
-            if (gSys.cnt_smp_control >= NUM_SAMPLES_CONTROL) {
-                ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer)); ///< Stop the timer to stop the sampling
-                // ESP_ERROR_CHECK(esp_timer_delete(gSys.oneshot_timer)); ///< Delete the timer to stop the sampling
-                stop_robot();
-                ESP_LOGI("sys_timer_cb", "Samples readed from all the sensors: %d", gSys.cnt_smp_control);
-                gSys.STATE = NONE; ///< Set the state to NONE to stop the system
-            }
             break;
 
         default:
             ESP_LOGI("sys_timer_cb", "default");
             break;
-    }
-}
-
-void parse_and_update_setpoints(const char* uart_buffer)
-{
-    char parsed[MAX_PARSED_LEN];
-    float setpoints[3] = {0};
-
-    // Find the "default" key in the string
-    char *start = strstr(uart_buffer, "\"default\":\"");
-    if (start) {
-        start += strlen("\"default\":\""); // Move past the key
-
-        // Find the closing quote of the value
-        char *end = strchr(start, '"');
-        if (end && (end - start) < sizeof(parsed)) {
-            // Copy the value substring into a temporary buffer
-            strncpy(parsed, start, end - start);
-            parsed[end - start] = '\0';
-
-            float sp0 = 0, sp1 = 0, sp2 = 0;
-
-            // Parse three float values from the string
-            if (sscanf(parsed, "%f %f %f", &sp0, &sp1, &sp2) == 3) {
-                // Update the setpoints array
-                xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); // Take the mutex to protect the control variables
-                control_set_setpoint(&gCtrl[0], sp0);
-                control_set_setpoint(&gCtrl[1], sp1);
-                control_set_setpoint(&gCtrl[2], sp2);
-                xSemaphoreGive(gSys.mtx_cntrl); // Release the mutex
-
-                wrap_printf("Setpoints updated: %.2f, %.2f, %.2f\n", sp0, sp1, sp2);
-            } else {
-                wrap_printf("Failed to parse three float values.\n");
-            }
-        } else {
-            wrap_printf("Invalid format: closing quote not found.\n");
-        }
-    } else {
-        wrap_printf(" 'default' key not found.\n");
     }
 }
 
@@ -413,7 +305,7 @@ void motor_identification_all(void)
                 break;
             }
 
-            bldc_set_duty_motor(motor, (float)duty);
+            bldc_set_duty_motor(&gMotor[motor_index], (float)duty);
 
             if (motor_index == 0) {
                 data[cnt].duty = duty;  // Solo se asigna una vez en la primera ronda
@@ -456,7 +348,7 @@ bool is_drivers_ready(void)
     ///< Check if the drivers and sensors are ready to be used
     if (gMotor[0].is_calibrated && gMotor[1].is_calibrated && gMotor[2].is_calibrated &&
         gAS5600[0].is_calibrated && gAS5600[1].is_calibrated && gAS5600[2].is_calibrated &&
-        gBNO055.is_calibrated && gVL53L1X[0].is_calibrated && gVL53L1X[1].is_calibrated && gVL53L1X[2].is_calibrated) {
+        gBNO055.is_calibrated) {
         return true;
     }
     return false;
@@ -483,196 +375,45 @@ float calculate_motor_speed(kalman1D_t *kf, int midx)
     return kalman1D_update(kf, delta * SAMP_RATE_MOTOR_HZ);
 }
 
-void calculate_motor_setpoints(float *w1, float *w2, float *w3)
+
+void parse_and_update_setpoints(const char* uart_buffer)
 {
-    if (gTraj.ktime >= gTraj.k_duration) {
-        *w1 = 0, *w2 = 0, *w3 = 0;
-        xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); ///< Take the mutex to protect the control variables
-        control_reset_pid(&gCtrl[0]); ///< Reset the controller for motor 1
-        control_reset_pid(&gCtrl[1]); ///< Reset the controller for motor 2
-        control_reset_pid(&gCtrl[2]); ///< Reset the controller for motor 3
-        xSemaphoreGive(gSys.mtx_cntrl); ///< Release the mutex
-        return;
+    char parsed[MAX_PARSED_LEN];
+    float setpoints[3] = {0};
+
+    // Find the "default" key in the string
+    char *start = strstr(uart_buffer, "\"default\":\"");
+    if (start) {
+        start += strlen("\"default\":\""); // Move past the key
+
+        // Find the closing quote of the value
+        char *end = strchr(start, '"');
+        if (end && (end - start) < sizeof(parsed)) {
+            // Copy the value substring into a temporary buffer
+            strncpy(parsed, start, end - start);
+            parsed[end - start] = '\0';
+
+            float sp0 = 0, sp1 = 0, sp2 = 0;
+
+            // Parse three float values from the string
+            if (sscanf(parsed, "%f %f %f", &sp0, &sp1, &sp2) == 3) {
+                // Update the setpoints array
+                xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); // Take the mutex to protect the control variables
+                control_set_setpoint(&gCtrl[0], sp0);
+                control_set_setpoint(&gCtrl[1], sp1);
+                control_set_setpoint(&gCtrl[2], sp2);
+                xSemaphoreGive(gSys.mtx_cntrl); // Release the mutex
+
+                wrap_printf("Setpoints updated: %.2f, %.2f, %.2f\n", sp0, sp1, sp2);
+            } else {
+                wrap_printf("Failed to parse three float values.\n");
+            }
+        } else {
+            wrap_printf("Invalid format: closing quote not found.\n");
+        }
+    } else {
+        wrap_printf(" 'default' key not found.\n");
     }
-    
-    float vbx = 0, vby = 0, wb = 0;
-
-    switch (gTraj.cmd)
-    {
-    case C1_STRAIGHT:
-        vbx = gTraj.speed * cos(gTraj.angle);
-        vby = gTraj.speed * sin(gTraj.angle);
-        wb = 0;
-        calc_invkinematics(vbx, vby, wb, w1, w2, w3);
-        break;
-
-    case C2_ROTATION:
-        vbx = 0;
-        vby = 0;
-        wb = gTraj.omega; ///< Angular velocity for rotation
-        calc_invkinematics(vbx, vby, wb, w1, w2, w3);
-        break;
-
-    case C3_CIRCULAR:
-        vbx = - gTraj.radius * gTraj.omega * sin(gTraj.omega * (float)gTraj.ktime/SAMP_RATE_MOTOR_HZ);
-        vby =   gTraj.radius * gTraj.omega * cos(gTraj.omega * (float)gTraj.ktime/SAMP_RATE_MOTOR_HZ);
-        wb = 0;
-        calc_invkinematics(vbx, vby, wb, w1, w2, w3);
-        break;
-    
-    default:
-        *w1 = 0, *w2 = 0, *w3 = 0; ///< If no command is set, stop the motors
-        break;
-    }
-    gTraj.ktime++;
-}
-
-void calculate_trajectory_params(uint8_t cmd, float angle, float speed, float dist_r, bool dir)
-{
-    gTraj.cmd = cmd; ///< Set the command
-    gTraj.angle = angle; ///< Set the angle
-    gTraj.dir = dir; ///< Set the direction
-
-    switch (cmd)
-    {
-    case 1: ///< C1_STRAIGHT
-        gTraj.cmd = C1_STRAIGHT; ///< Set the command to straight
-        gTraj.speed = speed / 100; ///< Set the speed in m/s
-        gTraj.distance = dist_r / 100; ///< Set the distance in meters
-        gTraj.k_duration = (int)( (dist_r / speed) * SAMP_RATE_MOTOR_HZ); ///< Calculate the duration in samples
-        break;
-
-    case 2: ///< C2_ROTATION
-        gTraj.cmd = C2_ROTATION; ///< Set the command to rotation
-        gTraj.omega = speed;
-        gTraj.k_duration = (int)( (angle / speed) * SAMP_RATE_MOTOR_HZ); ///< Calculate the duration in samples
-        break;
-
-    case 3: ///< C3_CIRCULAR
-        gTraj.cmd = C3_CIRCULAR; ///< Set the command to circular
-        gTraj.speed = speed / 100; 
-        gTraj.radius = dist_r / 100; 
-        gTraj.dir = dir;
-        gTraj.omega = gTraj.speed / gTraj.radius; ///< Calculate the angular velocity
-        gTraj.k_duration = (uint32_t)( (gTraj.angle * gTraj.radius / gTraj.speed) * SAMP_RATE_MOTOR_HZ); ///< Calculate the duration in samples
-        break;
-
-    default:
-        gTraj.cmd = C_NONE;
-        break;
-    }
-    ///< Print the trajectory parameters
-    wrap_printf("Trajectory parameters: cmd: %d, angle: %.2f, speed: %.2f, omega: %.3f, distance: %.2f, radius: %.2f, dir: %d, k_duration: %d\n",
-                gTraj.cmd, gTraj.angle, gTraj.speed, gTraj.omega, gTraj.distance, gTraj.radius, gTraj.dir, gTraj.k_duration);
-    
-    gTraj.ktime = 0; ///< Reset the time counter
-
-    ///< Reset the controllers
-    xSemaphoreTake(gSys.mtx_cntrl, portMAX_DELAY); ///< Take the mutex to protect the control variables
-    for (int i = 0; i < 3; i++) {
-        control_reset_pid(&gCtrl[i]); ///< Reset the controller
-    }
-    xSemaphoreGive(gSys.mtx_cntrl); ///< Release the mutex
-}
-
-bool parse_command(const char* input, size_t len)
-{
-    char buffer[128];
-    if (len >= sizeof(buffer)) return false;
-
-    strncpy(buffer, input, len);
-    buffer[len] = '\0';
-
-    char* token = strtok(buffer, ",");
-    if (!token) return false;
-
-    // Local variables to store parsed values
-    float angle = 0.0f;
-    float speed = 0.0f;
-    float dist_or_radius = 0.0f;
-    bool dir = false; // false = CCW, true = CW
-    uint8_t cmd = 0;
-
-    if (strcmp(token, "C1") == 0) 
-    {
-        cmd = 1; // C1_STRAIGHT
-
-        // Angle (degrees)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        angle = atof(token);
-
-        // Speed (cm/s)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        speed = atof(token);
-
-        // Distance (cm)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        dist_or_radius = atof(token);
-
-        printf("C1 -> angle: %.2f deg, speed: %.2f cm/s, distance: %.2f cm\n",
-               angle, speed, dist_or_radius);
-    }
-    else if (strcmp(token, "C2") == 0)
-    {
-        cmd = 2; // C2_ROTATION
-
-        // Angle (degrees)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        angle = atof(token);
-
-        // Speed (rad/s)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        speed = atof(token);
-
-        printf("C2 -> angle: %.2f deg, speed: %.2f rad/s\n",
-               angle, speed);
-    }
-    else if (strcmp(token, "C3") == 0)
-    {
-        cmd = 3; // C3_CIRCULAR
-
-        // Direction
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        if (strcmp(token, "CW") == 0)
-            dir = true;
-        else if (strcmp(token, "CCW") == 0)
-            dir = false;
-        else
-            return false;
-
-        // Radius (cm)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        dist_or_radius = atof(token);
-
-        // Speed (cm/s)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        speed = atof(token);
-
-        // Angle (degrees)
-        token = strtok(NULL, ",");
-        if (!token) return false;
-        angle = atof(token);
-
-        printf("C3 -> direction: %s, radius: %.2f cm, speed: %.2f cm/s, angle: %.2f deg\n",
-               dir ? "CW" : "CCW", dist_or_radius, speed, angle);
-    }
-    else
-    {
-        return false; // Unknown command
-    }
-
-    // Update trajectory parameters
-    calculate_trajectory_params(cmd, angle * M_PI/180, speed, dist_or_radius, dir);
-
-    return true;
 }
 
 void wrap_printf(const char *format, ...)

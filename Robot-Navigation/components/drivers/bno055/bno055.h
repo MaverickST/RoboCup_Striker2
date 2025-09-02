@@ -24,7 +24,7 @@
 #include "bno055_defs.h"
 
 #define I2C_MASTER_FREQ_HZ  400*1000    /*!< I2C master clock frequency */
-#define BNO055_SENSOR_ADDR  0x29        /*!< slave address for BNO055 sensor */
+#define BNO055_SENSOR_ADDR  0x29        /*!< slave address for BNO055 sensor (ADDR pin to HIGH) */
 
 /**
  * @brief Enumerated type for the operation mode of the BNO055 sensor

@@ -40,14 +40,6 @@ bool setup_as5600(uint32_t num_checks);
 bool setup_bno055(uint32_t num_checks);
 
 /**
- * @brief Initialize and setup the BNO055 sensor
- * Also runs an individual check to verify the sensor.
- * 
- * @param num_checks Number of checks to verify the sensor.
- */
-bool setup_vl53l1x(uint32_t num_checks);
-
-/**
  * @brief Verify and check if all the sensors are ready to be used.
  * 
  * @param num_checks 
@@ -68,13 +60,6 @@ void init_system(void);
  * @param arg 
  */
 void sys_timer_cb(void *arg);
-
-/**
- * @brief Parses a JSON-like string and updates the velocity setpoints for the motors.
- * 
- * @param uart_buffer 
- */
-void parse_and_update_setpoints(const char *uart_buffer);
 
 /**
  * @brief Perform motor identification for all motors.
@@ -115,33 +100,12 @@ void stop_robot(void);
 float calculate_motor_speed(kalman1D_t *kf, int midx);
 
 /**
- * @brief Calculate the setpoints for the motors based on the current time.
+ * @brief Parses a JSON-like string and updates the velocity setpoints for the motors.
+ * It is a command send by xIMU3 GUI to update the setpoints.
  * 
- * @param ktime 
+ * @param uart_buffer 
  */
-void calculate_motor_setpoints(float *w1, float *w2, float *w3);
-
-/**
- * @brief Calculate the trajectory parameters based on the command, angle, speed, distance, and direction.
- * If a trajectory does not need any parameter, it can be set to 0.
- * 
- * @param cmd 1 for straight, 2 for rotation, 3 for circular, 0 for none
- * @param angle in radians
- * @param speed it can be cm/s or rad/s depending on the command
- * @param dist_r it can be the distance in cm for straight or radius in cm for circular
- * @param dir true for clockwise, false for counter-clockwise
- */
-void calculate_trajectory_params(uint8_t cmd, float angle, float speed, float dist_r, bool dir);
-
-/**
- * @brief Parse a command from a string input and update the trajectory structure.
- * 
- * @param input 
- * @param len 
- * @return true 
- * @return false 
- */
-bool parse_command(const char *input, size_t len);
+void parse_and_update_setpoints(const char *uart_buffer);
 
 /**
  * @brief Wrapper function for printf to handle formatted output.
