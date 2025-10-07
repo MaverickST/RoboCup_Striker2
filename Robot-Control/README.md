@@ -16,6 +16,50 @@ Each command is sent through the UDP communication interface located in [`udp_se
 
 ---
 
+## 🧠 System Structure
+
+The control logic is divided between the **UDP command server** (on PC) and the **embedded control system** (on ESP32-S3).  
+Commands are parsed, transformed into trajectory parameters, and then translated into individual wheel speed setpoints.
+
+<p align="center">
+  <img src="./docs/SW block diagram.jpg" alt="Software Architecture Diagram" width="500"/>
+</p>
+
+---
+
+## 🧰 Hardware Setup
+
+The system is built around the **ESP32-S3** microcontroller and the following components:
+
+| Component | Description |
+|------------|-------------|
+| **Microcontroller** | ESP32-S3 (FreeRTOS-based) |
+| **Motors** | 3x BLDC motors with Hall sensors |
+| **Encoders** | AS5600 magnetic encoders |
+| **Power source** | 6S Li-Po battery |
+| **Communication** | UDP server + Wi-Fi interface |
+
+<p align="center">
+  <img src="./docs/HW Block Diagram.jpg" alt="Hardware Architecture Diagram" width="500"/>
+</p>
+
+---
+
+## 🧵 Task Management
+
+The ESP32-S3 runs a **FreeRTOS** scheduler with three main tasks:  
+- **WiFi Command Task:** receives UDP velocity commands.  
+- **BLDC Control Task:** executes motor control every 1 ms (timer-triggered).  
+- **UART Task:** handles telemetry output.  
+
+A periodic timer releases the control loop via semaphore, ensuring deterministic updates.
+
+<p align="center">
+  <img src="./docs/Task Diagram.jpg" alt="Task Diagram" width="550">
+</p>
+
+---
+
 ## ⚙️ Control Architecture
 
 - **Sensors used:** Wheel encoders only.  
@@ -24,37 +68,9 @@ Each command is sent through the UDP communication interface located in [`udp_se
 - **Controller:** A **PI (Proportional–Integral)** controller was implemented for precise wheel speed tracking.  
 - **Kinematics:** Inverse kinematics are applied to convert desired robot body velocities into individual wheel targets.
 
-<!-- START: Robot Control Flow Diagram -->
-
-```mermaid
-graph LR
-    subgraph Command and Kinematics Level
-        direction LR
-        A[Motion Command (UDP)] 
-        A -->|v, \alpha, \text{radius}| B[Command Processing]
-        B -->|Body Velocity $v_x, v_y, \omega_z$| C[Inverse Kinematics]
-        C --> |$\omega_{target}$| I{Σ Summing Junction}
-        
-        style A fill:#e0f7fa,stroke:#00796b,stroke-width:2px
-        style B fill:#b3e5fc,stroke:#01579b,stroke-width:2px
-        style C fill:#81d4fa,stroke:#01579b,stroke-width:2px
-    end
-
-    subgraph Velocity Control Loop (Per Wheel)
-        direction LR
-        I --> E[PI Controller]
-        E --> F[DC Motor / Wheel (Plant)]
-        F --> G(Encoder)
-        G --> H[Kalman Filter]
-        H -->|$-\omega_{filtered}$| I
-        
-        style I fill:#fff8e1,stroke:#ffd740,stroke-width:2px
-        style E fill:#ffe0b2,stroke:#ffb74d,stroke-width:2px
-        style F fill:#ffccbc,stroke:#ff8a65,stroke-width:2px
-        style G fill:#f8bbd0,stroke:#e91e63,stroke-width:2px
-        style H fill:#f48fb1,stroke:#e91e63,stroke-width:2px
-    end
-```
+<p align="center">
+  <img src="./docs/Control Block Diagram.jpg" alt="Control Architecture Diagram" width="500"/>
+</p>
 
 ---
 

@@ -33,7 +33,9 @@ Below is a short demonstration of the Striker robot executing a **circular traje
 - Total rotations: **2**
 
 <p align="center">
-  <video src="assets/Omniwheel Robot_Demostration.mp4" width="150" controls></video>
+  <a href="https://youtube.com/shorts/QfciuxDoMYk" target="_blank">
+    <img src="assets/demo_thumbnail.png" alt="Omniwheel robot demo video" width="300">
+  </a>
 </p>
 
 ---
@@ -74,11 +76,11 @@ The coordinate reference system is centered at the robot’s chassis.
 
 - **Languages:** C / C++ / Python  
 - **Frameworks / Libraries:**  
-  - STM32 HAL or Pico SDK  
+  - ESP IDF  
   - Python UDP sockets (for server modules)  
   - Numpy, Matplotlib (for data analysis and visualization)  
 - **Operating Systems:**  
-  - Embedded firmware on MCU  
+  - FreeRTOS and Embedded firmware on MCU  
   - Linux/Windows for navigation and server components  
 
 ---
@@ -98,9 +100,8 @@ The coordinate reference system is centered at the robot’s chassis.
   - Conversion between robot-body frame and wheel-frame velocities  
 
 - **UDP Communication:**  
-  Bidirectional protocol for:
-  - Sending robot telemetry to local server  
-  - Receiving body velocity commands `[vbx, vby, wb]`  
+  - Local host
+  - Receiving body velocity commands  
 
 ---
 
