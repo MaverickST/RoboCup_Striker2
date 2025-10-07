@@ -1,125 +1,94 @@
-# Sensor Fusion Velocity Control
+# 🤖 Robot-Control
 
-## Description
+This module implements the **low-level velocity control** for the Omniwheel robot.  
+The system receives motion commands via a **UDP server**, processes them, and controls each wheel independently using **PI controllers** designed from identified motor models.
 
-This project implements state estimation (position and velocity) for a BLDC motor using sensor fusion (encoder, lidar, and IMU) through a Kalman Filter. The estimated states are fed into PID controllers for precise control of the motor's velocity and position. The system runs on an ESP32-S3 using FreeRTOS and ESP-IDF.
-
-The code is structured into modular components for easy portability and adaptation to other microcontrollers, through a hardware abstraction layer (HAL) defined in the `platform` directory.
-
-
-## Task Structure
-
-The system is organized into **seven FreeRTOS tasks**, each with a specific role. The **system initialization** (Init System) is not a task itself but runs before the scheduler starts, setting up drivers, peripherals, and shared resources.
-
-<p align="center">
-  <img src="docs/task_diagram.jpg" alt="FreeRTOS Task Diagram" width="700"/>
-</p>
-
-### ✔️ Tasks:
-
-1. **Trigger Task**: Periodically activated by a timer interrupt. It synchronizes all sensor reads and control updates.
-2. **Hall Sensor Task**: Acquires angular position data using the **AS5600** magnetic encoder.
-3. **IMU Task**: Retrieves linear acceleration and angular velocity from the **BNO055** IMU.
-4. **Lidar Task**: Measures distance using the **VL53L1X** ToF sensor.
-5. **Control Task**: Performs sensor fusion using a Kalman filter and computes the control output (incremental PID). It also pushes relevant data into a queue.
-6. **UART Task**: Receives setpoint commands from the serial interface and logs data for debugging or telemetry.
-7. **Save Task**: Reads data from a queue (pushed by the control task) and stores it for offline analysis (e.g., on an SD card or internal memory).
-
-> 🛠 **Init System**: Although not a task, this function runs at system startup to initialize hardware abstraction, timers, drivers, queues, and shared variables.
 ---
 
-## Features
+## 🧩 Overview
 
-- **Kalman Filter** for sensor fusion (encoder, IMU, and LIDAR)
-- **Incremental PID Controller** for velocity and position regulation
-- **FreeRTOS-based** architecture with 7 independent tasks
-- **Modular driver structure** using ESP-IDF components
-- **Platform Abstraction Layer** to support multiple MCUs
-- UART interface for runtime configuration and data output
+The robot can execute several types of movements commanded from the host computer:
+- **Linear motion** – Forward or backward with specified velocity and distance.  
+- **Circular motion** – Rotation around a defined radius and angular speed.  
+- **In-place rotation** – Spin around its own axis by a given angle.
 
+Each command is sent through the UDP communication interface located in [`udp_server`](../udp_server).
 
-## Hardware Overview
+---
 
-- **MCU:** ESP32-S3 (using [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/))
-- **Motor:** Brushless DC Motor (BLDC)
-- **ESC:** Electronic Speed Controller compatible with PWM
-- **Sensors:**
-  - AS5600 (Magnetic Encoder)
-  - VL53L1X (Time-of-Flight Lidar)
-  - BNO055 (9DOF IMU with sensor fusion)
-- **UART Serial** interface for command input
+## ⚙️ Control Architecture
 
+- **Sensors used:** Wheel encoders only.  
+- **Estimation:** Encoder-derived velocities are filtered using a **Kalman filter** to reduce noise.  
+- **Model identification:** Each DC motor was modeled as a **first-order system** to obtain parameters for controller tuning.  
+- **Controller:** A **PI (Proportional–Integral)** controller was implemented for precise wheel speed tracking.  
+- **Kinematics:** Inverse kinematics are applied to convert desired robot body velocities into individual wheel targets.
 
-## Project Structure
+<!-- START: Robot Control Flow Diagram -->
 
-```text
-├── components/
-│   ├── control/
-│   │   └── control_senfusion.c/.h
-│   ├── drivers/
-│   │   ├── bldc_pwm/
-│   │   ├── bno055/
-│   │   ├── as5600/
-│   │   ├── vl53l1x/
-│   │   ├── uart_console/
-│   │   └── led/
-│   ├── platform/
-│   │   ├── platform_esp32s3.c/.h
-│   │   └── platform_wifi_esp32s3.c/.h
-├── src/
-│   ├── main.c
-│   ├── functions.c/.h
-│   └── tasks.c/.h
-├── docs/
-│   └── task_diagram.png
-├── Makefile
-├── README.md
+```mermaid
+graph LR
+    subgraph Command and Kinematics Level
+        direction LR
+        A[Motion Command (UDP)] 
+        A -->|v, \alpha, \text{radius}| B[Command Processing]
+        B -->|Body Velocity $v_x, v_y, \omega_z$| C[Inverse Kinematics]
+        C --> |$\omega_{target}$| I{Σ Summing Junction}
+        
+        style A fill:#e0f7fa,stroke:#00796b,stroke-width:2px
+        style B fill:#b3e5fc,stroke:#01579b,stroke-width:2px
+        style C fill:#81d4fa,stroke:#01579b,stroke-width:2px
+    end
+
+    subgraph Velocity Control Loop (Per Wheel)
+        direction LR
+        I --> E[PI Controller]
+        E --> F[DC Motor / Wheel (Plant)]
+        F --> G(Encoder)
+        G --> H[Kalman Filter]
+        H -->|$-\omega_{filtered}$| I
+        
+        style I fill:#fff8e1,stroke:#ffd740,stroke-width:2px
+        style E fill:#ffe0b2,stroke:#ffb74d,stroke-width:2px
+        style F fill:#ffccbc,stroke:#ff8a65,stroke-width:2px
+        style G fill:#f8bbd0,stroke:#e91e63,stroke-width:2px
+        style H fill:#f48fb1,stroke:#e91e63,stroke-width:2px
+    end
 ```
 
+---
 
-## Dependencies
+## 🧠 Relation to Higher-Level Modules
 
-* ESP-IDF framework
-* FreeRTOS (included by default in ESP-IDF)
-* Sensor driver libraries (integrated into `components/drivers/`)
-* HAL files (`platform/`) for porting to other microcontrollers via I2C, UART, WiFi, ADC abstraction
-
-## Key Algorithms
-
-* **Kalman Filter** for sensor fusion:
-
-  * Two stages: `predict()` and `update()` functions
-  * State-space model: uses identified discrete-time matrices
-  * Uses sensor data from encoder, lidar, and IMU
-  * Inverse matrix computation is done using **LU Decomposition** (matrix factorization method for efficient inversion)
-
-* **Incremental PID Control** for velocity and position:
-
-  * The control system computes changes in the actuator signal rather than the absolute value, improving numerical stability on embedded systems.
+This module serves as the **foundation for [Robot-Navigation](../Robot-Navigation)**,  
+where higher-level behaviors (trajectory tracking, obstacle avoidance, and sensor fusion) are built on top of this control layer.
 
 ---
 
-## Getting Started
-
-### Requirements
-
-- ESP-IDF toolchain
-- CMake
-- Python 3.x for ESP-IDF tools
-- Drivers for AS5600, VL53L1X, BNO055
-
-### Build and Flash
+## 🚀 How to Run
 
 ```bash
-git clone https://github.com/MaverickST/RoboCup_Striker2.git
-cd RoboCup_Striker2
-idf.py set-target esp32s3
-idf.py build
-idf.py flash
-idf.py monitor
+# Open project directory
+cd Robot-Control
+
+# Build and deploy to the microcontroller
+make all
+# or compile from your preferred IDE
+
+# Start UDP server on PC
+cd ../udp_server
+python3 udp_server.py
 ```
 
-> ⚠️ Ensure the correct serial port is selected and the MCU is in bootloader mode.
+Commands can then be sent to control the robot’s motion.
+
+---
+
+## 🧪 Validation
+
+- Step response tests were used to validate the PI controller performance.
+- Encoder velocity filtering was verified against noisy raw signals.
+- Command tracking was analyzed for linear, circular, and rotational motions.
 
 ---
 
