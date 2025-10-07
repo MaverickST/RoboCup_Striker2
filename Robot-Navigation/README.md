@@ -23,7 +23,7 @@ The complete navigation stack is divided into **three functional levels**:
 3. **Robot (ESP32-S3)** – Executes real-time control using FreeRTOS tasks, sensor fusion, and cascaded PID controllers.
 
 <p align="center">
-  <img src="./docs/SW_Block_Diagram.jpg" alt="Software Architecture Diagram" width="600"/>
+  <img src="./docs/SW_Block_Diagram.jpg" alt="Software Architecture Diagram" width="500"/>
 </p>
 
 ---
@@ -39,7 +39,7 @@ The complete navigation stack is divided into **three functional levels**:
 - **Power:** 6S Li-Po battery  
 
 <p align="center">
-  <img src="./docs/HW Diagram.jpg" alt="Hardware Diagram" width="650">
+  <img src="./docs/HW Diagram.jpg" alt="Hardware Diagram" width="550">
 </p>
 
 ---
@@ -50,7 +50,7 @@ The ESP32-S3 executes multiple **real-time tasks** under FreeRTOS, each one resp
 The figure below illustrates how tasks interact through message queues and periodic timers.
 
 <p align="center">
-  <img src="./docs/Task Diagram.jpg" alt="Task Diagram" width="650">
+  <img src="./docs/Task Diagram.jpg" alt="Task Diagram" width="550">
 </p>
 
 # 🧠 Task Description
