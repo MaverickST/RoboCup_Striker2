@@ -97,7 +97,7 @@ void stop_robot(void);
  * @param midx Index of the motor (0, 1, or 2).
  * @return float 
  */
-float calculate_motor_speed(kalman1D_t *kf, int midx);
+float calculate_motor_speed(kalman1D_t *kf, int midx, float *delt);
 
 /**
  * @brief Parses a JSON-like string and updates the velocity setpoints for the motors.

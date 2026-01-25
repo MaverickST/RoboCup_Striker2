@@ -2,8 +2,8 @@
 
 void create_tasks(void)
 {   
-    ///< Create a task wifi_task to manage the Wi-Fi connection and UDP server maximum priority
-    xTaskCreate(app_network_task, "wifi_task", 10*1024, NULL, 24, NULL);
+    // ///< Create a task wifi_task to manage the Wi-Fi connection and UDP server maximum priority
+    // xTaskCreate(app_network_task, "wifi_task", 10*1024, NULL, 24, NULL);
     
     ///< Create a task to handle the UART events
     xTaskCreate(uart_event_task, "uart_event_task", 4*1024, NULL, 20, NULL);
@@ -15,7 +15,7 @@ void create_tasks(void)
     xTaskCreate(bldc_control_task, "bldc_control_task", 6*1024, NULL, 12, &gSys.task_handle_bldc_ctrl);
 
     ///< Create the trigger task
-    xTaskCreate(robot_control_task, "robot_control_task", 6*1024, NULL, 11, &gSys.task_handle_robot_ctrl);
+    xTaskCreate(robot_control_task, "robot_control_task", 80*1024, NULL, 11, &gSys.task_handle_robot_ctrl);
 
     ///< Create the save task
     //xTaskCreate(save_data_task, "save_nvs_task", 60*1024, NULL, 2, &gSys.task_handle_save);
@@ -64,7 +64,7 @@ bool create_kernel_objects(void)
         ESP_LOGI("init_system", "Queue for BLDC not created");
         return false;
     }
-    gSys.queue_robot = xQueueCreate(1, sizeof(float) * 3);
+    gSys.queue_robot = xQueueCreate(1, sizeof(float) * 6);
     if (gSys.queue_robot == NULL) {
         ESP_LOGI("init_system", "Queue for robot not created");
         return false;
@@ -111,9 +111,12 @@ void bno055_task(void *pvParameters)
             else if (delta < -M_PI) delta += 2 * M_PI;
 
             ///< Data from the BNO055 sensor
-            acc[0] = kalman1D_update(&kf_bno055[0], gBNO055.ax);
-            acc[1] = kalman1D_update(&kf_bno055[1], gBNO055.ay);
-            acc[2] = kalman1D_update(&kf_bno055[2], delta * SAMPLING_RATE_HZ); 
+            // acc[0] = kalman1D_update(&kf_bno055[0], gBNO055.ax);
+            // acc[1] = kalman1D_update(&kf_bno055[1], gBNO055.ay);
+            // acc[2] = kalman1D_update(&kf_bno055[2], delta * SAMPLING_RATE_HZ); 
+            acc[0] = gBNO055.ax;
+            acc[1] = gBNO055.ay;
+            acc[2] = gBNO055.yaw;
 
             ///< Update
             yaw_prev = gBNO055.yaw;
@@ -133,7 +136,7 @@ void robot_control_task(void *pvParameters)
     float vb[3] = {0, 0, 0}; ///< Body velocities: vb[0] = vbx, vb[1] = vby, vb[2] = wb
     float vb_sp[3] = {0}; ///< Body velocity setpoints.
     float vb_sp_prev[3] = {0}; ///< Previous body velocity setpoints.
-    float omega[3] = {0}; ///< Angular velocities: omega[0] = w1, omega[1] = w2, omega[2] = w3
+    float omega_u[6] = {0}; ///< Angular velocities: omega[0] = w1, omega[1] = w2, omega[2] = w3
     float w_sp[3] = {0}; ///< Angular velocity setpoints: w_sp[0] = w1_sp, w_sp[1] = w2_sp, w_sp[2] = w3_sp
     float acc[3] = {0}; ///< Accelerometer data: acc[0] = ax, acc[1] = ay, acc[2] = omega (rad/s)
     float pid_output[3] = {0}; ///< PID output body velocities
@@ -171,43 +174,117 @@ void robot_control_task(void *pvParameters)
         control_init(&vb_ctrl[i], 1.0f / SAMPLING_RATE_HZ, config_pid);
     }
 
+    ///< Array to store the data
+    int num_samples = 1200;
+    float data_log[1200][13] = {0}; // 1200 samples of [ax, ay, alpha, w1, w2, w3, u1, u2, u3, vbx_sp, vby_sp, wb_sp, time]
+    clock_t time = clock();
+
     while (true) {
         ///< Receive the accelerometer data from the BNO055 task
         xQueueReceive(gSys.queue_bno055, (void *)acc, portMAX_DELAY);
 
         ///< Get wheels angular velocities and calculate body velocities with forward kinematics
-        xQueueReceive(gSys.queue_robot, (void *)omega, 0);
-        calc_fordwkinematics(omega[0], omega[1], omega[2], &vb[0], &vb[1], &vb[2]);
+        xQueueReceive(gSys.queue_robot, (void *)omega_u, 0);
+        // calc_fordwkinematics(omega[0], omega[1], omega[2], &vb[0], &vb[1], &vb[2]);
 
-        ///< Receive the body velocities setpoints from the queue
-        BaseType_t status = xQueueReceive(gSys.queue_wifi, (void *)vb_sp, 0);
-        if (status != pdTRUE) { ///< If there is no data in the queue, use default values
-            vb_sp[0] = vb_sp_prev[0];
-            vb_sp[1] = vb_sp_prev[1];
-            vb_sp[2] = vb_sp_prev[2];
-        }
-        vb_sp_prev[0] = vb_sp[0];
-        vb_sp_prev[1] = vb_sp[1];
-        vb_sp_prev[2] = vb_sp[2];
+        // Complex circular trayectory
+        // speed = (angle * radius / TIME) * SMP_RATE = (2pi * 0.6 / 1200) * 100  = 0.3142 m/s;  omega = speed / radius = 0.3142 / 0.60 = 0.523 rad/s
+        float t = (float)(clock() - time) / CLOCKS_PER_SEC;
+        vb_sp[0] = -0.6f * 0.523* cosf(0.523 * t);
+        vb_sp[1] =  0.6f * 0.523 * sinf(0.523 * t);
+        vb_sp[2] = 0.0f;
 
-        ///< Apply sensor fusion to the body velocities
-        for (int i = 0; i < 3; i++) {
-            senfusion_predict(&fusion[i], acc[i] / SAMPLING_RATE_HZ);
-            senfusion_update1(&fusion[i], vb[i]);
-            if (i == 2) {
-                senfusion_update2(&fusion[i], acc[i]);
-            }
-        }
+        // // Square trayectory with rotation
+        // float t = (float)(clock() - time) / CLOCKS_PER_SEC;
+        // if (t < 2.5f) {
+        //     vb_sp[0] = 0.35f; vb_sp[1] = 0.0f; vb_sp[2] = 0.0f;
+        // }
+        // else if (t < 5.0f) {
+        //     vb_sp[0] = 0.0f; vb_sp[1] = 0.35f; vb_sp[2] = 0.0f;
+        // }
+        // else if (t < 7.5f) {
+        //     vb_sp[0] = -0.35f; vb_sp[1] = 0.0f; vb_sp[2] = 0.0f;
+        // }
+        // else if (t < 10.0f) {
+        //     vb_sp[0] = 0.0f; vb_sp[1] = -0.35f; vb_sp[2] = 0.0f;
+        // }
+        // else if (t < 12.0f) {
+        //     vb_sp[0] = 0.0f; vb_sp[1] = 0.0f; vb_sp[2] = -1.2f;
+        // }
+        // else {
+        //     vb_sp[0] = 0.0f; vb_sp[1] = 0.0f; vb_sp[2] = 0.0f;
+        // }
 
-        ///< PI control for body velocities
-        for (int i = 0; i < 3; i++) {
-            control_set_setpoint(&vb_ctrl[i], vb_sp[i]); ///< Set the setpoint for each body velocity
-            pid_output[i] = control_calc_pid_z(&vb_ctrl[i], senfusion_get_state(&fusion[i]));
-        }
-
-        ///< Inverse kinematics to calculate the setpoints for each motor
-        calc_invkinematics(pid_output[0], pid_output[1], pid_output[2], &w_sp[0], &w_sp[1], &w_sp[2]);
+        calc_invkinematics(vb_sp[0], vb_sp[1], vb_sp[2], &w_sp[0], &w_sp[1], &w_sp[2]);
         xQueueOverwrite(gSys.queue_bldc, (void *)w_sp);
+        
+        ///< Store the data in the array
+        if (cnt < num_samples) {
+            data_log[cnt][0] = acc[0];
+            data_log[cnt][1] = acc[1];
+            data_log[cnt][2] = acc[2];
+            data_log[cnt][3] = omega_u[0];
+            data_log[cnt][4] = omega_u[1];
+            data_log[cnt][5] = omega_u[2];
+            data_log[cnt][6] = omega_u[3];
+            data_log[cnt][7] = omega_u[4];
+            data_log[cnt][8] = omega_u[5];
+            data_log[cnt][9] = vb_sp[0];
+            data_log[cnt][10] = vb_sp[1];
+            data_log[cnt][11] = vb_sp[2];
+            data_log[cnt][12] = (float)(clock() - time) / CLOCKS_PER_SEC;
+        }
+        else {
+            ESP_ERROR_CHECK(esp_timer_stop(gSys.oneshot_timer));
+            vTaskDelete(gSys.task_handle_bno055);
+            vTaskDelete(gSys.task_handle_bldc_ctrl);
+            stop_robot();
+            vTaskDelay(pdMS_TO_TICKS(30000)); // wait 30s before printing the data
+            wrap_printf("Printing data log...\r\n");
+            wrap_printf("t, ax, ay, alpha, w1, w2, w3, u1, u2, u3, vbx_sp, vby_sp, wb_sp\r\n");
+            for (int i = 0; i < num_samples; i++) {
+                wrap_printf("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\r\n",
+                            data_log[i][12],
+                            data_log[i][0], data_log[i][1], data_log[i][2],
+                            data_log[i][3], data_log[i][4], data_log[i][5],
+                            data_log[i][6], data_log[i][7], data_log[i][8],
+                            data_log[i][9], data_log[i][10], data_log[i][11]);
+                if (i % 500 == 0) {
+                    vTaskDelay(pdMS_TO_TICKS(100));
+                }
+            }
+
+        }
+
+        // ///< Receive the body velocities setpoints from the queue
+        // BaseType_t status = xQueueReceive(gSys.queue_wifi, (void *)vb_sp, 0);
+        // if (status != pdTRUE) { ///< If there is no data in the queue, use default values
+        //     vb_sp[0] = vb_sp_prev[0];
+        //     vb_sp[1] = vb_sp_prev[1];
+        //     vb_sp[2] = vb_sp_prev[2];
+        // }
+        // vb_sp_prev[0] = vb_sp[0];
+        // vb_sp_prev[1] = vb_sp[1];
+        // vb_sp_prev[2] = vb_sp[2];
+
+        // ///< Apply sensor fusion to the body velocities
+        // for (int i = 0; i < 3; i++) {
+        //     senfusion_predict(&fusion[i], acc[i] / SAMPLING_RATE_HZ);
+        //     senfusion_update1(&fusion[i], vb[i]);
+        //     if (i == 2) {
+        //         senfusion_update2(&fusion[i], acc[i]);
+        //     }
+        // }
+
+        // ///< PI control for body velocities
+        // for (int i = 0; i < 3; i++) {
+        //     control_set_setpoint(&vb_ctrl[i], vb_sp[i]); ///< Set the setpoint for each body velocity
+        //     pid_output[i] = control_calc_pid_z(&vb_ctrl[i], senfusion_get_state(&fusion[i]));
+        // }
+
+        // ///< Inverse kinematics to calculate the setpoints for each motor
+        // calc_invkinematics(pid_output[0], pid_output[1], pid_output[2], &w_sp[0], &w_sp[1], &w_sp[2]);
+        // xQueueOverwrite(gSys.queue_bldc, (void *)w_sp);
 
         // ///< Print states
         // wrap_printf("A, %d, %.4f, %.4f, %.4f \r\n", // euler
@@ -264,12 +341,13 @@ void bldc_control_task(void *pvParameters)
         xSemaphoreTake(gSys.smph_bldc, portMAX_DELAY);
 
         ///< Control variables: get angle and calculate speed
+        float delta[3] = {0};
         for (int i = 0; i < 3; i++) {
-            omega[i] = calculate_motor_speed(&kalman_enc[i], i);
+            omega[i] = calculate_motor_speed(&kalman_enc[i], i, &delta[i]); // in rad/s
         }
-        ///< Send the angular velocities to the robot control task: 
-        ///< overwrite the queue so that the last value is always the current one
-        xQueueOverwrite(gSys.queue_robot, (void *)omega);
+        // ///< Send the angular velocities to the robot control task: 
+        // ///< overwrite the queue so that the last value is always the current one
+        // xQueueOverwrite(gSys.queue_robot, (void *)omega);
 
         ///< Get the current setpoints for each motor
         BaseType_t status = xQueueReceive(gSys.queue_bldc, (void *)w_sp, 0); ///< Receive the setpoints from the queue
@@ -290,7 +368,11 @@ void bldc_control_task(void *pvParameters)
         }
         xSemaphoreGive(gSys.mtx_cntrl); ///< Give the mutex to protect the access to the control variables
 
-        ///< Set the duty cycle of the motors
+        ///< Send the angular velocities to the robot control task: 
+        ///< overwrite the queue so that the last value is always the current one
+        float omega_u[6] = {delta[0], delta[1], delta[2], duty[0], duty[1], duty[2]};
+        xQueueOverwrite(gSys.queue_robot, (void *)omega_u);
+        
         for (int i = 0; i < 3; i++) {
             bldc_set_duty_motor(&gMotor[i], duty[i]);
         }

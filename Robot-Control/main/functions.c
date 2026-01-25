@@ -11,7 +11,7 @@ void init_drivers(void)
         .min_output   = -60,
         .max_integral = 200,
         .min_integral = -200,
-        .a1 = 1.53, .a0 = -1.5, .b1 = 1, .b0 = -1,
+        .a1 = 1.5296, .a0 = -1.5236, .b1 = 1, .b0 = -1,
         .order = 1,
     };
 

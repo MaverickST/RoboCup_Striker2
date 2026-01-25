@@ -311,7 +311,7 @@ void motor_identification_all(void)
                 data[cnt].duty = duty;  // Solo se asigna una vez en la primera ronda
             }
 
-            float speed = calculate_motor_speed(&kalman_enc[motor_index], motor_index);
+            float speed = calculate_motor_speed(&kalman_enc[motor_index], motor_index, NULL);
             data[cnt].speed[motor_index] = speed;
         }
 
@@ -362,7 +362,7 @@ void stop_robot(void)
     }
 }
 
-float calculate_motor_speed(kalman1D_t *kf, int midx)
+float calculate_motor_speed(kalman1D_t *kf, int midx, float *delt)
 {
     float raw = gAS5600[midx].angle_offset - AS5600_ADC_GetAngle(&gAS5600[midx]);
     float delta = raw - gAS5600[midx].angle_prev;
@@ -372,6 +372,7 @@ float calculate_motor_speed(kalman1D_t *kf, int midx)
 
     gAS5600[midx].angle_prev = raw; ///< Update the previous angle    
 
+    *delt = delta * SAMP_RATE_MOTOR_HZ; // in rad/s
     return kalman1D_update(kf, delta * SAMP_RATE_MOTOR_HZ);
 }
 

@@ -1,0 +1,2566 @@
+I (123156) cmd: dir-> 1, dist-> 10, vel-> 8
+Setpoint: dir 1, dist 0.117 m, vel 0.080 m/s
+
+Control: 0.13, Pos enc: -0.00 m, Vel enc: -0.079
+Control: 0.29, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 0.40, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 0.52, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 0.65, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 0.76, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 0.86, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 0.96, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 1.04, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 1.19, Pos enc: -0.00 m, Vel enc: -0.050
+Control: 1.30, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 1.40, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 1.51, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 1.82, Pos enc: -0.00 m, Vel enc: -0.250
+Control: 1.86, Pos enc: -0.00 m, Vel enc: 0.257
+Control: 1.82, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 1.93, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 2.05, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 2.15, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 2.29, Pos enc: -0.00 m, Vel enc: -0.043
+Control: 2.42, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 2.55, Pos enc: -0.00 m, Vel enc: -0.021
+Control: 2.62, Pos enc: -0.00 m, Vel enc: 0.064
+Control: 2.73, Pos enc: -0.00 m, Vel enc: -0.043
+Control: 2.85, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 2.92, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 3.02, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 3.16, Pos enc: -0.00 m, Vel enc: -0.021
+Control: 3.27, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 3.36, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 3.47, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 3.61, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 3.71, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 3.83, Pos enc: -0.00 m, Vel enc: -0.036
+Control: 3.93, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 4.03, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 4.14, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 4.26, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 4.36, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 4.49, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 4.62, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 4.71, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 4.83, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 4.93, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 5.05, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 5.11, Pos enc: -0.00 m, Vel enc: 0.064
+Control: 5.24, Pos enc: -0.00 m, Vel enc: -0.064
+Control: 5.38, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 5.47, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 5.59, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 5.68, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 5.80, Pos enc: -0.00 m, Vel enc: -0.036
+Control: 5.94, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 6.02, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 6.11, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 6.21, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 6.32, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 4.98, Pos enc: 0.02 m, Vel enc: 1.792
+Control: 4.11, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 4.23, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 5.77, Pos enc: -0.00 m, Vel enc: -1.742
+Control: 6.80, Pos enc: -0.00 m, Vel enc: 0.057
+Control: 5.76, Pos enc: 0.01 m, Vel enc: 1.378
+Control: 4.83, Pos enc: 0.02 m, Vel enc: 0.336
+Control: 6.51, Pos enc: -0.00 m, Vel enc: -2.163
+Control: 6.10, Pos enc: 0.02 m, Vel enc: 2.121
+Control: 5.32, Pos enc: 0.01 m, Vel enc: -0.357
+Control: 5.31, Pos enc: 0.02 m, Vel enc: 0.386
+Control: 6.65, Pos enc: -0.00 m, Vel enc: -1.778
+Control: 7.75, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 6.42, Pos enc: 0.02 m, Vel enc: 1.778
+Control: 5.98, Pos enc: 0.01 m, Vel enc: -0.550
+Control: 5.93, Pos enc: 0.02 m, Vel enc: 0.578
+Control: 5.75, Pos enc: 0.02 m, Vel enc: -0.043
+Control: 6.22, Pos enc: 0.01 m, Vel enc: -0.407
+Control: 7.67, Pos enc: -0.00 m, Vel enc: -1.371
+Control: 8.56, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 8.68, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 8.68, Pos enc: 0.00 m, Vel enc: 0.129
+Control: 7.95, Pos enc: 0.01 m, Vel enc: 0.935
+Control: 7.22, Pos enc: 0.01 m, Vel enc: 0.400
+Control: 6.81, Pos enc: 0.02 m, Vel enc: 0.357
+Control: 6.74, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 8.09, Pos enc: 0.00 m, Vel enc: -1.521
+Control: 7.82, Pos enc: 0.02 m, Vel enc: 1.514
+Control: 7.04, Pos enc: 0.02 m, Vel enc: 0.057
+Control: 7.12, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 7.23, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 8.79, Pos enc: -0.00 m, Vel enc: -1.785
+Control: 8.47, Pos enc: 0.02 m, Vel enc: 1.756
+Control: 7.95, Pos enc: 0.01 m, Vel enc: -0.436
+Control: 7.94, Pos enc: 0.02 m, Vel enc: 0.457
+Control: 7.78, Pos enc: 0.02 m, Vel enc: 0.014
+Control: 7.88, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 8.66, Pos enc: 0.01 m, Vel enc: -0.821
+Control: 8.56, Pos enc: 0.02 m, Vel enc: 0.821
+Control: 8.22, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 8.31, Pos enc: 0.02 m, Vel enc: 0.021
+Control: 8.42, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 8.51, Pos enc: 0.02 m, Vel enc: 0.021
+Control: 8.63, Pos enc: 0.02 m, Vel enc: -0.021
+Control: 8.77, Pos enc: 0.02 m, Vel enc: -0.029
+Control: 8.87, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 8.96, Pos enc: 0.02 m, Vel enc: 0.007
+Control: 9.04, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 9.17, Pos enc: 0.02 m, Vel enc: -0.043
+Control: 9.25, Pos enc: 0.02 m, Vel enc: 0.071
+Control: 9.37, Pos enc: 0.02 m, Vel enc: -0.064
+Control: 9.52, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 9.62, Pos enc: 0.02 m, Vel enc: 0.014
+Control: 9.72, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 9.83, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 9.95, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 10.07, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 10.18, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 12.00, Pos enc: -0.00 m, Vel enc: -2.106
+Control: 11.76, Pos enc: 0.02 m, Vel enc: 1.885
+Control: 10.68, Pos enc: 0.02 m, Vel enc: 0.171
+Control: 10.98, Pos enc: 0.01 m, Vel enc: -0.357
+Control: 12.74, Pos enc: -0.00 m, Vel enc: -1.792
+Control: 13.89, Pos enc: -0.01 m, Vel enc: -0.043
+Control: 12.19, Pos enc: 0.02 m, Vel enc: 2.256
+Control: 12.84, Pos enc: -0.00 m, Vel enc: -2.213
+Control: 12.39, Pos enc: 0.02 m, Vel enc: 2.206
+Control: 11.27, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 13.17, Pos enc: -0.00 m, Vel enc: -2.192
+Control: 12.74, Pos enc: 0.02 m, Vel enc: 2.171
+Control: 11.66, Pos enc: 0.02 m, Vel enc: -0.029
+Control: 12.06, Pos enc: 0.01 m, Vel enc: -0.336
+Control: 13.83, Pos enc: -0.00 m, Vel enc: -1.814
+Control: 14.39, Pos enc: 0.00 m, Vel enc: 0.685
+Control: 12.87, Pos enc: 0.02 m, Vel enc: 1.542
+Control: 12.53, Pos enc: 0.01 m, Vel enc: -0.514
+Control: 12.63, Pos enc: 0.02 m, Vel enc: 0.371
+Control: 13.02, Pos enc: 0.01 m, Vel enc: -0.607
+Control: 12.90, Pos enc: 0.02 m, Vel enc: 0.707
+Control: 14.38, Pos enc: -0.00 m, Vel enc: -2.178
+Control: 13.93, Pos enc: 0.02 m, Vel enc: 2.192
+Control: 12.81, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 12.91, Pos enc: 0.02 m, Vel enc: 0.014
+Control: 14.80, Pos enc: -0.00 m, Vel enc: -2.199
+Control: 16.12, Pos enc: -0.00 m, Vel enc: 0.021
+Control: 16.13, Pos enc: -0.00 m, Vel enc: 0.100
+Control: 14.49, Pos enc: 0.02 m, Vel enc: 2.092
+Control: 13.44, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 14.29, Pos enc: 0.01 m, Vel enc: -0.892
+Control: 15.94, Pos enc: -0.00 m, Vel enc: -1.292
+Control: 16.79, Pos enc: -0.00 m, Vel enc: -0.021
+Control: 16.92, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 15.23, Pos enc: 0.02 m, Vel enc: 2.235
+Control: 14.09, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 14.22, Pos enc: 0.02 m, Vel enc: -0.029
+Control: 16.13, Pos enc: -0.00 m, Vel enc: -2.199
+Control: 17.46, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 16.15, Pos enc: 0.01 m, Vel enc: 1.742
+Control: 14.90, Pos enc: 0.02 m, Vel enc: 0.471
+Control: 14.89, Pos enc: 0.02 m, Vel enc: -0.178
+Control: 16.74, Pos enc: -0.00 m, Vel enc: -2.013
+Control: 18.00, Pos enc: -0.00 m, Vel enc: -0.036
+Control: 18.02, Pos enc: -0.00 m, Vel enc: 0.136
+Control: 16.48, Pos enc: 0.02 m, Vel enc: 1.935
+Control: 17.19, Pos enc: -0.00 m, Vel enc: -2.071
+Control: 16.70, Pos enc: 0.02 m, Vel enc: 2.163
+Control: 17.08, Pos enc: -0.00 m, Vel enc: -1.821
+Control: 18.17, Pos enc: -0.00 m, Vel enc: 0.043
+Control: 18.58, Pos enc: -0.00 m, Vel enc: -0.393
+Control: 18.93, Pos enc: -0.01 m, Vel enc: -0.036
+Control: 19.03, Pos enc: -0.00 m, Vel enc: 0.043
+Control: 17.33, Pos enc: 0.02 m, Vel enc: 2.192
+Control: 16.19, Pos enc: 0.02 m, Vel enc: 0.036
+Control: 18.10, Pos enc: -0.00 m, Vel enc: -2.235
+Control: 19.45, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 19.55, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 19.66, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 19.77, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 18.36, Pos enc: 0.01 m, Vel enc: 1.856
+Control: 17.15, Pos enc: 0.02 m, Vel enc: 0.350
+Control: 18.52, Pos enc: -0.00 m, Vel enc: -1.792
+Control: 18.55, Pos enc: 0.01 m, Vel enc: 1.328
+Control: 19.32, Pos enc: -0.00 m, Vel enc: -1.721
+Control: 20.45, Pos enc: -0.01 m, Vel enc: -0.071
+Control: 20.48, Pos enc: -0.00 m, Vel enc: 0.150
+Control: 20.59, Pos enc: -0.00 m, Vel enc: -0.107
+Control: 20.76, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 20.77, Pos enc: -0.00 m, Vel enc: 0.129
+Control: 19.11, Pos enc: 0.02 m, Vel enc: 2.092
+Control: 19.83, Pos enc: -0.00 m, Vel enc: -2.185
+Control: 21.17, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 21.29, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 19.60, Pos enc: 0.02 m, Vel enc: 2.221
+Control: 18.50, Pos enc: 0.02 m, Vel enc: -0.029
+Control: 18.59, Pos enc: 0.02 m, Vel enc: 0.043
+Control: 18.68, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 18.81, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 18.93, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 20.84, Pos enc: -0.00 m, Vel enc: -2.221
+Control: 20.37, Pos enc: 0.02 m, Vel enc: 2.249
+Control: 21.04, Pos enc: -0.00 m, Vel enc: -2.235
+Control: 20.68, Pos enc: 0.02 m, Vel enc: 2.113
+Control: 20.93, Pos enc: 0.00 m, Vel enc: -1.635
+Control: 21.19, Pos enc: 0.01 m, Vel enc: 0.942
+Control: 20.18, Pos enc: 0.02 m, Vel enc: 0.735
+Control: 20.82, Pos enc: 0.01 m, Vel enc: -1.157
+Control: 20.61, Pos enc: 0.02 m, Vel enc: 1.185
+Control: 20.04, Pos enc: 0.02 m, Vel enc: 0.021
+Control: 20.13, Pos enc: 0.02 m, Vel enc: 0.014
+Control: 22.04, Pos enc: -0.00 m, Vel enc: -2.228
+Control: 22.21, Pos enc: 0.01 m, Vel enc: 1.457
+Control: 20.90, Pos enc: 0.02 m, Vel enc: 0.743
+Control: 22.38, Pos enc: -0.00 m, Vel enc: -2.199
+Control: 23.69, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 22.42, Pos enc: 0.01 m, Vel enc: 1.671
+Control: 21.20, Pos enc: 0.02 m, Vel enc: 0.493
+Control: 22.81, Pos enc: -0.00 m, Vel enc: -2.185
+Control: 24.15, Pos enc: -0.00 m, Vel enc: -0.021
+Control: 24.32, Pos enc: -0.01 m, Vel enc: -0.050
+Control: 24.32, Pos enc: -0.00 m, Vel enc: 0.164
+Control: 23.31, Pos enc: 0.01 m, Vel enc: 1.271
+Control: 23.83, Pos enc: -0.00 m, Vel enc: -1.385
+Control: 24.71, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 24.80, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 24.91, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 25.03, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 25.15, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 25.23, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 23.56, Pos enc: 0.02 m, Vel enc: 2.171
+Control: 24.25, Pos enc: -0.00 m, Vel enc: -2.206
+Control: 25.57, Pos enc: -0.00 m, Vel enc: 0.021
+Control: 24.26, Pos enc: 0.01 m, Vel enc: 1.735
+Control: 23.08, Pos enc: 0.02 m, Vel enc: 0.400
+Control: 24.70, Pos enc: -0.00 m, Vel enc: -2.135
+Control: 25.11, Pos enc: 0.01 m, Vel enc: 1.100
+Control: 25.50, Pos enc: -0.00 m, Vel enc: -1.107
+Control: 26.23, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 26.35, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 24.78, Pos enc: 0.02 m, Vel enc: 2.071
+Control: 25.40, Pos enc: -0.00 m, Vel enc: -2.056
+Control: 26.66, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 24.97, Pos enc: 0.02 m, Vel enc: 2.221
+Control: 24.11, Pos enc: 0.01 m, Vel enc: -0.328
+Control: 24.26, Pos enc: 0.02 m, Vel enc: 0.171
+Control: 25.97, Pos enc: -0.00 m, Vel enc: -2.078
+Control: 27.22, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 27.22, Pos enc: -0.00 m, Vel enc: 0.129
+Control: 27.37, Pos enc: -0.00 m, Vel enc: -0.136
+Control: 27.56, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 27.66, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 25.99, Pos enc: 0.02 m, Vel enc: 2.185
+Control: 24.88, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 25.44, Pos enc: 0.01 m, Vel enc: -0.557
+Control: 26.23, Pos enc: 0.01 m, Vel enc: -0.457
+Control: 27.54, Pos enc: -0.00 m, Vel enc: -1.164
+Control: 26.57, Pos enc: 0.02 m, Vel enc: 2.135
+Control: 25.45, Pos enc: 0.02 m, Vel enc: 0.050
+Control: 27.31, Pos enc: -0.00 m, Vel enc: -2.199
+Control: 28.63, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 28.74, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 27.07, Pos enc: 0.02 m, Vel enc: 2.213
+Control: 27.75, Pos enc: -0.00 m, Vel enc: -2.221
+Control: 29.10, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 29.18, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 27.49, Pos enc: 0.02 m, Vel enc: 2.185
+Control: 28.18, Pos enc: -0.00 m, Vel enc: -2.213
+Control: 29.52, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 28.26, Pos enc: 0.01 m, Vel enc: 1.685
+Control: 28.73, Pos enc: -0.00 m, Vel enc: -1.606
+Control: 29.65, Pos enc: -0.00 m, Vel enc: 0.107
+Control: 29.85, Pos enc: -0.00 m, Vel enc: -0.178
+Control: 28.34, Pos enc: 0.02 m, Vel enc: 2.113
+Control: 27.92, Pos enc: 0.01 m, Vel enc: -0.807
+Control: 29.53, Pos enc: -0.00 m, Vel enc: -1.292
+Control: 30.39, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 30.50, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 30.53, Pos enc: -0.00 m, Vel enc: 0.086
+Control: 28.99, Pos enc: 0.02 m, Vel enc: 1.971
+Control: 29.67, Pos enc: -0.00 m, Vel enc: -2.056
+Control: 29.13, Pos enc: 0.02 m, Vel enc: 2.213
+Control: 28.87, Pos enc: 0.01 m, Vel enc: -1.064
+Control: 30.52, Pos enc: -0.00 m, Vel enc: -1.157
+Control: 31.28, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 31.39, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 31.50, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 31.30, Pos enc: -0.00 m, Vel enc: 0.386
+Control: 31.50, Pos enc: -0.00 m, Vel enc: -0.386
+Control: 30.35, Pos enc: 0.01 m, Vel enc: 1.821
+Control: 30.71, Pos enc: -0.00 m, Vel enc: -1.564
+Control: 31.89, Pos enc: -0.00 m, Vel enc: -0.243
+Control: 30.65, Pos enc: 0.01 m, Vel enc: 1.835
+Control: 31.21, Pos enc: -0.00 m, Vel enc: -1.821
+Control: 32.37, Pos enc: -0.00 m, Vel enc: -0.036
+Control: 32.48, Pos enc: -0.00 m, Vel enc: 0.021
+Control: 32.59, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 32.21, Pos enc: 0.00 m, Vel enc: 0.607
+Control: 32.39, Pos enc: -0.00 m, Vel enc: -0.507
+Control: 32.87, Pos enc: -0.00 m, Vel enc: -0.100
+Control: 33.03, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 31.33, Pos enc: 0.02 m, Vel enc: 2.221
+Control: 30.67, Pos enc: 0.01 m, Vel enc: -0.578
+Control: 31.89, Pos enc: 0.00 m, Vel enc: -0.971
+Control: 32.70, Pos enc: 0.00 m, Vel enc: -0.193
+Control: 33.32, Pos enc: -0.00 m, Vel enc: -0.493
+Control: 32.79, Pos enc: 0.01 m, Vel enc: 1.121
+Control: 32.94, Pos enc: -0.00 m, Vel enc: -0.821
+Control: 33.57, Pos enc: -0.00 m, Vel enc: -0.079
+Control: 32.08, Pos enc: 0.02 m, Vel enc: 2.028
+Control: 32.84, Pos enc: -0.00 m, Vel enc: -2.199
+Control: 34.22, Pos enc: -0.00 m, Vel enc: -0.050
+Control: 34.35, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 32.64, Pos enc: 0.02 m, Vel enc: 2.242
+Control: 31.58, Pos enc: 0.02 m, Vel enc: -0.100
+Control: 33.48, Pos enc: -0.00 m, Vel enc: -2.142
+Control: 34.70, Pos enc: -0.00 m, Vel enc: 0.107
+Control: 33.08, Pos enc: 0.02 m, Vel enc: 2.056
+Control: 33.68, Pos enc: -0.00 m, Vel enc: -2.013
+Control: 33.19, Pos enc: 0.02 m, Vel enc: 2.121
+Control: 33.95, Pos enc: -0.00 m, Vel enc: -2.256
+Control: 35.33, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 35.43, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 35.52, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 35.65, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 35.75, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 34.06, Pos enc: 0.02 m, Vel enc: 2.199
+Control: 32.94, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 33.63, Pos enc: 0.01 m, Vel enc: -0.714
+Control: 35.28, Pos enc: -0.00 m, Vel enc: -1.407
+Control: 34.34, Pos enc: 0.02 m, Vel enc: 2.263
+Control: 33.24, Pos enc: 0.02 m, Vel enc: -0.064
+Control: 33.36, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 35.26, Pos enc: -0.00 m, Vel enc: -2.228
+Control: 36.60, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 36.73, Pos enc: -0.00 m, Vel enc: -0.036
+Control: 35.06, Pos enc: 0.02 m, Vel enc: 2.221
+Control: 34.12, Pos enc: 0.02 m, Vel enc: -0.236
+Control: 35.96, Pos enc: -0.00 m, Vel enc: -1.963
+Control: 37.06, Pos enc: -0.00 m, Vel enc: 0.121
+Control: 37.19, Pos enc: -0.00 m, Vel enc: -0.107
+Control: 37.37, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 37.50, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 35.87, Pos enc: 0.02 m, Vel enc: 2.142
+Control: 36.52, Pos enc: -0.00 m, Vel enc: -2.135
+Control: 36.05, Pos enc: 0.02 m, Vel enc: 2.178
+Control: 36.70, Pos enc: -0.00 m, Vel enc: -2.163
+Control: 38.03, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 38.14, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 38.25, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 38.38, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 38.48, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 38.59, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 38.71, Pos enc: -0.00 m, Vel enc: -0.021
+Control: 37.16, Pos enc: 0.02 m, Vel enc: 2.056
+Control: 37.78, Pos enc: -0.00 m, Vel enc: -2.035
+Control: 37.22, Pos enc: 0.02 m, Vel enc: 2.228
+Control: 36.11, Pos enc: 0.02 m, Vel enc: -0.029
+Control: 37.58, Pos enc: 0.00 m, Vel enc: -1.656
+Control: 37.20, Pos enc: 0.02 m, Vel enc: 1.742
+Control: 38.19, Pos enc: -0.00 m, Vel enc: -2.285
+Control: 39.57, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 39.68, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 39.80, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 39.91, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 40.02, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 40.14, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 40.23, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 40.40, Pos enc: -0.00 m, Vel enc: -0.093
+Control: 38.65, Pos enc: 0.02 m, Vel enc: 2.349
+Control: 39.28, Pos enc: -0.00 m, Vel enc: -2.256
+Control: 40.64, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 38.95, Pos enc: 0.02 m, Vel enc: 2.199
+Control: 37.81, Pos enc: 0.02 m, Vel enc: 0.036
+Control: 38.14, Pos enc: 0.02 m, Vel enc: -0.300
+Control: 38.31, Pos enc: 0.02 m, Vel enc: 0.129
+Control: 38.21, Pos enc: 0.02 m, Vel enc: 0.171
+Control: 38.60, Pos enc: 0.01 m, Vel enc: -0.464
+Control: 38.74, Pos enc: 0.02 m, Vel enc: 0.286
+Control: 38.82, Pos enc: 0.02 m, Vel enc: -0.157
+Control: 38.77, Pos enc: 0.02 m, Vel enc: 0.300
+Control: 38.73, Pos enc: 0.02 m, Vel enc: -0.021
+Control: 38.85, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 39.61, Pos enc: 0.01 m, Vel enc: -0.793
+Control: 39.45, Pos enc: 0.02 m, Vel enc: 0.871
+Control: 39.12, Pos enc: 0.02 m, Vel enc: -0.057
+Control: 41.08, Pos enc: -0.00 m, Vel enc: -2.235
+Control: 42.44, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 41.01, Pos enc: 0.02 m, Vel enc: 1.899
+Control: 40.77, Pos enc: 0.01 m, Vel enc: -0.878
+Control: 42.18, Pos enc: -0.00 m, Vel enc: -0.992
+Control: 42.85, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 42.97, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 43.09, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 41.44, Pos enc: 0.02 m, Vel enc: 2.171
+Control: 40.34, Pos enc: 0.02 m, Vel enc: 0.000
+Control: 42.21, Pos enc: -0.00 m, Vel enc: -2.171
+Control: 41.68, Pos enc: 0.02 m, Vel enc: 2.271
+Control: 40.83, Pos enc: 0.02 m, Vel enc: -0.371
+Control: 42.70, Pos enc: -0.00 m, Vel enc: -1.914
+Control: 42.02, Pos enc: 0.02 m, Vel enc: 2.285
+Control: 40.93, Pos enc: 0.02 m, Vel enc: -0.086
+Control: 41.07, Pos enc: 0.02 m, Vel enc: 0.021
+Control: 41.11, Pos enc: 0.02 m, Vel enc: 0.064
+Control: 41.10, Pos enc: 0.02 m, Vel enc: 0.100
+Control: 41.17, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 41.15, Pos enc: 0.02 m, Vel enc: 0.164
+Control: 41.46, Pos enc: 0.02 m, Vel enc: -0.350
+Control: 41.78, Pos enc: 0.02 m, Vel enc: -0.029
+Control: 41.74, Pos enc: 0.02 m, Vel enc: 0.214
+Control: 41.79, Pos enc: 0.02 m, Vel enc: -0.079
+Control: 41.92, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 42.04, Pos enc: 0.02 m, Vel enc: -0.036
+Control: 41.97, Pos enc: 0.02 m, Vel enc: 0.250
+Control: 42.37, Pos enc: 0.02 m, Vel enc: -0.528
+Control: 42.70, Pos enc: 0.02 m, Vel enc: 0.093
+Control: 41.82, Pos enc: 0.03 m, Vel enc: 1.150
+Control: 33.96, Pos enc: 0.12 m, Vel enc: 9.032
+Control task finished. Position: 0.40 m, Velocity: 9.03 m/s
+---- Sent utf8 encoded message: "set I10_8" ----
+I (152509) uart_task: UART_DATA
+I (152510) uart_task: cmd-> set
+I (152510) cmd: dir-> 0, dist-> 10, vel-> 8
+Setpoint: dir 0, dist 0.019 m, vel -0.080 m/s
+
+Control: 32.54, Pos enc: 0.07 m, Vel enc: -4.491
+Control: 34.96, Pos enc: 0.07 m, Vel enc: -0.029
+Control: 34.87, Pos enc: 0.07 m, Vel enc: 0.000
+Control: 34.76, Pos enc: 0.07 m, Vel enc: 0.000
+Control: 34.64, Pos enc: 0.07 m, Vel enc: 0.007
+Control: 34.53, Pos enc: 0.07 m, Vel enc: 0.000
+Control: 34.43, Pos enc: 0.07 m, Vel enc: -0.007
+Control: 34.31, Pos enc: 0.07 m, Vel enc: 0.007
+Control: 34.21, Pos enc: 0.07 m, Vel enc: -0.007
+Control: 34.08, Pos enc: 0.07 m, Vel enc: 0.021
+Control: 33.93, Pos enc: 0.07 m, Vel enc: 0.043
+Control: 33.74, Pos enc: 0.08 m, Vel enc: 0.071
+Control: 33.57, Pos enc: 0.08 m, Vel enc: 0.014
+Control: 33.40, Pos enc: 0.08 m, Vel enc: 0.071
+Control: 33.31, Pos enc: 0.08 m, Vel enc: -0.071
+Control: 33.14, Pos enc: 0.08 m, Vel enc: 0.121
+Control: 32.98, Pos enc: 0.08 m, Vel enc: -0.021
+Control: 29.75, Pos enc: 0.11 m, Vel enc: 3.863
+Control: 27.75, Pos enc: 0.11 m, Vel enc: -0.336
+Control: 30.30, Pos enc: 0.08 m, Vel enc: -3.042
+Control: 28.82, Pos enc: 0.12 m, Vel enc: 3.784
+Control: 26.59, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 26.48, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 29.75, Pos enc: 0.08 m, Vel enc: -4.155
+Control: 28.58, Pos enc: 0.12 m, Vel enc: 4.155
+Control: 26.16, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 26.05, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 25.94, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 25.83, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 25.72, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 25.61, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 25.19, Pos enc: 0.12 m, Vel enc: 0.378
+Control: 24.32, Pos enc: 0.13 m, Vel enc: 0.678
+Control: 24.03, Pos enc: 0.13 m, Vel enc: -0.243
+Control: 23.92, Pos enc: 0.13 m, Vel enc: 0.164
+Control: 23.66, Pos enc: 0.13 m, Vel enc: 0.079
+Control: 22.89, Pos enc: 0.14 m, Vel enc: 0.750
+Control: 21.91, Pos enc: 0.14 m, Vel enc: 0.564
+Control: 21.19, Pos enc: 0.15 m, Vel enc: 0.364
+Control: 19.17, Pos enc: 0.17 m, Vel enc: 2.099
+Control: 18.60, Pos enc: 0.16 m, Vel enc: -0.878
+Control: 16.99, Pos enc: 0.18 m, Vel enc: 2.456
+Control: 16.45, Pos enc: 0.17 m, Vel enc: -1.164
+Control: 16.99, Pos enc: 0.17 m, Vel enc: 0.000
+Control: 16.77, Pos enc: 0.17 m, Vel enc: 0.143
+Control: 15.59, Pos enc: 0.19 m, Vel enc: 1.214
+Control: 13.72, Pos enc: 0.20 m, Vel enc: 1.335
+Control: 13.11, Pos enc: 0.20 m, Vel enc: -0.293
+Control: 14.46, Pos enc: 0.18 m, Vel enc: -1.599
+Control: 13.43, Pos enc: 0.20 m, Vel enc: 2.235
+Control: 13.74, Pos enc: 0.18 m, Vel enc: -2.056
+Control: 14.66, Pos enc: 0.18 m, Vel enc: 0.143
+Control: 12.66, Pos enc: 0.20 m, Vel enc: 2.228
+Control: 13.17, Pos enc: 0.18 m, Vel enc: -2.292
+Control: 14.35, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 12.36, Pos enc: 0.21 m, Vel enc: 2.328
+Control: 12.72, Pos enc: 0.18 m, Vel enc: -2.178
+Control: 13.85, Pos enc: 0.18 m, Vel enc: -0.029
+Control: 13.77, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 13.65, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 13.48, Pos enc: 0.18 m, Vel enc: 0.071
+Control: 11.60, Pos enc: 0.21 m, Vel enc: 2.135
+Control: 12.03, Pos enc: 0.18 m, Vel enc: -2.142
+Control: 13.10, Pos enc: 0.18 m, Vel enc: 0.021
+Control: 13.00, Pos enc: 0.18 m, Vel enc: -0.021
+Control: 12.89, Pos enc: 0.18 m, Vel enc: 0.007
+Control: 12.76, Pos enc: 0.18 m, Vel enc: 0.029
+Control: 10.78, Pos enc: 0.21 m, Vel enc: 2.278
+Control: 9.48, Pos enc: 0.21 m, Vel enc: -0.100
+Control: 11.13, Pos enc: 0.18 m, Vel enc: -2.099
+Control: 10.43, Pos enc: 0.21 m, Vel enc: 2.178
+Control: 9.16, Pos enc: 0.21 m, Vel enc: -0.071
+Control: 10.87, Pos enc: 0.18 m, Vel enc: -2.185
+Control: 11.86, Pos enc: 0.19 m, Vel enc: 0.136
+Control: 11.69, Pos enc: 0.19 m, Vel enc: -0.014
+Control: 11.61, Pos enc: 0.19 m, Vel enc: -0.029
+Control: 11.52, Pos enc: 0.19 m, Vel enc: 0.000
+Control: 10.13, Pos enc: 0.20 m, Vel enc: 1.578
+Control: 9.53, Pos enc: 0.20 m, Vel enc: -0.478
+Control: 10.59, Pos enc: 0.18 m, Vel enc: -1.114
+Control: 9.53, Pos enc: 0.20 m, Vel enc: 1.928
+Control: 9.98, Pos enc: 0.18 m, Vel enc: -2.006
+Control: 9.23, Pos enc: 0.21 m, Vel enc: 2.171
+Control: 9.67, Pos enc: 0.18 m, Vel enc: -2.171
+Control: 10.76, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 8.75, Pos enc: 0.21 m, Vel enc: 2.328
+Control: 7.34, Pos enc: 0.21 m, Vel enc: 0.000
+Control: 7.34, Pos enc: 0.21 m, Vel enc: -0.129
+Control: 7.37, Pos enc: 0.21 m, Vel enc: -0.093
+Control: 9.05, Pos enc: 0.18 m, Vel enc: -2.135
+Control: 10.14, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 10.08, Pos enc: 0.18 m, Vel enc: -0.050
+Control: 10.00, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 9.90, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 7.96, Pos enc: 0.21 m, Vel enc: 2.263
+Control: 8.20, Pos enc: 0.19 m, Vel enc: -1.985
+Control: 9.40, Pos enc: 0.18 m, Vel enc: -0.243
+Control: 9.43, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 9.37, Pos enc: 0.18 m, Vel enc: -0.050
+Control: 9.28, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 9.15, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 9.02, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 7.14, Pos enc: 0.21 m, Vel enc: 2.171
+Control: 5.75, Pos enc: 0.21 m, Vel enc: 0.086
+Control: 5.78, Pos enc: 0.20 m, Vel enc: -0.228
+Control: 7.52, Pos enc: 0.18 m, Vel enc: -2.121
+Control: 8.56, Pos enc: 0.18 m, Vel enc: 0.043
+Control: 8.41, Pos enc: 0.18 m, Vel enc: 0.021
+Control: 8.42, Pos enc: 0.18 m, Vel enc: -0.164
+Control: 6.70, Pos enc: 0.20 m, Vel enc: 2.092
+Control: 5.30, Pos enc: 0.20 m, Vel enc: 0.150
+Control: 5.13, Pos enc: 0.20 m, Vel enc: -0.021
+Control: 5.01, Pos enc: 0.20 m, Vel enc: 0.021
+Control: 6.67, Pos enc: 0.18 m, Vel enc: -2.192
+Control: 7.76, Pos enc: 0.18 m, Vel enc: 0.036
+Control: 7.66, Pos enc: 0.18 m, Vel enc: -0.036
+Control: 5.86, Pos enc: 0.20 m, Vel enc: 2.106
+Control: 6.34, Pos enc: 0.18 m, Vel enc: -2.185
+Control: 7.41, Pos enc: 0.18 m, Vel enc: 0.050
+Control: 7.20, Pos enc: 0.18 m, Vel enc: 0.093
+Control: 6.97, Pos enc: 0.18 m, Vel enc: 0.086
+Control: 6.84, Pos enc: 0.18 m, Vel enc: -0.036
+Control: 6.74, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 4.81, Pos enc: 0.21 m, Vel enc: 2.228
+Control: 5.22, Pos enc: 0.18 m, Vel enc: -2.163
+Control: 5.05, Pos enc: 0.20 m, Vel enc: 1.557
+Control: 5.41, Pos enc: 0.18 m, Vel enc: -1.642
+Control: 6.23, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 6.11, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 6.07, Pos enc: 0.18 m, Vel enc: -0.093
+Control: 6.02, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 5.92, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 5.77, Pos enc: 0.18 m, Vel enc: 0.050
+Control: 5.65, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 5.64, Pos enc: 0.18 m, Vel enc: -0.114
+Control: 5.64, Pos enc: 0.18 m, Vel enc: -0.057
+Control: 4.11, Pos enc: 0.20 m, Vel enc: 1.785
+Control: 4.42, Pos enc: 0.18 m, Vel enc: -1.742
+Control: 5.29, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 5.12, Pos enc: 0.18 m, Vel enc: 0.093
+Control: 5.02, Pos enc: 0.18 m, Vel enc: -0.079
+Control: 4.93, Pos enc: 0.18 m, Vel enc: 0.029
+Control: 3.09, Pos enc: 0.20 m, Vel enc: 2.106
+Control: 1.81, Pos enc: 0.20 m, Vel enc: 0.000
+Control: 3.36, Pos enc: 0.18 m, Vel enc: -2.042
+Control: 4.44, Pos enc: 0.18 m, Vel enc: -0.064
+Control: 4.35, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 4.18, Pos enc: 0.18 m, Vel enc: 0.064
+Control: 4.05, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 3.99, Pos enc: 0.18 m, Vel enc: -0.050
+Control: 3.89, Pos enc: 0.18 m, Vel enc: 0.021
+Control: 3.76, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 3.62, Pos enc: 0.18 m, Vel enc: 0.029
+Control: 3.50, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 3.44, Pos enc: 0.18 m, Vel enc: -0.043
+Control: 3.32, Pos enc: 0.18 m, Vel enc: 0.043
+Control: 3.22, Pos enc: 0.18 m, Vel enc: -0.050
+Control: 3.11, Pos enc: 0.18 m, Vel enc: 0.036
+Control: 2.98, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 2.84, Pos enc: 0.18 m, Vel enc: 0.043
+Control: 2.73, Pos enc: 0.18 m, Vel enc: -0.029
+Control: 2.66, Pos enc: 0.18 m, Vel enc: -0.029
+Control: 2.58, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 2.44, Pos enc: 0.18 m, Vel enc: 0.043
+Control: 2.32, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 2.20, Pos enc: 0.18 m, Vel enc: 0.014
+Control: 2.10, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 2.00, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 1.91, Pos enc: 0.18 m, Vel enc: -0.029
+Control: 1.82, Pos enc: 0.18 m, Vel enc: -0.007
+Control: 1.69, Pos enc: 0.18 m, Vel enc: 0.036
+Control: 1.56, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 1.45, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 1.34, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 1.24, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 1.15, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 1.01, Pos enc: 0.18 m, Vel enc: 0.043
+Control: 0.88, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 0.77, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 0.70, Pos enc: 0.18 m, Vel enc: -0.050
+Control: 0.59, Pos enc: 0.18 m, Vel enc: 0.036
+Control: 0.47, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 0.37, Pos enc: 0.18 m, Vel enc: 0.000
+Control: 0.27, Pos enc: 0.18 m, Vel enc: -0.014
+Control: 0.14, Pos enc: 0.18 m, Vel enc: 0.043
+Control: 0.02, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -0.06, Pos enc: 0.18 m, Vel enc: -0.036
+Control: -0.15, Pos enc: 0.18 m, Vel enc: 0.007
+Control: -0.26, Pos enc: 0.18 m, Vel enc: -0.007
+Control: -0.38, Pos enc: 0.18 m, Vel enc: 0.021
+Control: -0.52, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -0.62, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -0.73, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -0.85, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -0.96, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -1.05, Pos enc: 0.18 m, Vel enc: -0.029
+Control: -1.14, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -1.27, Pos enc: 0.18 m, Vel enc: 0.029
+Control: -1.39, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -1.49, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -1.61, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -1.74, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -1.85, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -1.94, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -2.04, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -2.17, Pos enc: 0.18 m, Vel enc: 0.029
+Control: -2.27, Pos enc: 0.18 m, Vel enc: -0.029
+Control: -2.36, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -2.45, Pos enc: 0.18 m, Vel enc: -0.007
+Control: -2.59, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -2.69, Pos enc: 0.18 m, Vel enc: -0.036
+Control: -2.78, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -2.90, Pos enc: 0.18 m, Vel enc: 0.021
+Control: -3.01, Pos enc: 0.18 m, Vel enc: -0.021
+Control: -3.13, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -3.25, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -3.34, Pos enc: 0.18 m, Vel enc: -0.021
+Control: -3.46, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -3.56, Pos enc: 0.18 m, Vel enc: -0.036
+Control: -3.68, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -3.80, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -3.88, Pos enc: 0.18 m, Vel enc: -0.021
+Control: -4.01, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -4.12, Pos enc: 0.18 m, Vel enc: -0.029
+Control: -4.20, Pos enc: 0.18 m, Vel enc: -0.007
+Control: -4.34, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -4.48, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -4.59, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -4.66, Pos enc: 0.18 m, Vel enc: -0.036
+Control: -4.75, Pos enc: 0.18 m, Vel enc: 0.007
+Control: -4.89, Pos enc: 0.18 m, Vel enc: 0.029
+Control: -5.01, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -5.11, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -5.23, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -5.36, Pos enc: 0.18 m, Vel enc: 0.014
+Control: -5.43, Pos enc: 0.18 m, Vel enc: -0.050
+Control: -5.52, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -5.67, Pos enc: 0.18 m, Vel enc: 0.050
+Control: -5.76, Pos enc: 0.18 m, Vel enc: -0.050
+Control: -5.87, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -5.99, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -6.09, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -6.32, Pos enc: 0.18 m, Vel enc: 0.143
+Control: -8.11, Pos enc: 0.20 m, Vel enc: 1.978
+Control: -8.49, Pos enc: 0.19 m, Vel enc: -1.035
+Control: -7.17, Pos enc: 0.18 m, Vel enc: -1.042
+Control: -8.45, Pos enc: 0.20 m, Vel enc: 2.156
+Control: -7.98, Pos enc: 0.18 m, Vel enc: -2.199
+Control: -8.68, Pos enc: 0.20 m, Vel enc: 2.242
+Control: -10.33, Pos enc: 0.21 m, Vel enc: 0.357
+Control: -10.74, Pos enc: 0.21 m, Vel enc: 0.129
+Control: -9.34, Pos enc: 0.19 m, Vel enc: -1.956
+Control: -9.69, Pos enc: 0.21 m, Vel enc: 1.642
+Control: -10.90, Pos enc: 0.21 m, Vel enc: 0.228
+Control: -10.99, Pos enc: 0.21 m, Vel enc: -0.178
+Control: -10.95, Pos enc: 0.21 m, Vel enc: -0.064
+Control: -9.22, Pos enc: 0.18 m, Vel enc: -2.221
+Control: -8.07, Pos enc: 0.18 m, Vel enc: -0.029
+Control: -8.14, Pos enc: 0.18 m, Vel enc: -0.021
+Control: -10.03, Pos enc: 0.20 m, Vel enc: 2.206
+Control: -11.03, Pos enc: 0.20 m, Vel enc: -0.421
+Control: -9.46, Pos enc: 0.18 m, Vel enc: -1.778
+Control: -10.42, Pos enc: 0.21 m, Vel enc: 2.271
+Control: -10.03, Pos enc: 0.18 m, Vel enc: -2.178
+Control: -10.41, Pos enc: 0.20 m, Vel enc: 1.828
+Control: -11.66, Pos enc: 0.20 m, Vel enc: 0.143
+Control: -11.89, Pos enc: 0.20 m, Vel enc: 0.050
+Control: -10.31, Pos enc: 0.18 m, Vel enc: -2.106
+Control: -11.17, Pos enc: 0.21 m, Vel enc: 2.363
+Control: -10.75, Pos enc: 0.18 m, Vel enc: -2.278
+Control: -9.54, Pos enc: 0.18 m, Vel enc: -0.057
+Control: -11.53, Pos enc: 0.21 m, Vel enc: 2.356
+Control: -11.04, Pos enc: 0.18 m, Vel enc: -2.356
+Control: -9.85, Pos enc: 0.18 m, Vel enc: 0.021
+Control: -10.03, Pos enc: 0.18 m, Vel enc: 0.071
+Control: -10.23, Pos enc: 0.18 m, Vel enc: 0.064
+Control: -10.40, Pos enc: 0.19 m, Vel enc: 0.029
+Control: -10.57, Pos enc: 0.19 m, Vel enc: 0.057
+Control: -10.70, Pos enc: 0.19 m, Vel enc: -0.014
+Control: -10.80, Pos enc: 0.19 m, Vel enc: 0.000
+Control: -10.95, Pos enc: 0.19 m, Vel enc: 0.050
+Control: -11.06, Pos enc: 0.19 m, Vel enc: -0.036
+Control: -11.18, Pos enc: 0.19 m, Vel enc: 0.036
+Control: -11.29, Pos enc: 0.19 m, Vel enc: -0.029
+Control: -11.36, Pos enc: 0.19 m, Vel enc: -0.021
+Control: -11.44, Pos enc: 0.19 m, Vel enc: -0.029
+Control: -11.50, Pos enc: 0.18 m, Vel enc: -0.043
+Control: -11.64, Pos enc: 0.19 m, Vel enc: 0.071
+Control: -11.74, Pos enc: 0.19 m, Vel enc: -0.057
+Control: -11.82, Pos enc: 0.19 m, Vel enc: 0.000
+Control: -11.98, Pos enc: 0.19 m, Vel enc: 0.057
+Control: -12.12, Pos enc: 0.19 m, Vel enc: 0.000
+Control: -12.19, Pos enc: 0.19 m, Vel enc: -0.043
+Control: -12.32, Pos enc: 0.19 m, Vel enc: 0.043
+Control: -12.41, Pos enc: 0.19 m, Vel enc: -0.043
+Control: -12.49, Pos enc: 0.19 m, Vel enc: -0.014
+Control: -12.58, Pos enc: 0.18 m, Vel enc: -0.014
+Control: -12.67, Pos enc: 0.18 m, Vel enc: -0.007
+Control: -12.71, Pos enc: 0.18 m, Vel enc: -0.086
+Control: -14.56, Pos enc: 0.21 m, Vel enc: 2.199
+Control: -15.94, Pos enc: 0.21 m, Vel enc: 0.057
+Control: -14.24, Pos enc: 0.18 m, Vel enc: -2.271
+Control: -13.05, Pos enc: 0.18 m, Vel enc: -0.043
+Control: -13.16, Pos enc: 0.18 m, Vel enc: 0.036
+Control: -13.26, Pos enc: 0.18 m, Vel enc: -0.036
+Control: -14.71, Pos enc: 0.20 m, Vel enc: 1.671
+Control: -16.22, Pos enc: 0.21 m, Vel enc: 0.578
+Control: -16.58, Pos enc: 0.21 m, Vel enc: -0.086
+Control: -16.65, Pos enc: 0.21 m, Vel enc: 0.014
+Control: -14.97, Pos enc: 0.18 m, Vel enc: -2.221
+Control: -13.84, Pos enc: 0.18 m, Vel enc: 0.000
+Control: -14.85, Pos enc: 0.19 m, Vel enc: 1.114
+Control: -14.68, Pos enc: 0.18 m, Vel enc: -1.114
+Control: -15.93, Pos enc: 0.20 m, Vel enc: 2.171
+Control: -15.38, Pos enc: 0.18 m, Vel enc: -2.306
+Control: -15.55, Pos enc: 0.20 m, Vel enc: 1.656
+Control: -16.89, Pos enc: 0.20 m, Vel enc: 0.378
+Control: -17.11, Pos enc: 0.20 m, Vel enc: -0.121
+Control: -15.49, Pos enc: 0.18 m, Vel enc: -2.042
+Control: -16.18, Pos enc: 0.20 m, Vel enc: 2.113
+Control: -15.69, Pos enc: 0.18 m, Vel enc: -2.185
+Control: -16.01, Pos enc: 0.20 m, Vel enc: 1.756
+Control: -15.58, Pos enc: 0.18 m, Vel enc: -1.871
+Control: -16.25, Pos enc: 0.20 m, Vel enc: 1.978
+Control: -17.45, Pos enc: 0.20 m, Vel enc: -0.021
+Control: -17.45, Pos enc: 0.20 m, Vel enc: -0.121
+Control: -17.46, Pos enc: 0.20 m, Vel enc: -0.043
+Control: -17.45, Pos enc: 0.20 m, Vel enc: -0.114
+Control: -17.27, Pos enc: 0.19 m, Vel enc: -0.278
+Control: -15.62, Pos enc: 0.17 m, Vel enc: -1.971
+Control: -14.43, Pos enc: 0.17 m, Vel enc: -0.250
+Control: -14.52, Pos enc: 0.17 m, Vel enc: 0.150
+Control: -16.12, Pos enc: 0.19 m, Vel enc: 1.728
+Control: -16.99, Pos enc: 0.19 m, Vel enc: -0.250
+Control: -16.47, Pos enc: 0.18 m, Vel enc: -0.600
+Control: -15.49, Pos enc: 0.17 m, Vel enc: -0.928
+Control: -14.02, Pos enc: 0.16 m, Vel enc: -1.307
+Control: -13.04, Pos enc: 0.15 m, Vel enc: -0.450
+Control: -12.78, Pos enc: 0.15 m, Vel enc: -0.143
+Control: -12.75, Pos enc: 0.15 m, Vel enc: -0.071
+Control: -12.64, Pos enc: 0.15 m, Vel enc: -0.221
+Control: -12.97, Pos enc: 0.15 m, Vel enc: 0.421
+Control: -12.32, Pos enc: 0.14 m, Vel enc: -1.228
+Control: -11.62, Pos enc: 0.14 m, Vel enc: -0.150
+Control: -11.48, Pos enc: 0.14 m, Vel enc: -0.207
+Control: -11.84, Pos enc: 0.14 m, Vel enc: 0.450
+Control: -12.14, Pos enc: 0.14 m, Vel enc: -0.079
+Control: -11.98, Pos enc: 0.14 m, Vel enc: -0.278
+Control: -11.86, Pos enc: 0.14 m, Vel enc: -0.086
+Control: -11.04, Pos enc: 0.13 m, Vel enc: -1.085
+Control: -10.18, Pos enc: 0.12 m, Vel enc: -0.443
+Control: -10.51, Pos enc: 0.13 m, Vel enc: 0.571
+Control: -10.91, Pos enc: 0.13 m, Vel enc: -0.036
+Control: -10.96, Pos enc: 0.13 m, Vel enc: -0.050
+Control: -10.90, Pos enc: 0.13 m, Vel enc: -0.171
+Control: -10.38, Pos enc: 0.12 m, Vel enc: -0.664
+Control: -10.12, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.23, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.34, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.44, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.58, Pos enc: 0.12 m, Vel enc: 0.036
+Control: -10.68, Pos enc: 0.12 m, Vel enc: -0.036
+Control: -10.77, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.88, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.99, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.10, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.21, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.32, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.43, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.54, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.65, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -11.76, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -8.49, Pos enc: 0.08 m, Vel enc: -4.163
+Control: -8.19, Pos enc: 0.10 m, Vel enc: 2.363
+Control: -10.99, Pos enc: 0.12 m, Vel enc: 1.685
+Control: -8.70, Pos enc: 0.08 m, Vel enc: -4.113
+Control: -6.46, Pos enc: 0.08 m, Vel enc: -0.071
+Control: -9.80, Pos enc: 0.12 m, Vel enc: 4.034
+Control: -11.03, Pos enc: 0.10 m, Vel enc: -1.392
+Control: -11.61, Pos enc: 0.12 m, Vel enc: 1.535
+Control: -9.61, Pos enc: 0.08 m, Vel enc: -3.656
+Control: -7.77, Pos enc: 0.08 m, Vel enc: 0.114
+Control: -10.40, Pos enc: 0.11 m, Vel enc: 3.020
+Control: -9.28, Pos enc: 0.08 m, Vel enc: -3.584
+Control: -10.63, Pos enc: 0.12 m, Vel enc: 3.984
+Control: -9.58, Pos enc: 0.07 m, Vel enc: -4.170
+Control: -10.27, Pos enc: 0.11 m, Vel enc: 3.584
+Control: -12.68, Pos enc: 0.11 m, Vel enc: 0.371
+Control: -13.15, Pos enc: 0.12 m, Vel enc: 0.193
+Control: -13.37, Pos enc: 0.12 m, Vel enc: 0.000
+Control: -10.07, Pos enc: 0.07 m, Vel enc: -4.198
+Control: -7.85, Pos enc: 0.07 m, Vel enc: 0.021
+Control: -8.15, Pos enc: 0.08 m, Vel enc: 0.214
+Control: -11.68, Pos enc: 0.12 m, Vel enc: 4.070
+Control: -13.32, Pos enc: 0.11 m, Vel enc: -0.914
+Control: -11.79, Pos enc: 0.09 m, Vel enc: -1.399
+Control: -9.50, Pos enc: 0.07 m, Vel enc: -1.985
+Control: -8.51, Pos enc: 0.07 m, Vel enc: 0.007
+Control: -11.83, Pos enc: 0.11 m, Vel enc: 3.948
+Control: -10.95, Pos enc: 0.07 m, Vel enc: -3.934
+Control: -12.05, Pos enc: 0.11 m, Vel enc: 3.927
+Control: -14.35, Pos enc: 0.11 m, Vel enc: -0.007
+Control: -11.12, Pos enc: 0.07 m, Vel enc: -4.098
+Control: -8.99, Pos enc: 0.07 m, Vel enc: 0.057
+Control: -9.07, Pos enc: 0.07 m, Vel enc: -0.086
+Control: -11.19, Pos enc: 0.10 m, Vel enc: 2.542
+Control: -13.93, Pos enc: 0.11 m, Vel enc: 1.492
+Control: -11.67, Pos enc: 0.07 m, Vel enc: -3.941
+Control: -12.27, Pos enc: 0.11 m, Vel enc: 3.313
+Control: -14.60, Pos enc: 0.11 m, Vel enc: 0.457
+Control: -11.74, Pos enc: 0.07 m, Vel enc: -3.977
+Control: -9.66, Pos enc: 0.07 m, Vel enc: 0.036
+Control: -12.84, Pos enc: 0.11 m, Vel enc: 3.756
+Control: -11.86, Pos enc: 0.07 m, Vel enc: -3.920
+Control: -9.91, Pos enc: 0.07 m, Vel enc: 0.164
+Control: -10.07, Pos enc: 0.07 m, Vel enc: -0.050
+Control: -10.14, Pos enc: 0.07 m, Vel enc: -0.014
+Control: -10.30, Pos enc: 0.07 m, Vel enc: 0.064
+Control: -10.42, Pos enc: 0.07 m, Vel enc: -0.029
+Control: -10.31, Pos enc: 0.07 m, Vel enc: -0.257
+Control: -10.37, Pos enc: 0.07 m, Vel enc: 0.121
+Control: -10.29, Pos enc: 0.07 m, Vel enc: -0.314
+Control: -10.38, Pos enc: 0.07 m, Vel enc: 0.193
+Control: -10.80, Pos enc: 0.07 m, Vel enc: 0.250
+Control: -10.51, Pos enc: 0.06 m, Vel enc: -0.664
+Control: -10.16, Pos enc: 0.06 m, Vel enc: -0.114
+Control: -10.47, Pos enc: 0.07 m, Vel enc: 0.328
+Control: -10.82, Pos enc: 0.07 m, Vel enc: 0.064
+Control: -10.87, Pos enc: 0.07 m, Vel enc: -0.114
+Control: -13.26, Pos enc: 0.10 m, Vel enc: 2.885
+Control: -14.96, Pos enc: 0.10 m, Vel enc: -0.021
+Control: -15.09, Pos enc: 0.10 m, Vel enc: 0.036
+Control: -17.13, Pos enc: 0.12 m, Vel enc: 2.356
+Control: -16.64, Pos enc: 0.10 m, Vel enc: -2.356
+Control: -15.42, Pos enc: 0.10 m, Vel enc: -0.014
+Control: -15.53, Pos enc: 0.10 m, Vel enc: 0.007
+Control: -15.64, Pos enc: 0.10 m, Vel enc: 0.000
+Control: -8.78, Pos enc: 0.01 m, Vel enc: -8.582
+Control task finished. Position: 0.32 m, Velocity: -8.58 m/s
+---- Sent utf8 encoded message: "set I10_8" ----
+I (204860) uart_task: UART_DATA
+I (204860) uart_task: cmd-> set
+I (204860) cmd: dir-> 0, dist-> 10, vel-> 8
+Setpoint: dir 0, dist -0.090 m, vel -0.080 m/s
+
+Control: -4.71, Pos enc: 0.02 m, Vel enc: 0.743
+Control: -5.23, Pos enc: 0.02 m, Vel enc: 0.000
+Control: -5.32, Pos enc: 0.02 m, Vel enc: -0.021
+Control: -5.42, Pos enc: 0.02 m, Vel enc: 0.000
+Control: -5.53, Pos enc: 0.02 m, Vel enc: -0.007
+Control: -5.63, Pos enc: 0.02 m, Vel enc: 0.000
+Control: -5.75, Pos enc: 0.02 m, Vel enc: 0.014
+Control: -5.86, Pos enc: 0.02 m, Vel enc: -0.014
+Control: -5.96, Pos enc: 0.02 m, Vel enc: 0.000
+Control: -6.08, Pos enc: 0.02 m, Vel enc: 0.007
+Control: -6.18, Pos enc: 0.02 m, Vel enc: -0.007
+Control: -6.27, Pos enc: 0.02 m, Vel enc: -0.021
+Control: -6.40, Pos enc: 0.02 m, Vel enc: 0.036
+Control: -6.54, Pos enc: 0.02 m, Vel enc: 0.014
+Control: -6.66, Pos enc: 0.02 m, Vel enc: 0.000
+Control: -6.75, Pos enc: 0.02 m, Vel enc: -0.014
+Control: -6.86, Pos enc: 0.02 m, Vel enc: 0.000
+Control: -6.95, Pos enc: 0.02 m, Vel enc: -0.014
+Control: -7.04, Pos enc: 0.02 m, Vel enc: -0.014
+Control: -7.16, Pos enc: 0.02 m, Vel enc: 0.021
+Control: -7.30, Pos enc: 0.02 m, Vel enc: 0.021
+Control: -7.41, Pos enc: 0.02 m, Vel enc: -0.014
+Control: -7.50, Pos enc: 0.02 m, Vel enc: -0.014
+Control: -7.62, Pos enc: 0.02 m, Vel enc: 0.014
+Control: -7.74, Pos enc: 0.02 m, Vel enc: 0.014
+Control: -6.13, Pos enc: -0.00 m, Vel enc: -2.135
+Control: -6.74, Pos enc: 0.02 m, Vel enc: 2.085
+Control: -6.24, Pos enc: -0.01 m, Vel enc: -2.178
+Control: -6.95, Pos enc: 0.02 m, Vel enc: 2.228
+Control: -8.32, Pos enc: 0.02 m, Vel enc: 0.021
+Control: -6.89, Pos enc: -0.00 m, Vel enc: -1.914
+Control: -7.66, Pos enc: 0.02 m, Vel enc: 2.135
+Control: -9.08, Pos enc: 0.02 m, Vel enc: 0.150
+Control: -9.32, Pos enc: 0.02 m, Vel enc: 0.050
+Control: -9.47, Pos enc: 0.02 m, Vel enc: 0.014
+Control: -9.63, Pos enc: 0.02 m, Vel enc: 0.057
+Control: -9.70, Pos enc: 0.02 m, Vel enc: -0.093
+Control: -9.52, Pos enc: 0.02 m, Vel enc: -0.293
+Control: -8.06, Pos enc: 0.00 m, Vel enc: -1.728
+Control: -7.04, Pos enc: -0.00 m, Vel enc: -0.207
+Control: -6.89, Pos enc: -0.00 m, Vel enc: -0.178
+Control: -8.71, Pos enc: 0.02 m, Vel enc: 2.235
+Control: -8.25, Pos enc: -0.00 m, Vel enc: -2.235
+Control: -8.98, Pos enc: 0.02 m, Vel enc: 2.292
+Control: -10.19, Pos enc: 0.02 m, Vel enc: -0.221
+Control: -8.46, Pos enc: -0.00 m, Vel enc: -2.113
+Control: -7.34, Pos enc: -0.00 m, Vel enc: -0.050
+Control: -7.28, Pos enc: -0.01 m, Vel enc: -0.186
+Control: -9.08, Pos enc: 0.02 m, Vel enc: 2.221
+Control: -8.80, Pos enc: -0.00 m, Vel enc: -2.013
+Control: -9.55, Pos enc: 0.02 m, Vel enc: 2.178
+Control: -10.81, Pos enc: 0.02 m, Vel enc: -0.086
+Control: -10.88, Pos enc: 0.02 m, Vel enc: 0.014
+Control: -11.07, Pos enc: 0.02 m, Vel enc: 0.093
+Control: -9.28, Pos enc: -0.01 m, Vel enc: -2.406
+Control: -9.99, Pos enc: 0.02 m, Vel enc: 2.385
+Control: -9.67, Pos enc: -0.00 m, Vel enc: -2.163
+Control: -8.62, Pos enc: -0.00 m, Vel enc: 0.057
+Control: -10.59, Pos enc: 0.02 m, Vel enc: 2.249
+Control: -12.06, Pos enc: 0.02 m, Vel enc: 0.136
+Control: -10.32, Pos enc: -0.00 m, Vel enc: -2.370
+Control: -9.17, Pos enc: -0.00 m, Vel enc: 0.079
+Control: -9.31, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -9.40, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -9.49, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -9.61, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -9.71, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -9.75, Pos enc: -0.00 m, Vel enc: -0.079
+Control: -9.86, Pos enc: -0.00 m, Vel enc: 0.050
+Control: -10.01, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -10.12, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -10.20, Pos enc: -0.00 m, Vel enc: -0.036
+Control: -10.29, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -10.40, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -10.53, Pos enc: -0.00 m, Vel enc: 0.021
+Control: -10.66, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -10.73, Pos enc: -0.00 m, Vel enc: -0.064
+Control: -10.83, Pos enc: -0.00 m, Vel enc: 0.029
+Control: -10.95, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -11.06, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -11.17, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -11.28, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -11.33, Pos enc: -0.00 m, Vel enc: -0.079
+Control: -11.40, Pos enc: -0.00 m, Vel enc: 0.007
+Control: -11.54, Pos enc: -0.00 m, Vel enc: 0.043
+Control: -11.64, Pos enc: -0.00 m, Vel enc: -0.043
+Control: -13.57, Pos enc: 0.02 m, Vel enc: 2.263
+Control: -14.87, Pos enc: 0.02 m, Vel enc: -0.086
+Control: -14.47, Pos enc: 0.01 m, Vel enc: -0.564
+Control: -14.80, Pos enc: 0.02 m, Vel enc: 0.650
+Control: -13.45, Pos enc: -0.00 m, Vel enc: -2.235
+Control: -12.32, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -12.39, Pos enc: -0.00 m, Vel enc: -0.050
+Control: -14.24, Pos enc: 0.02 m, Vel enc: 2.185
+Control: -14.26, Pos enc: 0.00 m, Vel enc: -1.614
+Control: -13.02, Pos enc: -0.00 m, Vel enc: -0.550
+Control: -12.86, Pos enc: -0.00 m, Vel enc: 0.043
+Control: -12.96, Pos enc: -0.00 m, Vel enc: -0.043
+Control: -13.07, Pos enc: -0.00 m, Vel enc: 0.029
+Control: -13.19, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -13.28, Pos enc: -0.00 m, Vel enc: -0.029
+Control: -13.37, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -13.51, Pos enc: -0.00 m, Vel enc: 0.029
+Control: -13.59, Pos enc: -0.00 m, Vel enc: -0.050
+Control: -13.68, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -13.83, Pos enc: -0.00 m, Vel enc: 0.036
+Control: -13.94, Pos enc: -0.00 m, Vel enc: -0.029
+Control: -14.02, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -14.13, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -14.25, Pos enc: -0.00 m, Vel enc: 0.007
+Control: -14.59, Pos enc: -0.00 m, Vel enc: 0.286
+Control: -14.69, Pos enc: -0.00 m, Vel enc: -0.214
+Control: -14.63, Pos enc: -0.00 m, Vel enc: -0.057
+Control: -16.33, Pos enc: 0.02 m, Vel enc: 1.999
+Control: -15.92, Pos enc: -0.00 m, Vel enc: -2.013
+Control: -14.90, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -15.01, Pos enc: -0.00 m, Vel enc: 0.007
+Control: -15.14, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -15.24, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -15.35, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -15.45, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -15.58, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -15.68, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -15.78, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -15.88, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -15.98, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -16.10, Pos enc: -0.00 m, Vel enc: 0.021
+Control: -16.23, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -16.33, Pos enc: -0.00 m, Vel enc: -0.021
+Control: -16.43, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -16.55, Pos enc: -0.00 m, Vel enc: 0.029
+Control: -16.68, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -16.77, Pos enc: -0.00 m, Vel enc: -0.029
+Control: -16.87, Pos enc: -0.00 m, Vel enc: 0.007
+Control: -16.99, Pos enc: -0.00 m, Vel enc: 0.007
+Control: -17.09, Pos enc: -0.00 m, Vel enc: -0.007
+Control: -17.24, Pos enc: -0.00 m, Vel enc: 0.050
+Control: -17.35, Pos enc: -0.00 m, Vel enc: -0.029
+Control: -17.45, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -17.60, Pos enc: -0.00 m, Vel enc: 0.057
+Control: -17.71, Pos enc: -0.00 m, Vel enc: -0.043
+Control: -17.81, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -17.90, Pos enc: -0.00 m, Vel enc: -0.029
+Control: -17.98, Pos enc: -0.00 m, Vel enc: -0.021
+Control: -19.69, Pos enc: 0.02 m, Vel enc: 1.985
+Control: -19.29, Pos enc: -0.00 m, Vel enc: -1.985
+Control: -18.32, Pos enc: -0.00 m, Vel enc: 0.036
+Control: -18.43, Pos enc: -0.00 m, Vel enc: -0.029
+Control: -18.53, Pos enc: -0.00 m, Vel enc: 0.014I (206359) save_data_task: Buffer full, printing data to console
+Duty    Angle(deg)      Acce(m^2)       Dist(m) Pos(m)  Vel(m/s)
+
+Control: -20.43, Pos enc: 0.02 m, Vel enc: 2.185
+Control: -19.98, Pos enc: -0.00 m, Vel enc: -2.185
+Control: -18.88, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -18.99, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -19.08, Pos enc: -0.00 m, Vel enc: -0.014
+Control: -19.19, Pos enc: -0.00 m, Vel enc: 0.014
+Control: -19.31, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -19.42, Pos enc: -0.00 m, Vel enc: 0.000
+Control: -19.53, Pos enc: -0.00 m, Vel enc: 0.000
+
+Control task finished. Position: 0.14 m, Velocity: 1.71 m/s
+31.3    -8.86   8.3181  -0.0130 0.3556  -0.0071
+31.4    -8.86   8.6026  -0.0130 0.3537  0.0000
+31.5    -8.86   12.6117 -0.0130 0.3524  0.0000
+31.3    -1.50   8.5808  -0.0130 0.3528  0.3856
+31.5    -8.86   3.7062  -0.0130 0.3522  -0.3856
+30.3    25.91   4.3788  -0.0130 0.3570  1.8207
+30.7    -3.95   2.5027  -0.0130 0.3565  -1.5637
+31.9    -8.59   5.8268  -0.0130 0.3553  -0.2428
+30.6    26.45   6.8150  -0.0130 0.3593  1.8350
+31.2    -8.32   3.6211  -0.0130 0.3576  -1.8207
+32.4    -9.00   8.8795  -0.0130 0.3559  -0.0357
+32.5    -8.59   1.9413  -0.0130 0.3545  0.0214
+32.6    -8.86   8.6924  -0.0130 0.3535  -0.0143
+32.2    2.73    1.9500  -0.0130 0.3545  0.6069
+32.4    -6.95   3.5569  -0.0130 0.3539  -0.5069
+32.9    -8.86   5.6994  -0.0130 0.3533  -0.1000
+33.0    -8.73   6.5774  -0.0130 0.3528  0.0071
+31.3    33.68   3.4862  -0.0130 0.3587  2.2205
+30.7    22.64   7.8802  -0.0130 0.3620  -0.5783
+31.9    4.09    9.5449  -0.0130 0.3616  -0.9710
+32.7    0.41    2.0861  -0.0130 0.3604  -0.1928
+33.3    -9.00   2.6109  -0.0130 0.3579  -0.4927
+32.8    12.41   2.7583  -0.0130 0.3589  1.1210
+32.9    -3.27   1.0548  -0.0130 0.3575  -0.8211
+33.6    -4.77   9.9800  -0.0130 0.3561  -0.0785
+32.1    33.95   5.2051  -0.0130 0.3608  2.0278
+32.8    -8.05   3.0053  -0.0130 0.3585  -2.1991
+34.2    -9.00   9.1132  -0.0130 0.3563  -0.0500
+34.4    -8.86   5.4606  -0.0130 0.3546  0.0071
+32.6    33.95   8.9293  -0.0130 0.3597  2.2420
+31.6    32.05   8.6559  -0.0130 0.3639  -0.1000
+33.5    -8.86   4.6068  -0.0130 0.3610  -2.1420
+34.7    -6.82   3.6797  -0.0130 0.3586  0.1071
+33.1    32.45   7.9402  -0.0130 0.3625  2.0563
+33.7    -6.00   5.1868  -0.0130 0.3602  -2.0135
+33.2    34.50   4.7020  -0.0130 0.3641  2.1206
+33.9    -8.59   6.7198  -0.0130 0.3610  -2.2562
+35.3    -8.86   4.5196  -0.0130 0.3582  -0.0143
+35.4    -8.59   5.8671  -0.0130 0.3561  0.0143
+35.5    -8.32   2.9207  -0.0130 0.3547  0.0143
+35.6    -8.86   11.1068 -0.0130 0.3537  -0.0286
+35.8    -8.32   7.7086  -0.0130 0.3533  0.0286
+34.1    33.68   3.5000  -0.0130 0.3594  2.1991
+32.9    33.68   6.2355  -0.0130 0.3645  0.0000
+33.6    20.05   9.3022  -0.0130 0.3664  -0.7140
+35.3    -6.82   3.3493  -0.0130 0.3636  -1.4066
+34.3    36.41   3.6259  -0.0130 0.3673  2.2634
+33.2    35.18   2.2388  -0.0130 0.3701  -0.0643
+33.4    35.73   1.6881  -0.0130 0.3721  0.0286
+35.3    -6.82   6.1633  -0.0130 0.3671  -2.2277
+36.6    -6.55   3.3774  -0.0130 0.3628  0.0143
+36.7    -7.23   2.8806  -0.0130 0.3592  -0.0357
+35.1    35.18   2.8999  -0.0130 0.3629  2.2205
+34.1    30.68   7.1719  -0.0130 0.3656  -0.2356
+36.0    -6.82   2.6936  -0.0130 0.3622  -1.9635
+37.1    -4.50   5.4336  -0.0130 0.3596  0.1214
+37.2    -6.55   3.0054  -0.0130 0.3573  -0.1071
+37.4    -6.82   2.6300  -0.0130 0.3557  -0.0143
+37.5    -6.95   6.8586  -0.0130 0.3546  -0.0071
+35.9    33.95   0.6054  -0.0130 0.3600  2.1420
+36.5    -6.82   5.6920  -0.0130 0.3586  -2.1349
+36.1    34.77   2.8448  -0.0130 0.3633  2.1777
+36.7    -6.55   4.1193  -0.0130 0.3611  -2.1634
+38.0    -6.82   2.0280  -0.0130 0.3589  -0.0143
+38.1    -6.55   4.3971  -0.0130 0.3572  0.0143
+38.2    -6.82   1.9360  -0.0130 0.3558  -0.0143
+38.4    -7.09   3.7007  -0.0130 0.3549  -0.0143
+38.5    -6.82   0.4215  -0.0130 0.3542  0.0143
+38.6    -6.82   1.6051  -0.0130 0.3538  0.0000
+38.7    -7.23   2.4789  -0.0130 0.3535  -0.0214
+37.2    32.05   6.5734  -0.0130 0.3592  2.0563
+37.8    -6.82   4.0478  -0.0130 0.3581  -2.0349
+37.2    35.73   6.0525  -0.0130 0.3632  2.2277
+36.1    35.18   3.0171  -0.0130 0.3672  -0.0286
+37.6    3.55    3.1655  -0.0130 0.3654  -1.6565
+37.2    36.82   4.8127  -0.0130 0.3683  1.7422
+38.2    -6.82   2.4600  -0.0130 0.3641  -2.2848
+39.6    -6.82   1.2462  -0.0130 0.3604  0.0000
+39.7    -6.82   1.6907  -0.0130 0.3574  0.0000
+39.8    -6.95   1.6773  -0.0130 0.3551  -0.0071
+39.9    -6.82   1.9331  -0.0130 0.3536  0.0071
+40.0    -6.95   1.7424  -0.0130 0.3526  -0.0071
+40.1    -7.23   1.9388  -0.0130 0.3520  -0.0143
+40.2    -6.55   3.1302  -0.0130 0.3518  0.0357
+40.4    -8.32   1.7415  -0.0130 0.3515  -0.0928
+38.6    36.55   1.2369  -0.0130 0.3580  2.3491
+39.3    -6.55   1.3982  -0.0130 0.3569  -2.2562
+40.6    -6.27   0.9296  -0.0130 0.3557  0.0143
+39.0    35.73   4.9212  -0.0130 0.3608  2.1991
+37.8    36.41   1.3070  -0.0130 0.3650  0.0357
+38.1    30.68   1.7854  -0.0130 0.3672  -0.2999
+38.3    33.14   1.9722  -0.0130 0.3688  0.1285
+38.2    36.41   4.1578  -0.0130 0.3702  0.1714
+38.6    27.55   1.7989  -0.0130 0.3696  -0.4641
+38.7    33.00   4.1850  -0.0130 0.3696  0.2856
+38.8    30.00   3.6922  -0.0130 0.3690  -0.1571
+38.8    35.73   1.4093  -0.0130 0.3692  0.2999
+38.7    35.32   2.2161  -0.0130 0.3692  -0.0214
+38.9    35.32   4.8512  -0.0130 0.3691  0.0000
+39.6    20.18   4.6907  -0.0130 0.3667  -0.7925
+39.4    36.82   2.6447  -0.0130 0.3672  0.8711
+39.1    35.73   3.3055  -0.0130 0.3676  -0.0571
+41.1    -6.95   3.1121  -0.0130 0.3615  -2.2348
+42.4    -7.09   0.7316  -0.0130 0.3566  -0.0071
+41.0    29.18   5.4101  -0.0130 0.3584  1.8992
+40.8    12.41   2.0419  -0.0130 0.3578  -0.8782
+42.2    -6.55   2.6092  -0.0130 0.3547  -0.9925
+42.9    -6.82   0.8544  -0.0130 0.3523  -0.0143
+43.0    -6.82   0.7616  -0.0130 0.3506  0.0000
+43.1    -6.95   6.0614  -0.0130 0.3496  -0.0071
+41.4    34.50   4.3428  -0.0130 0.3552  2.1706
+40.3    34.50   6.2508  -0.0130 0.3601  0.0000
+42.2    -6.95   4.0410  -0.0130 0.3576  -2.1706
+41.7    36.41   1.2988  -0.0130 0.3617  2.2705
+40.8    29.32   3.5949  -0.0130 0.3639  -0.3713
+42.7    -7.23   2.3036  -0.0130 0.3600  -1.9135
+42.0    36.41   0.6946  -0.0130 0.3630  2.2848
+40.9    34.77   1.6888  -0.0130 0.3652  -0.0857
+41.1    35.18   2.0683  -0.0130 0.3668  0.0214
+41.1    36.41   2.4671  -0.0130 0.3680  0.0643
+41.1    38.32   3.3457  -0.0130 0.3690  0.1000
+41.2    38.05   1.3757  -0.0130 0.3695  -0.0143
+41.2    41.18   3.2358  -0.0130 0.3701  0.1642
+41.5    34.50   3.9752  -0.0130 0.3694  -0.3499
+41.8    33.95   4.3028  -0.0130 0.3686  -0.0286
+41.7    38.05   3.6998  -0.0130 0.3686  0.2142
+41.8    36.55   3.9959  -0.0130 0.3683  -0.0785
+41.9    37.09   3.9194  -0.0130 0.3681  0.0286
+42.0    36.41   5.9021  -0.0130 0.3679  -0.0357
+42.0    41.18   3.0349  -0.0130 0.3685  0.2499
+42.4    31.09   1.2963  -0.0130 0.3674  -0.5284
+42.7    32.86   3.7518  -0.0130 0.3668  0.0928
+41.8    54.82   3.0662  -0.0130 0.3696  1.1495
+34.0    227.32  1.3418  -0.0130 0.3976  9.0321
+32.5    141.55  2.1230  -0.0130 0.4054  -4.4910
+35.0    141.00  2.1581  -0.0130 0.4082  -0.0286
+34.9    141.00  2.1943  -0.0130 0.4098  0.0000
+34.8    141.00  2.1586  -0.0130 0.4106  0.0000
+34.6    141.14  2.1660  -0.0130 0.4108  0.0071
+34.5    141.14  2.1654  -0.0130 0.4106  0.0000
+34.4    141.00  2.1225  -0.0130 0.4102  -0.0071
+34.3    141.14  2.0938  -0.0130 0.4096  0.0071
+34.2    141.00  2.1225  -0.0130 0.4089  -0.0071
+34.1    141.41  2.1435  -0.0130 0.4083  0.0214
+33.9    142.23  5.0106  -0.0130 0.4078  0.0428
+33.7    143.59  2.0660  -0.0130 0.4075  0.0714
+33.6    143.86  1.8655  -0.0130 0.4073  0.0143
+33.4    145.23  5.5237  -0.0130 0.4073  0.0714
+33.3    143.86  5.5919  -0.0130 0.4070  -0.0714
+33.1    146.18  5.3052  -0.0130 0.4071  0.1214
+33.0    145.77  6.9481  -0.0130 0.4071  -0.0214
+29.7    219.55  4.4140  -0.0130 0.4180  3.8627
+27.8    213.14  2.0253  -0.0130 0.4258  -0.3356
+30.3    155.05  4.8858  -0.0130 0.4227  -3.0416
+28.8    -132.68 7.1645  -0.0130 0.4300  3.7842
+26.6    -132.68 5.7904  -0.0130 0.4356  0.0000
+26.5    -132.68 8.6740  -0.0130 0.4394  0.0000
+29.7    147.95  9.4069  -0.0130 0.4299  -4.1555
+28.6    -132.68 3.9619  -0.0130 0.4333  4.1555
+26.2    -132.68 6.5248  -0.0130 0.4362  0.0000
+26.0    -132.68 9.8229  -0.0130 0.4383  0.0000
+25.9    -132.68 4.3281  -0.0130 0.4397  0.0000
+25.8    -132.68 3.1213  -0.0130 0.4403  0.0000
+25.7    -132.68 3.9608  -0.0130 0.4405  0.0000
+25.6    -132.68 6.1005  -0.0130 0.4404  0.0000
+25.2    -125.45 3.6924  -0.0130 0.4411  0.3784
+24.3    -112.50 6.4309  -0.0130 0.4435  0.6783
+24.0    -117.14 3.2297  -0.0130 0.4445  -0.2428
+23.9    -114.00 5.9534  -0.0130 0.4455  0.1642
+23.7    -112.50 7.7006  -0.0130 0.4463  0.0785
+22.9    -98.18  4.7541  -0.0130 0.4489  0.7497
+21.9    -87.41  6.1268  -0.0130 0.4523  0.5641
+21.2    -80.45  3.7802  -0.0130 0.4558  0.3641
+19.2    -40.36  1.2841  -0.0130 0.4641  2.0992
+18.6    -57.14  5.2576  -0.0130 0.4678  -0.8782
+17.0    -10.23  5.8282  -0.0130 0.4769  2.4562
+16.5    -32.45  2.6691  -0.0130 0.4801  -1.1638
+17.0    -32.45  4.1210  -0.0130 0.4817  0.0000
+16.8    -29.73  9.3215  -0.0130 0.4825  0.1428
+15.6    -6.55   2.2879  -0.0130 0.4859  1.2138
+13.7    18.95   2.0026  -0.0130 0.4919  1.3352
+13.1    13.36   4.1126  -0.0130 0.4953  -0.2927
+14.5    -17.18  5.5229  -0.0130 0.4926  -1.5994
+13.4    25.50   6.0904  -0.0130 0.4961  2.2348
+13.7    -13.77  6.1568  -0.0130 0.4928  -2.0563
+14.7    -11.05  1.8698  -0.0130 0.4900  0.1428
+12.7    31.50   2.1355  -0.0130 0.4939  2.2277
+13.2    -12.27  0.9969  -0.0130 0.4905  -2.2919
+14.4    -12.55  3.4390  -0.0130 0.4874  -0.0143
+12.4    31.91   0.9843  -0.0130 0.4915  2.3276
+12.7    -9.68   2.6964  -0.0130 0.4887  -2.1777
+13.8    -10.23  1.8139  -0.0130 0.4860  -0.0286
+13.8    -10.50  1.7833  -0.0130 0.4839  -0.0143
+13.7    -10.23  2.4112  -0.0130 0.4823  0.0143
+13.5    -8.86   0.8349  -0.0130 0.4813  0.0714
+11.6    31.91   0.7811  -0.0130 0.4868  2.1349
+12.0    -9.00   1.4991  -0.0130 0.4852  -2.1420
+13.1    -8.59   2.7400  -0.0130 0.4836  0.0214
+13.0    -9.00   2.3847  -0.0130 0.4821  -0.0214
+12.9    -8.86   3.0857  -0.0130 0.4810  0.0071
+12.8    -8.32   3.8366  -0.0130 0.4802  0.0286
+10.8    35.18   2.5059  -0.0130 0.4862  2.2777
+9.5     33.27   6.4362  -0.0130 0.4908  -0.1000
+11.1    -6.82   3.8108  -0.0130 0.4881  -2.0992
+10.4    34.77   1.1783  -0.0130 0.4917  2.1777
+9.2     33.41   0.9218  -0.0130 0.4941  -0.0714
+10.9    -8.32   5.2446  -0.0130 0.4895  -2.1848
+11.9    -5.73   3.0339  -0.0130 0.4858  0.1357
+11.7    -6.00   2.2536  -0.0130 0.4827  -0.0143
+11.6    -6.55   4.9021  -0.0130 0.4804  -0.0286
+11.5    -6.55   3.0959  -0.0130 0.4787  0.0000
+10.1    23.59   4.5187  -0.0130 0.4822  1.5779
+9.5     14.45   3.8502  -0.0130 0.4838  -0.4784
+10.6    -6.82   1.9896  -0.0130 0.4818  -1.1138
+9.5     30.00   3.5601  -0.0130 0.4855  1.9278
+10.0    -8.32   6.4352  -0.0130 0.4828  -2.0063
+9.2     33.14   6.3200  -0.0130 0.4866  2.1706
+9.7     -8.32   0.6451  -0.0130 0.4834  -2.1706
+10.8    -8.05   4.7208  -0.0130 0.4807  0.0143
+8.8     36.41   3.0794  -0.0130 0.4852  2.3276
+7.3     36.41   0.9831  -0.0130 0.4889  0.0000
+7.3     33.95   1.3017  -0.0130 0.4913  -0.1285
+7.4     32.18   4.7904  -0.0130 0.4925  -0.0928
+9.0     -8.59   2.7362  -0.0130 0.4869  -2.1349
+10.1    -8.86   4.0355  -0.0130 0.4820  -0.0143
+10.1    -9.82   2.1001  -0.0130 0.4781  -0.0500
+10.0    -9.82   1.1987  -0.0130 0.4752  0.0000
+9.9     -10.09  2.6294  -0.0130 0.4732  -0.0143
+8.0     33.14   0.5277  -0.0130 0.4784  2.2634
+8.2     -4.77   1.7050  -0.0130 0.4772  -1.9849
+9.4     -9.41   0.8134  -0.0130 0.4752  -0.2428
+9.4     -9.68   3.0082  -0.0130 0.4736  -0.0143
+9.4     -10.64  4.1862  -0.0130 0.4723  -0.0500
+9.3     -10.36  3.5859  -0.0130 0.4714  0.0143
+9.2     -10.09  2.5967  -0.0130 0.4708  0.0143
+9.0     -9.82   0.5099  -0.0130 0.4705  0.0143
+7.1     31.64   2.5213  -0.0130 0.4765  2.1706
+5.8     33.27   2.1130  -0.0130 0.4817  0.0857
+5.8     28.91   4.9817  -0.0130 0.4847  -0.2285
+7.5     -11.59  3.8365  -0.0130 0.4806  -2.1206
+8.6     -10.77  3.3426  -0.0130 0.4768  0.0428
+8.4     -10.36  1.6065  -0.0130 0.4738  0.0214
+8.4     -13.50  5.3695  -0.0130 0.4710  -0.1642
+6.7     26.45   2.6769  -0.0130 0.4750  2.0920
+5.3     29.32   3.9681  -0.0130 0.4789  0.1499
+5.1     28.91   2.7631  -0.0130 0.4818  -0.0214
+5.0     29.32   2.2232  -0.0130 0.4838  0.0214
+6.7     -12.55  0.9596  -0.0130 0.4787  -2.1920
+7.8     -11.86  3.8142  -0.0130 0.4744  0.0357
+7.7     -12.55  1.4322  -0.0130 0.4708  -0.0357
+5.9     27.68   1.7052  -0.0130 0.4743  2.1063
+6.3     -14.05  2.6295  -0.0130 0.4710  -2.1848
+7.4     -13.09  1.5312  -0.0130 0.4685  0.0500
+7.2     -11.32  2.6235  -0.0130 0.4668  0.0928
+7.0     -9.68   1.5627  -0.0130 0.4659  0.0857
+6.8     -10.36  1.3000  -0.0130 0.4652  -0.0357
+6.7     -10.09  3.0060  -0.0130 0.4649  0.0143
+4.8     32.45   1.9796  -0.0130 0.4711  2.2277
+5.2     -8.86   2.1702  -0.0130 0.4700  -2.1634
+5.1     20.86   2.4520  -0.0130 0.4731  1.5565
+5.4     -10.50  0.9415  -0.0130 0.4708  -1.6422
+6.2     -10.77  3.0332  -0.0130 0.4685  -0.0143
+6.1     -10.50  1.7469  -0.0130 0.4666  0.0143
+6.1     -12.27  2.3097  -0.0130 0.4649  -0.0928
+6.0     -12.55  1.3741  -0.0130 0.4636  -0.0143
+5.9     -12.55  2.4274  -0.0130 0.4626  0.0000
+5.8     -11.59  1.4203  -0.0130 0.4621  0.0500
+5.6     -11.86  1.2474  -0.0130 0.4617  -0.0143
+5.6     -14.05  4.0465  -0.0130 0.4611  -0.1142
+5.6     -15.14  2.3231  -0.0130 0.4605  -0.0571
+4.1     18.95   2.8454  -0.0130 0.4652  1.7850
+4.4     -14.32  0.9319  -0.0130 0.4640  -1.7422
+5.3     -14.59  4.9686  -0.0130 0.4627  -0.0143
+5.1     -12.82  1.9502  -0.0130 0.4618  0.0928
+5.0     -14.32  2.6032  -0.0130 0.4608  -0.0785
+4.9     -13.77  2.7376  -0.0130 0.4601  0.0286
+3.1     26.45   1.4001  -0.0130 0.4656  2.1063
+1.8     26.45   2.9828  -0.0130 0.4701  0.0000
+3.4     -12.55  2.2416  -0.0130 0.4674  -2.0420
+4.4     -13.77  1.5339  -0.0130 0.4645  -0.0643
+4.4     -13.50  2.2314  -0.0130 0.4621  0.0143
+4.2     -12.27  2.5961  -0.0130 0.4604  0.0643
+4.1     -12.55  1.5212  -0.0130 0.4591  -0.0143
+4.0     -13.50  2.3418  -0.0130 0.4580  -0.0500
+3.9     -13.09  2.1718  -0.0130 0.4573  0.0214
+3.8     -12.82  2.7511  -0.0130 0.4569  0.0143
+3.6     -12.27  2.5956  -0.0130 0.4567  0.0286
+3.5     -12.55  2.1498  -0.0130 0.4565  -0.0143
+3.4     -13.36  2.2010  -0.0130 0.4563  -0.0428
+3.3     -12.55  2.2514  -0.0130 0.4562  0.0428
+3.2     -13.50  2.0793  -0.0130 0.4560  -0.0500
+3.1     -12.82  2.1693  -0.0130 0.4559  0.0357
+3.0     -12.82  2.1079  -0.0130 0.4558  0.0000
+2.8     -12.00  2.3336  -0.0130 0.4557  0.0428
+2.7     -12.55  2.2990  -0.0130 0.4556  -0.0286
+2.7     -13.09  2.1891  -0.0130 0.4553  -0.0286
+2.6     -13.36  2.1795  -0.0130 0.4550  -0.0143
+2.4     -12.55  2.2589  -0.0130 0.4548  0.0428
+2.3     -12.82  2.1637  -0.0130 0.4546  -0.0143
+2.2     -12.55  2.1855  -0.0130 0.4544  0.0143
+2.1     -12.82  2.1638  -0.0130 0.4541  -0.0143
+2.0     -12.82  2.1932  -0.0130 0.4539  0.0000
+1.9     -13.36  2.1586  -0.0130 0.4535  -0.0286
+1.8     -13.50  2.2152  -0.0130 0.4532  -0.0071
+1.7     -12.82  2.2203  -0.0130 0.4530  0.0357
+1.6     -12.82  2.2558  -0.0130 0.4527  0.0000
+1.4     -12.82  2.1921  -0.0130 0.4525  0.0000
+1.3     -12.82  2.2005  -0.0130 0.4523  0.0000
+1.2     -13.09  2.1290  -0.0130 0.4520  -0.0143
+1.2     -13.36  2.1572  -0.0130 0.4517  -0.0143
+1.0     -12.55  2.1638  -0.0130 0.4516  0.0428
+0.9     -12.55  2.2133  -0.0130 0.4514  0.0000
+0.8     -12.55  2.1921  -0.0130 0.4512  0.0000
+0.7     -13.50  2.2066  -0.0130 0.4508  -0.0500
+0.6     -12.82  2.1937  -0.0130 0.4506  0.0357
+0.5     -13.09  2.1932  -0.0130 0.4503  -0.0143
+0.4     -13.09  2.1991  -0.0130 0.4501  0.0000
+0.3     -13.36  2.1991  -0.0130 0.4498  -0.0143
+0.1     -12.55  2.1637  -0.0130 0.4496  0.0428
+0.0     -12.82  2.1714  -0.0130 0.4494  -0.0143
+-0.1    -13.50  2.1649  -0.0130 0.4491  -0.0357
+-0.2    -13.36  2.1645  -0.0130 0.4488  0.0071
+-0.3    -13.50  2.1779  -0.0130 0.4485  -0.0071
+-0.4    -13.09  2.2204  -0.0130 0.4483  0.0214
+-0.5    -12.82  2.2346  -0.0130 0.4481  0.0143
+-0.6    -13.09  2.2066  -0.0130 0.4479  -0.0143
+-0.7    -12.82  2.1855  -0.0130 0.4477  0.0143
+-0.9    -12.82  2.1928  -0.0130 0.4475  0.0000
+-1.0    -12.82  2.1922  -0.0130 0.4473  0.0000
+-1.0    -13.36  2.1991  -0.0130 0.4470  -0.0286
+-1.1    -13.36  2.1779  -0.0130 0.4467  0.0000
+-1.3    -12.82  2.1779  -0.0130 0.4465  0.0286
+-1.4    -13.09  2.1711  -0.0130 0.4463  -0.0143
+-1.5    -13.09  2.1714  -0.0130 0.4460  0.0000
+-1.6    -12.82  2.1645  -0.0130 0.4459  0.0143
+-1.7    -12.55  2.2207  -0.0130 0.4457  0.0143
+-1.8    -12.82  2.1921  -0.0130 0.4455  -0.0143
+-1.9    -13.09  2.2066  -0.0130 0.4452  -0.0143
+-2.0    -13.09  2.1997  -0.0130 0.4449  0.0000
+-2.2    -12.55  2.1783  -0.0130 0.4448  0.0286
+-2.3    -13.09  2.1639  -0.0130 0.4445  -0.0286
+-2.4    -13.36  2.1851  -0.0130 0.4442  -0.0143
+-2.5    -13.50  2.1920  -0.0130 0.4439  -0.0071
+-2.6    -12.82  2.2135  -0.0130 0.4437  0.0357
+-2.7    -13.50  2.2066  -0.0130 0.4434  -0.0357
+-2.8    -13.50  2.2066  -0.0130 0.4431  0.0000
+-2.9    -13.09  2.2138  -0.0130 0.4429  0.0214
+-3.0    -13.50  2.2207  -0.0130 0.4427  -0.0214
+-3.1    -12.82  2.1708  -0.0130 0.4425  0.0357
+-3.3    -13.09  2.1851  -0.0130 0.4423  -0.0143
+-3.3    -13.50  2.1570  -0.0130 0.4421  -0.0214
+-3.5    -12.82  2.1786  -0.0130 0.4419  0.0357
+-3.6    -13.50  2.1711  -0.0130 0.4416  -0.0357
+-3.7    -12.82  2.1994  -0.0130 0.4415  0.0357
+-3.8    -13.09  2.1921  -0.0130 0.4412  -0.0143
+-3.9    -13.50  2.1994  -0.0130 0.4410  -0.0214
+-4.0    -12.82  2.1997  -0.0130 0.4408  0.0357
+-4.1    -13.36  2.1997  -0.0130 0.4405  -0.0286
+-4.2    -13.50  2.1922  -0.0130 0.4403  -0.0071
+-4.3    -12.82  2.1855  -0.0130 0.4401  0.0357
+-4.5    -12.55  2.1851  -0.0130 0.4400  0.0143
+-4.6    -12.82  2.1779  -0.0130 0.4398  -0.0143
+-4.7    -13.50  2.1642  -0.0130 0.4395  -0.0357
+-4.8    -13.36  2.2138  -0.0130 0.4392  0.0071
+-4.9    -12.82  2.2207  -0.0130 0.4390  0.0286
+-5.0    -13.09  2.1994  -0.0130 0.4388  -0.0143
+-5.1    -13.09  2.1997  -0.0130 0.4386  0.0000
+-5.2    -12.82  2.1992  -0.0130 0.4384  0.0143
+-5.4    -12.55  2.1783  -0.0130 0.4382  0.0143
+-5.4    -13.50  2.1852  -0.0130 0.4379  -0.0500
+-5.5    -13.50  2.2066  -0.0130 0.4376  0.0000
+-5.7    -12.55  2.1922  -0.0130 0.4375  0.0500
+-5.8    -13.50  2.1994  -0.0130 0.4372  -0.0500
+-5.9    -12.82  2.1994  -0.0130 0.4370  0.0357
+-6.0    -13.09  2.1994  -0.0130 0.4368  -0.0143
+-6.1    -13.09  2.1928  -0.0130 0.4366  0.0000
+-6.3    -10.36  2.2066  -0.0130 0.4368  0.1428
+-8.1    27.41   2.2069  -0.0130 0.4426  1.9778
+-8.5    7.64    1.4101  -0.0130 0.4443  -1.0353
+-7.2    -12.27  4.4189  -0.0130 0.4421  -1.0424
+-8.5    28.91   2.9859  -0.0130 0.4462  2.1563
+-8.0    -13.09  1.7990  -0.0130 0.4431  -2.1991
+-8.7    29.73   1.8962  -0.0130 0.4467  2.2420
+-10.3   36.55   1.8981  -0.0130 0.4506  0.3570
+-10.7   39.00   2.3505  -0.0130 0.4537  0.1285
+-9.3    1.64    2.4540  -0.0130 0.4501  -1.9564
+-9.7    33.00   2.4885  -0.0130 0.4514  1.6422
+-10.9   37.36   1.4058  -0.0130 0.4531  0.2285
+-11.0   33.95   1.2267  -0.0130 0.4537  -0.1785
+-10.9   32.73   0.4940  -0.0130 0.4537  -0.0643
+-9.2    -9.68   1.4317  -0.0130 0.4469  -2.2205
+-8.1    -10.23  1.1131  -0.0130 0.4412  -0.0286
+-8.1    -10.64  2.8877  -0.0130 0.4369  -0.0214
+-10.0   31.50   1.5259  -0.0130 0.4403  2.2063
+-11.0   23.45   2.3603  -0.0130 0.4422  -0.4213
+-9.5    -10.50  1.8761  -0.0130 0.4386  -1.7779
+-10.4   32.86   2.6641  -0.0130 0.4423  2.2705
+-10.0   -8.73   3.3185  -0.0130 0.4390  -2.1777
+-10.4   26.18   2.7780  -0.0130 0.4416  1.8278
+-11.7   28.91   2.3971  -0.0130 0.4442  0.1428
+-11.9   29.86   2.6784  -0.0130 0.4463  0.0500
+-10.3   -10.36  1.5296  -0.0130 0.4416  -2.1063
+-11.2   34.77   3.4728  -0.0130 0.4444  2.3633
+-10.7   -8.73   3.6905  -0.0130 0.4401  -2.2777
+-9.5    -9.82   1.0745  -0.0130 0.4364  -0.0571
+-11.5   35.18   3.6233  -0.0130 0.4403  2.3562
+-11.0   -9.82   3.3675  -0.0130 0.4370  -2.3562
+-9.9    -9.41   3.0706  -0.0130 0.4342  0.0214
+-10.0   -8.05   1.9720  -0.0130 0.4323  0.0714
+-10.2   -6.82   2.8072  -0.0130 0.4312  0.0643
+-10.4   -6.27   2.4817  -0.0130 0.4307  0.0286
+-10.6   -5.18   3.2881  -0.0130 0.4306  0.0571
+-10.7   -5.45   3.3673  -0.0130 0.4306  -0.0143
+-10.8   -5.45   1.1630  -0.0130 0.4306  0.0000
+-11.0   -4.50   1.8761  -0.0130 0.4309  0.0500
+-11.1   -5.18   1.7765  -0.0130 0.4309  -0.0357
+-11.2   -4.50   3.1992  -0.0130 0.4311  0.0357
+-11.3   -5.05   2.6321  -0.0130 0.4310  -0.0286
+-11.4   -5.45   3.9297  -0.0130 0.4309  -0.0214
+-11.4   -6.00   2.3102  -0.0130 0.4307  -0.0286
+-11.5   -6.82   4.2090  -0.0130 0.4303  -0.0428
+-11.6   -5.45   3.0710  -0.0130 0.4302  0.0714
+-11.7   -6.55   2.5296  -0.0130 0.4300  -0.0571
+-11.8   -6.55   1.7610  -0.0130 0.4297  0.0000
+-12.0   -5.45   1.4363  -0.0130 0.4296  0.0571
+-12.1   -5.45   3.2561  -0.0130 0.4295  0.0000
+-12.2   -6.27   2.8221  -0.0130 0.4293  -0.0428
+-12.3   -5.45   1.9079  -0.0130 0.4292  0.0428
+-12.4   -6.27   2.4558  -0.0130 0.4289  -0.0428
+-12.5   -6.55   2.0164  -0.0130 0.4287  -0.0143
+-12.6   -6.82   3.1480  -0.0130 0.4283  -0.0143
+-12.7   -6.95   4.0608  -0.0130 0.4281  -0.0071
+-12.7   -8.59   1.0640  -0.0130 0.4276  -0.0857
+-14.6   33.41   2.0796  -0.0130 0.4335  2.1991
+-15.9   34.50   1.3506  -0.0130 0.4385  0.0571
+-14.2   -8.86   2.8616  -0.0130 0.4354  -2.2705
+-13.0   -9.68   2.7954  -0.0130 0.4322  -0.0428
+-13.2   -9.00   3.1401  -0.0130 0.4296  0.0357
+-13.3   -9.68   4.8021  -0.0130 0.4276  -0.0357
+-14.7   22.23   1.8042  -0.0130 0.4309  1.6708
+-16.2   33.27   3.6477  -0.0130 0.4355  0.5783
+-16.6   31.64   2.2366  -0.0130 0.4387  -0.0857
+-16.7   31.91   4.0419  -0.0130 0.4410  0.0143
+-15.0   -10.50  4.6547  -0.0130 0.4359  -2.2205
+-13.8   -10.50  1.3621  -0.0130 0.4314  0.0000
+-14.9   10.77   3.9395  -0.0130 0.4311  1.1138
+-14.7   -10.50  2.1219  -0.0130 0.4279  -1.1138
+-15.9   30.95   5.4793  -0.0130 0.4318  2.1706
+-15.4   -13.09  2.8801  -0.0130 0.4284  -2.3062
+-15.5   18.55   2.7208  -0.0130 0.4304  1.6565
+-16.9   25.77   2.7242  -0.0130 0.4333  0.3784
+-17.1   23.45   2.7688  -0.0130 0.4351  -0.1214
+-15.5   -15.55  2.0869  -0.0130 0.4304  -2.0420
+-16.2   24.82   2.8208  -0.0130 0.4325  2.1134
+-15.7   -16.91  3.0761  -0.0130 0.4280  -2.1848
+-16.0   16.64   4.2219  -0.0130 0.4294  1.7564
+-15.6   -19.09  3.8203  -0.0130 0.4253  -1.8707
+-16.3   18.68   2.7412  -0.0130 0.4277  1.9778
+-17.4   18.27   2.8486  -0.0130 0.4299  -0.0214
+-17.4   15.95   0.8907  -0.0130 0.4312  -0.1214
+-17.5   15.14   4.0551  -0.0130 0.4319  -0.0428
+-17.4   12.95   3.4382  -0.0130 0.4320  -0.1142
+-17.3   7.64    4.7774  -0.0130 0.4311  -0.2785
+-15.6   -30.00  2.2389  -0.0130 0.4245  -1.9706
+-14.4   -34.77  2.2971  -0.0130 0.4184  -0.2499
+-14.5   -31.91  3.1146  -0.0130 0.4144  0.1499
+-16.1   1.09    2.5086  -0.0130 0.4167  1.7279
+-17.0   -3.68   6.7530  -0.0130 0.4185  -0.2499
+-16.5   -15.14  8.4220  -0.0130 0.4183  -0.5998
+-15.5   -32.86  2.4285  -0.0130 0.4154  -0.9282
+-14.0   -57.82  1.8025  -0.0130 0.4093  -1.3066
+-13.0   -66.41  2.2173  -0.0130 0.4033  -0.4498
+-12.8   -69.14  1.8208  -0.0130 0.3986  -0.1428
+-12.8   -70.50  1.1838  -0.0130 0.3953  -0.0714
+-12.6   -74.73  3.5490  -0.0130 0.3926  -0.2213
+-13.0   -66.68  2.4809  -0.0130 0.3922  0.4213
+-12.3   -90.14  7.3433  -0.0130 0.3889  -1.2281
+-11.6   -93.00  5.9547  -0.0130 0.3862  -0.1499
+-11.5   -96.95  3.1219  -0.0130 0.3838  -0.2071
+-11.8   -88.36  1.3200  -0.0130 0.3837  0.4498
+-12.1   -89.86  1.9896  -0.0130 0.3838  -0.0785
+-12.0   -95.18  1.3576  -0.0130 0.3833  -0.2785
+-11.9   -96.82  1.6868  -0.0130 0.3828  -0.0857
+-11.0   -117.55 4.3701  -0.0130 0.3794  -1.0853
+-10.2   -126.00 3.0594  -0.0130 0.3755  -0.4427
+-10.5   -115.09 2.8898  -0.0130 0.3743  0.5712
+-10.9   -115.77 4.3185  -0.0130 0.3736  -0.0357
+-11.0   -116.73 4.0251  -0.0130 0.3733  -0.0500
+-10.9   -120.00 1.6400  -0.0130 0.3727  -0.1714
+-10.4   -132.68 1.2665  -0.0130 0.3704  -0.6640
+-10.1   -132.68 2.8711  -0.0130 0.3687  0.0000
+-10.2   -132.68 3.0066  -0.0130 0.3675  0.0000
+-10.3   -132.68 2.3676  -0.0130 0.3668  0.0000
+-10.4   -132.68 1.5484  -0.0130 0.3664  0.0000
+-10.6   -132.00 1.8248  -0.0130 0.3664  0.0357
+-10.7   -132.68 1.8241  -0.0130 0.3663  -0.0357
+-10.8   -132.68 4.6124  -0.0130 0.3663  0.0000
+-10.9   -132.68 2.8798  -0.0130 0.3663  0.0000
+-11.0   -132.68 3.3878  -0.0130 0.3664  0.0000
+-11.1   -132.68 2.6519  -0.0130 0.3664  0.0000
+-11.2   -132.68 2.7093  -0.0130 0.3664  0.0000
+-11.3   -132.68 3.0470  -0.0130 0.3664  0.0000
+-11.4   -132.68 1.9186  -0.0130 0.3663  0.0000
+-11.5   -132.68 3.0391  -0.0130 0.3662  0.0000
+-11.6   -132.68 3.8839  -0.0130 0.3661  0.0000
+-11.8   -132.68 2.1425  -0.0130 0.3659  0.0000
+-8.5    147.82  3.2210  -0.0130 0.3536  -4.1626
+-8.2    192.95  3.3154  -0.0130 0.3506  2.3633
+-11.0   225.14  2.8714  -0.0130 0.3539  1.6850
+-8.7    146.59  2.0164  -0.0130 0.3451  -4.1126
+-6.5    145.23  1.0548  -0.0130 0.3379  -0.0714
+-9.8    222.27  2.7266  -0.0130 0.3445  4.0341
+-11.0   195.68  3.6805  -0.0130 0.3466  -1.3923
+-11.6   225.00  1.9646  -0.0130 0.3528  1.5351
+-9.6    155.18  2.0024  -0.0130 0.3469  -3.6557
+-7.8    157.36  2.0369  -0.0130 0.3422  0.1142
+-10.4   215.05  2.4725  -0.0130 0.3474  3.0202
+-9.3    146.59  3.1217  -0.0130 0.3414  -3.5843
+-10.6   222.68  3.8578  -0.0130 0.3481  3.9841
+-9.6    143.05  2.8240  -0.0130 0.3416  -4.1698
+-10.3   211.50  1.5700  -0.0130 0.3465  3.5843
+-12.7   218.59  0.7235  -0.0130 0.3518  0.3713
+-13.2   222.27  1.4534  -0.0130 0.3564  0.1928
+-13.4   222.27  2.4520  -0.0130 0.3596  0.0000
+-10.1   142.09  1.3123  -0.0130 0.3493  -4.1983
+-7.9    142.50  2.0011  -0.0130 0.3405  0.0214
+-8.2    146.59  3.2854  -0.0130 0.3344  0.2142
+-11.7   224.32  3.4199  -0.0130 0.3422  4.0698
+-13.3   206.86  3.0614  -0.0130 0.3464  -0.9139
+-11.8   180.14  5.8860  -0.0130 0.3455  -1.3994
+-9.5    142.23  3.2456  -0.0130 0.3387  -1.9849
+-8.5    142.36  1.5472  -0.0130 0.3331  0.0071
+-11.8   217.77  4.2117  -0.0130 0.3407  3.9484
+-10.9   142.64  2.4509  -0.0130 0.3357  -3.9341
+-12.1   217.64  0.8213  -0.0130 0.3430  3.9270
+-14.3   217.50  2.6849  -0.0130 0.3490  -0.0071
+-11.1   139.23  2.8313  -0.0130 0.3414  -4.0984
+-9.0    140.32  5.7208  -0.0130 0.3350  0.0571
+-9.1    138.68  3.4868  -0.0130 0.3297  -0.0857
+-11.2   187.23  2.0367  -0.0130 0.3334  2.5418
+-13.9   215.73  1.8311  -0.0130 0.3413  1.4923
+-11.7   140.45  3.5246  -0.0130 0.3361  -3.9413
+-12.3   203.73  2.1645  -0.0130 0.3411  3.3130
+-14.6   212.45  1.9535  -0.0130 0.3465  0.4570
+-11.7   136.50  3.4945  -0.0130 0.3390  -3.9770
+-9.7    137.18  3.5612  -0.0130 0.3325  0.0357
+-12.8   208.91  2.2932  -0.0130 0.3384  3.7556
+-11.9   134.05  2.2227  -0.0130 0.3322  -3.9199
+-9.9    137.18  2.3085  -0.0130 0.3275  0.1642
+-10.1   136.23  4.1477  -0.0130 0.3239  -0.0500
+-10.1   135.95  2.1664  -0.0130 0.3214  -0.0143
+-10.3   137.18  1.7640  -0.0130 0.3200  0.0643
+-10.4   136.64  1.8032  -0.0130 0.3193  -0.0286
+-10.3   131.73  2.7295  -0.0130 0.3182  -0.2570
+-10.4   134.05  2.0231  -0.0130 0.3179  0.1214
+-10.3   128.05  1.5869  -0.0130 0.3170  -0.3142
+-10.4   131.73  1.3060  -0.0130 0.3170  0.1928
+-10.8   136.50  0.6191  -0.0130 0.3178  0.2499
+-10.5   123.82  2.3618  -0.0130 0.3166  -0.6640
+-10.2   121.64  3.3105  -0.0130 0.3152  -0.1142
+-10.5   127.91  3.2640  -0.0130 0.3152  0.3284
+-10.8   129.14  4.7070  -0.0130 0.3155  0.0643
+-10.9   126.95  2.6793  -0.0130 0.3154  -0.1142
+-13.3   182.05  1.9912  -0.0130 0.3239  2.8846
+-15.0   181.64  1.3183  -0.0130 0.3305  -0.0214
+-15.1   182.32  2.2163  -0.0130 0.3353  0.0357
+-17.1   227.32  1.7004  -0.0130 0.3454  2.3562
+-16.6   182.32  2.9099  -0.0130 0.3457  -2.3562
+-15.4   182.05  2.1223  -0.0130 0.3448  -0.0143
+-15.5   182.18  3.3880  -0.0130 0.3435  0.0071
+-15.6   182.18  4.4138  -0.0130 0.3420  0.0000
+-8.8    18.27   2.1727  -0.0130 0.3154  -8.5823
+-4.7    32.45   2.2502  -0.0130 0.2966  0.7426
+-5.2    32.45   2.2279  -0.0130 0.2835  0.0000
+-5.3    32.05   2.2142  -0.0130 0.2748  -0.0214
+-5.4    32.05   2.1855  -0.0130 0.2695  0.0000
+-5.5    31.91   2.2356  -0.0130 0.2668  -0.0071
+-5.6    31.91   2.2502  -0.0130 0.2659  0.0000
+-5.8    32.18   2.2352  -0.0130 0.2662  0.0143
+-5.9    31.91   2.2723  -0.0130 0.2671  -0.0143
+-6.0    31.91   2.2785  -0.0130 0.2683  0.0000
+-6.1    32.05   2.2566  -0.0130 0.2696  0.0071
+-6.2    31.91   2.2152  -0.0130 0.2707  -0.0071
+-6.3    31.50   2.2287  -0.0130 0.2716  -0.0214
+-6.4    32.18   2.2429  -0.0130 0.2724  0.0357
+-6.5    32.45   2.2283  -0.0130 0.2730  0.0143
+-6.7    32.45   2.2649  -0.0130 0.2734  0.0000
+-6.8    32.18   2.2283  -0.0130 0.2735  -0.0143
+-6.9    32.18   2.2356  -0.0130 0.2735  0.0000
+-7.0    31.91   2.2575  -0.0130 0.2734  -0.0143
+-7.0    31.64   2.2287  -0.0130 0.2732  -0.0143
+-7.2    32.05   2.2361  -0.0130 0.2730  0.0214
+-7.3    32.45   2.2502  -0.0130 0.2728  0.0214
+-7.4    32.18   2.2497  -0.0130 0.2726  -0.0143
+-7.5    31.91   2.2279  -0.0130 0.2723  -0.0143
+-7.6    32.18   2.2429  -0.0130 0.2721  0.0143
+-7.7    32.45   2.2287  -0.0130 0.2720  0.0143
+-6.1    -8.32   2.2434  -0.0130 0.2655  -2.1349
+-6.7    31.50   2.4092  -0.0130 0.2665  2.0849
+-6.2    -10.09  3.3412  -0.0130 0.2612  -2.1777
+-6.9    32.45   1.9220  -0.0130 0.2636  2.2277
+-8.3    32.86   1.9849  -0.0130 0.2660  0.0214
+-6.9    -3.68   1.9195  -0.0130 0.2624  -1.9135
+-7.7    37.09   1.5140  -0.0130 0.2655  2.1349
+-9.1    39.95   3.3828  -0.0130 0.2687  0.1499
+-9.3    40.91   3.1710  -0.0130 0.2713  0.0500
+-9.5    41.18   3.3897  -0.0130 0.2731  0.0143
+-9.6    42.27   0.5819  -0.0130 0.2743  0.0571
+-9.7    40.50   2.8595  -0.0130 0.2747  -0.0928
+-9.5    34.91   2.6450  -0.0130 0.2739  -0.2927
+-8.1    1.91    1.5765  -0.0130 0.2679  -1.7279
+-7.0    -2.05   3.5515  -0.0130 0.2624  -0.2071
+-6.9    -5.45   1.2034  -0.0130 0.2577  -0.1785
+-8.7    37.23   3.3834  -0.0130 0.2610  2.2348
+-8.3    -5.45   1.6012  -0.0130 0.2576  -2.2348
+-9.0    38.32   1.8767  -0.0130 0.2616  2.2919
+-10.2   34.09   2.3669  -0.0130 0.2644  -0.2213
+-8.5    -6.27   3.2881  -0.0130 0.2604  -2.1134
+-7.3    -7.23   3.1541  -0.0130 0.2567  -0.0500
+-7.3    -10.77  3.0473  -0.0130 0.2534  -0.1856
+-9.1    31.64   2.2347  -0.0130 0.2576  2.2205
+-8.8    -6.82   4.3066  -0.0130 0.2554  -2.0135
+-9.6    34.77   2.4205  -0.0130 0.2599  2.1777
+-10.8   33.14   2.6545  -0.0130 0.2634  -0.0857
+-10.9   33.41   2.9051  -0.0130 0.2659  0.0143
+-11.1   35.18   2.6746  -0.0130 0.2679  0.0928
+-9.3    -10.77  1.9589  -0.0130 0.2620  -2.4062
+-10.0   34.77   2.6737  -0.0130 0.2639  2.3848
+-9.7    -6.55   3.6495  -0.0130 0.2593  -2.1634
+-8.6    -5.45   1.3686  -0.0130 0.2556  0.0571
+-10.6   37.50   0.4428  -0.0130 0.2594  2.2491
+-12.1   40.09   1.3203  -0.0130 0.2632  0.1357
+-10.3   -5.18   1.8478  -0.0130 0.2591  -2.3705
+-9.2    -3.68   2.5500  -0.0130 0.2558  0.0785
+-9.3    -3.95   1.6479  -0.0130 0.2531  -0.0143
+-9.4    -4.23   2.1529  -0.0130 0.2512  -0.0143
+-9.5    -4.50   3.3875  -0.0130 0.2499  -0.0143
+-9.6    -4.23   2.4546  -0.0130 0.2492  0.0143
+-9.7    -4.50   2.5872  -0.0130 0.2487  -0.0143
+-9.7    -6.00   3.1142  -0.0130 0.2483  -0.0785
+-9.9    -5.05   3.3189  -0.0130 0.2482  0.0500
+-10.0   -4.77   2.5807  -0.0130 0.2483  0.0143
+-10.1   -4.77   1.9165  -0.0130 0.2484  0.0000
+-10.2   -5.45   2.6262  -0.0130 0.2484  -0.0357
+-10.3   -5.45   3.2468  -0.0130 0.2484  0.0000
+-10.4   -5.45   1.7330  -0.0130 0.2484  0.0000
+-10.5   -5.05   3.0231  -0.0130 0.2484  0.0214
+-10.7   -4.77   3.3581  -0.0130 0.2485  0.0143
+-10.7   -6.00   1.1720  -0.0130 0.2483  -0.0643
+-10.8   -5.45   2.7015  -0.0130 0.2481  0.0286
+-11.0   -5.45   2.6702  -0.0130 0.2480  0.0000
+-11.1   -5.45   2.7514  -0.0130 0.2478  0.0000
+-11.2   -5.45   2.0696  -0.0130 0.2477  0.0000
+-11.3   -5.45   4.5312  -0.0130 0.2476  0.0000
+-11.3   -6.95   2.5401  -0.0130 0.2472  -0.0785
+-11.4   -6.82   3.1401  -0.0130 0.2469  0.0071
+-11.5   -6.00   4.1284  -0.0130 0.2468  0.0428
+-11.6   -6.82   2.2008  -0.0130 0.2465  -0.0428
+-13.6   36.41   3.4941  -0.0130 0.2530  2.2634
+-14.9   34.77   3.0930  -0.0130 0.2579  -0.0857
+-14.5   24.00   2.8163  -0.0130 0.2597  -0.5641
+-14.8   36.41   1.8173  -0.0130 0.2625  0.6497
+-13.5   -6.27   3.2739  -0.0130 0.2577  -2.2348
+-12.3   -6.27   2.6002  -0.0130 0.2534  0.0000
+-12.4   -7.23   1.9682  -0.0130 0.2498  -0.0500
+-14.2   34.50   3.0634  -0.0130 0.2535  2.1848
+-14.3   3.68    2.8200  -0.0130 0.2521  -1.6136
+-13.0   -6.82   1.2808  -0.0130 0.2491  -0.5498
+-12.9   -6.00   2.1506  -0.0130 0.2469  0.0428
+-13.0   -6.82   3.2114  -0.0130 0.2452  -0.0428
+-13.1   -6.27   3.1767  -0.0130 0.2442  0.0286
+-13.2   -6.27   3.3631  -0.0130 0.2436  0.0000
+-13.3   -6.82   2.9488  -0.0130 0.2432  -0.0286
+-13.4   -6.82   2.5911  -0.0130 0.2430  0.0000
+-13.5   -6.27   1.3674  -0.0130 0.2430  0.0286
+-13.6   -7.23   2.6431  -0.0130 0.2429  -0.0500
+-13.7   -6.95   2.1225  -0.0130 0.2429  0.0143
+-13.8   -6.27   1.9451  -0.0130 0.2431  0.0357
+-13.9   -6.82   3.2360  -0.0130 0.2431  -0.0286
+-14.0   -6.95   2.9121  -0.0130 0.2430  -0.0071
+-14.1   -6.95   3.3839  -0.0130 0.2430  0.0000
+-14.2   -6.82   3.5415  -0.0130 0.2429  0.0071
+-14.6   -1.36   6.3530  -0.0130 0.2437  0.2856
+-14.7   -5.45   1.4654  -0.0130 0.2437  -0.2142
+-14.6   -6.55   2.2582  -0.0130 0.2434  -0.0571
+-16.3   31.64   3.3517  -0.0130 0.2490  1.9992
+-15.9   -6.82   1.1831  -0.0130 0.2475  -2.0135
+-14.9   -6.95   2.4560  -0.0130 0.2459  -0.0071
+-15.0   -6.82   1.7032  -0.0130 0.2444  0.0071
+-15.1   -6.55   4.0474  -0.0130 0.2433  0.0143
+-15.2   -6.82   2.1523  -0.0130 0.2424  -0.0143
+-15.3   -6.82   2.0901  -0.0130 0.2418  0.0000
+-15.5   -6.82   1.3960  -0.0130 0.2413  0.0000
+-15.6   -6.55   3.0480  -0.0130 0.2410  0.0143
+-15.7   -6.82   5.0172  -0.0130 0.2408  -0.0143
+-15.8   -6.95   3.0117  -0.0130 0.2406  -0.0071
+-15.9   -7.09   1.4199  -0.0130 0.2405  -0.0071
+-16.0   -7.23   3.7147  -0.0130 0.2404  -0.0071
+-16.1   -6.82   1.5212  -0.0130 0.2403  0.0214
+-16.2   -6.55   4.8782  -0.0130 0.2404  0.0143
+-16.3   -6.95   2.0216  -0.0130 0.2403  -0.0214
+-16.4   -7.09   1.1885  -0.0130 0.2402  -0.0071
+-16.6   -6.55   5.7697  -0.0130 0.2401  0.0286
+-16.7   -6.55   4.3626  -0.0130 0.2401  0.0000
+-16.8   -7.09   2.6388  -0.0130 0.2400  -0.0286
+-16.9   -6.95   2.2792  -0.0130 0.2398  0.0071
+-17.0   -6.82   1.2969  -0.0130 0.2397  0.0071
+-17.1   -6.95   2.9840  -0.0130 0.2396  -0.0071
+-17.2   -6.00   1.8318  -0.0130 0.2395  0.0500
+-17.4   -6.55   2.0771  -0.0130 0.2394  -0.0286
+-17.4   -6.55   4.6417  -0.0130 0.2393  0.0000
+-17.6   -5.45   1.1521  -0.0130 0.2393  0.0571
+-17.7   -6.27   2.9411  -0.0130 0.2392  -0.0428
+-17.8   -6.00   3.9002  -0.0130 0.2391  0.0143
+-17.9   -6.55   3.7082  -0.0130 0.2389  -0.0286
+-18.0   -6.95   0.9285  -0.0130 0.2386  -0.0214
+-19.7   30.95   3.9582  -0.0130 0.2442  1.9849
+-19.3   -6.95   5.1312  -0.0130 0.2429  -1.9849
+-18.3   -6.27   1.7580  -0.0130 0.2415  0.0357
+-18.4   -6.82   2.5719  -0.0130 0.2401  -0.0286
+-18.5   -6.55   1.0521  -0.0130 0.2391  0.0143
+
+I (272287) cmd: dir-> 1, dist-> 10, vel-> 8
+Setpoint: dir 1, dist 0.004 m, vel 0.080 m/s
+
+Control: -25.87, Pos enc: -0.11 m, Vel enc: -1.828
+Control: -24.72, Pos enc: -0.11 m, Vel enc: -0.029
+Control: -24.57, Pos enc: -0.11 m, Vel enc: -0.029
+Control: -24.44, Pos enc: -0.11 m, Vel enc: -0.007
+Control: -24.33, Pos enc: -0.11 m, Vel enc: 0.007
+Control: -24.22, Pos enc: -0.11 m, Vel enc: 0.000
+Control: -24.11, Pos enc: -0.11 m, Vel enc: 0.000
+Control: -23.99, Pos enc: -0.11 m, Vel enc: -0.014
+Control: -23.89, Pos enc: -0.11 m, Vel enc: 0.014
+Control: -23.80, Pos enc: -0.11 m, Vel enc: 0.014
+Control: -23.68, Pos enc: -0.11 m, Vel enc: -0.021
+Control: -23.56, Pos enc: -0.11 m, Vel enc: 0.007
+Control: -23.45, Pos enc: -0.11 m, Vel enc: -0.007
+Control: -23.34, Pos enc: -0.11 m, Vel enc: 0.000
+Control: -23.23, Pos enc: -0.11 m, Vel enc: 0.007
+Control: -23.12, Pos enc: -0.11 m, Vel enc: -0.007
+Control: -23.01, Pos enc: -0.11 m, Vel enc: 0.007
+Control: -22.94, Pos enc: -0.11 m, Vel enc: 0.036
+Control: -22.81, Pos enc: -0.11 m, Vel enc: -0.043
+Control: -22.68, Pos enc: -0.11 m, Vel enc: 0.000
+Control: -22.56, Pos enc: -0.11 m, Vel enc: -0.007
+Control: -22.50, Pos enc: -0.11 m, Vel enc: 0.064
+Control: -22.38, Pos enc: -0.11 m, Vel enc: -0.057
+Control: -22.25, Pos enc: -0.11 m, Vel enc: 0.007
+Control: -24.99, Pos enc: -0.08 m, Vel enc: 3.513
+Control: -23.97, Pos enc: -0.11 m, Vel enc: -3.541
+Control: -21.87, Pos enc: -0.12 m, Vel enc: -0.014
+Control: -21.76, Pos enc: -0.11 m, Vel enc: 0.014
+Control: -24.20, Pos enc: -0.08 m, Vel enc: 3.120
+Control: -26.76, Pos enc: -0.07 m, Vel enc: 1.150
+Control: -27.26, Pos enc: -0.07 m, Vel enc: -0.036
+Control: -23.84, Pos enc: -0.11 m, Vel enc: -4.063
+Control: -21.41, Pos enc: -0.11 m, Vel enc: -0.064
+Control: -21.17, Pos enc: -0.11 m, Vel enc: -0.107
+Control: -23.25, Pos enc: -0.09 m, Vel enc: 2.763
+Control: -22.61, Pos enc: -0.11 m, Vel enc: -2.549
+Control: -24.42, Pos enc: -0.07 m, Vel enc: 4.120
+Control: -23.18, Pos enc: -0.11 m, Vel enc: -4.227
+Control: -20.88, Pos enc: -0.11 m, Vel enc: 0.200
+Control: -20.76, Pos enc: -0.11 m, Vel enc: -0.150
+Control: -20.49, Pos enc: -0.11 m, Vel enc: -0.093
+Control: -23.76, Pos enc: -0.07 m, Vel enc: 4.227
+Control: -25.88, Pos enc: -0.07 m, Vel enc: -0.157
+Control: -23.84, Pos enc: -0.10 m, Vel enc: -2.271
+Control: -24.29, Pos enc: -0.07 m, Vel enc: 2.249
+Control: -22.09, Pos enc: -0.11 m, Vel enc: -4.113
+Control: -19.61, Pos enc: -0.12 m, Vel enc: -0.100
+Control: -19.28, Pos enc: -0.12 m, Vel enc: -0.207
+Control: -19.10, Pos enc: -0.12 m, Vel enc: 0.064
+Control: -22.39, Pos enc: -0.08 m, Vel enc: 4.141
+Control: -21.23, Pos enc: -0.12 m, Vel enc: -4.141
+Control: -20.71, Pos enc: -0.09 m, Vel enc: 2.335
+Control: -20.12, Pos enc: -0.12 m, Vel enc: -2.192
+Control: -18.64, Pos enc: -0.12 m, Vel enc: -0.179
+Control: -21.52, Pos enc: -0.08 m, Vel enc: 3.798
+Control: -20.35, Pos enc: -0.12 m, Vel enc: -3.906
+Control: -20.24, Pos enc: -0.09 m, Vel enc: 2.677
+Control: -22.82, Pos enc: -0.08 m, Vel enc: 1.471
+Control: -20.10, Pos enc: -0.12 m, Vel enc: -4.227
+Control: -17.86, Pos enc: -0.12 m, Vel enc: 0.286
+Control: -17.53, Pos enc: -0.12 m, Vel enc: -0.471
+Control: -17.21, Pos enc: -0.12 m, Vel enc: 0.071
+Control: -17.26, Pos enc: -0.12 m, Vel enc: 0.143
+Control: -20.30, Pos enc: -0.08 m, Vel enc: 3.784
+Control: -19.01, Pos enc: -0.12 m, Vel enc: -4.056
+Control: -19.13, Pos enc: -0.09 m, Vel enc: 3.063
+Control: -18.18, Pos enc: -0.12 m, Vel enc: -3.142
+Control: -19.33, Pos enc: -0.09 m, Vel enc: 3.713
+Control: -21.49, Pos enc: -0.08 m, Vel enc: 0.243
+Control: -21.42, Pos enc: -0.08 m, Vel enc: -0.114
+Control: -17.90, Pos enc: -0.13 m, Vel enc: -4.120
+Control: -15.65, Pos enc: -0.12 m, Vel enc: 0.200
+Control: -15.56, Pos enc: -0.12 m, Vel enc: -0.121
+Control: -15.32, Pos enc: -0.13 m, Vel enc: -0.079
+Control: -15.33, Pos enc: -0.12 m, Vel enc: 0.200
+Control: -15.13, Pos enc: -0.13 m, Vel enc: -0.250
+Control: -14.86, Pos enc: -0.13 m, Vel enc: -0.021
+Control: -14.64, Pos enc: -0.13 m, Vel enc: -0.114
+Control: -14.50, Pos enc: -0.13 m, Vel enc: 0.036
+Control: -14.49, Pos enc: -0.13 m, Vel enc: 0.100
+Control: -14.50, Pos enc: -0.13 m, Vel enc: 0.071
+Control: -14.33, Pos enc: -0.13 m, Vel enc: -0.121
+Control: -14.15, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -14.17, Pos enc: -0.12 m, Vel enc: 0.157
+Control: -14.26, Pos enc: -0.12 m, Vel enc: 0.136
+Control: -14.17, Pos enc: -0.12 m, Vel enc: -0.064
+Control: -14.07, Pos enc: -0.12 m, Vel enc: 0.057
+Control: -13.80, Pos enc: -0.13 m, Vel enc: -0.236
+Control: -13.71, Pos enc: -0.12 m, Vel enc: 0.178
+Control: -13.67, Pos enc: -0.12 m, Vel enc: -0.029
+Control: -13.49, Pos enc: -0.13 m, Vel enc: -0.071
+Control: -13.26, Pos enc: -0.13 m, Vel enc: -0.100
+Control: -13.23, Pos enc: -0.12 m, Vel enc: 0.171
+Control: -13.03, Pos enc: -0.13 m, Vel enc: -0.228
+Control: -12.92, Pos enc: -0.13 m, Vel enc: 0.157
+Control: -13.04, Pos enc: -0.12 m, Vel enc: 0.171
+Control: -12.91, Pos enc: -0.12 m, Vel enc: -0.143
+Control: -12.52, Pos enc: -0.13 m, Vel enc: -0.250
+Control: -12.21, Pos enc: -0.13 m, Vel enc: -0.079
+Control: -12.29, Pos enc: -0.13 m, Vel enc: 0.293
+Control: -12.37, Pos enc: -0.12 m, Vel enc: 0.036
+Control: -12.24, Pos enc: -0.13 m, Vel enc: -0.057
+Control: -15.64, Pos enc: -0.08 m, Vel enc: 4.370
+Control: -14.56, Pos enc: -0.12 m, Vel enc: -4.198
+Control: -12.51, Pos enc: -0.12 m, Vel enc: 0.493
+Control: -15.53, Pos enc: -0.08 m, Vel enc: 3.520
+Control: -14.34, Pos enc: -0.12 m, Vel enc: -3.748
+Control: -11.94, Pos enc: -0.12 m, Vel enc: -0.250
+Control: -11.44, Pos enc: -0.13 m, Vel enc: -0.314
+Control: -11.13, Pos enc: -0.13 m, Vel enc: -0.029
+Control: -11.07, Pos enc: -0.13 m, Vel enc: 0.086
+Control: -11.03, Pos enc: -0.13 m, Vel enc: 0.021
+Control: -11.03, Pos enc: -0.12 m, Vel enc: 0.121
+Control: -14.38, Pos enc: -0.08 m, Vel enc: 4.184
+Control: -16.09, Pos enc: -0.09 m, Vel enc: -0.643
+Control: -15.56, Pos enc: -0.09 m, Vel enc: -0.079
+Control: -12.38, Pos enc: -0.13 m, Vel enc: -3.727
+Control: -10.05, Pos enc: -0.13 m, Vel enc: -0.171
+Control: -10.08, Pos enc: -0.13 m, Vel enc: 0.293
+Control: -10.45, Pos enc: -0.12 m, Vel enc: 0.393
+Control: -13.09, Pos enc: -0.09 m, Vel enc: 3.113
+Control: -11.81, Pos enc: -0.13 m, Vel enc: -3.584
+Control: -13.08, Pos enc: -0.09 m, Vel enc: 4.170
+Control: -12.04, Pos enc: -0.13 m, Vel enc: -4.013
+Control: -10.55, Pos enc: -0.11 m, Vel enc: 1.057
+Control: -10.25, Pos enc: -0.12 m, Vel enc: -0.964
+Control: -12.79, Pos enc: -0.09 m, Vel enc: 3.927
+Control: -11.56, Pos enc: -0.13 m, Vel enc: -4.077
+Control: -9.13, Pos enc: -0.13 m, Vel enc: -0.057
+Control: -10.48, Pos enc: -0.11 m, Vel enc: 1.842
+Control: -10.04, Pos enc: -0.12 m, Vel enc: -1.678
+Control: -9.13, Pos enc: -0.12 m, Vel enc: 0.171
+Control: -9.16, Pos enc: -0.12 m, Vel enc: 0.050
+Control: -12.12, Pos enc: -0.09 m, Vel enc: 3.748
+Control: -10.84, Pos enc: -0.13 m, Vel enc: -4.020
+Control: -11.62, Pos enc: -0.09 m, Vel enc: 3.856
+Control: -13.69, Pos enc: -0.09 m, Vel enc: 0.043
+Control: -13.62, Pos enc: -0.09 m, Vel enc: 0.014
+Control: -13.51, Pos enc: -0.09 m, Vel enc: -0.014
+Control: -13.51, Pos enc: -0.08 m, Vel enc: 0.150
+Control: -12.32, Pos enc: -0.10 m, Vel enc: -1.435
+Control: -8.92, Pos enc: -0.13 m, Vel enc: -3.070
+Control: -7.67, Pos enc: -0.12 m, Vel enc: 0.714
+Control: -10.49, Pos enc: -0.09 m, Vel enc: 3.113
+Control: -10.66, Pos enc: -0.11 m, Vel enc: -1.799
+Control: -11.46, Pos enc: -0.09 m, Vel enc: 2.356
+Control: -11.73, Pos enc: -0.10 m, Vel enc: -1.150
+Control: -8.65, Pos enc: -0.13 m, Vel enc: -2.870
+Control: -6.94, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -6.81, Pos enc: -0.13 m, Vel enc: -0.021
+Control: -9.98, Pos enc: -0.09 m, Vel enc: 4.056
+Control: -8.94, Pos enc: -0.13 m, Vel enc: -3.927
+Control: -6.68, Pos enc: -0.12 m, Vel enc: 0.050
+Control: -9.73, Pos enc: -0.09 m, Vel enc: 3.848
+Control: -8.60, Pos enc: -0.13 m, Vel enc: -3.898
+Control: -7.77, Pos enc: -0.11 m, Vel enc: 1.792
+Control: -7.19, Pos enc: -0.13 m, Vel enc: -1.814
+Control: -6.07, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -6.05, Pos enc: -0.12 m, Vel enc: 0.114
+Control: -5.77, Pos enc: -0.13 m, Vel enc: -0.286
+Control: -5.73, Pos enc: -0.12 m, Vel enc: 0.286
+Control: -5.71, Pos enc: -0.13 m, Vel enc: -0.093
+Control: -5.55, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -6.37, Pos enc: -0.11 m, Vel enc: 1.142
+Control: -6.13, Pos enc: -0.12 m, Vel enc: -0.935
+Control: -5.24, Pos enc: -0.13 m, Vel enc: -0.328
+Control: -9.58, Pos enc: -0.07 m, Vel enc: 5.705
+Control: -10.73, Pos enc: -0.09 m, Vel enc: -2.363
+Control: -11.22, Pos enc: -0.07 m, Vel enc: 2.363
+Control: -11.13, Pos enc: -0.09 m, Vel enc: -1.606
+Control: -8.00, Pos enc: -0.11 m, Vel enc: -2.613
+Control: -8.59, Pos enc: -0.09 m, Vel enc: 2.663
+Control: -9.97, Pos enc: -0.08 m, Vel enc: 0.007
+Control: -6.53, Pos enc: -0.13 m, Vel enc: -4.105
+Control: -4.11, Pos enc: -0.13 m, Vel enc: -0.036
+Control: -4.11, Pos enc: -0.12 m, Vel enc: 0.164
+Control: -4.11, Pos enc: -0.12 m, Vel enc: 0.021
+Control: -4.02, Pos enc: -0.12 m, Vel enc: 0.014
+Control: -6.78, Pos enc: -0.09 m, Vel enc: 3.527
+Control: -5.62, Pos enc: -0.13 m, Vel enc: -3.727
+Control: -3.54, Pos enc: -0.12 m, Vel enc: 0.143
+Control: -3.33, Pos enc: -0.13 m, Vel enc: -0.221
+Control: -3.15, Pos enc: -0.13 m, Vel enc: 0.064
+Control: -3.13, Pos enc: -0.13 m, Vel enc: 0.064
+Control: -3.03, Pos enc: -0.13 m, Vel enc: -0.036
+Control: -2.92, Pos enc: -0.13 m, Vel enc: 0.021
+Control: -2.86, Pos enc: -0.13 m, Vel enc: 0.050
+Control: -2.72, Pos enc: -0.13 m, Vel enc: -0.071
+Control: -2.55, Pos enc: -0.13 m, Vel enc: -0.029
+Control: -2.46, Pos enc: -0.13 m, Vel enc: 0.050
+Control: -2.36, Pos enc: -0.13 m, Vel enc: -0.021
+Control: -2.22, Pos enc: -0.13 m, Vel enc: -0.029
+Control: -2.05, Pos enc: -0.13 m, Vel enc: -0.050
+Control: -1.96, Pos enc: -0.13 m, Vel enc: 0.050
+Control: -1.89, Pos enc: -0.13 m, Vel enc: 0.014
+Control: -1.77, Pos enc: -0.13 m, Vel enc: -0.014
+Control: -1.65, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -1.54, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -1.45, Pos enc: -0.13 m, Vel enc: 0.014
+Control: -1.33, Pos enc: -0.13 m, Vel enc: -0.014
+Control: -1.22, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -1.11, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -1.00, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -0.89, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -0.78, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -0.68, Pos enc: -0.13 m, Vel enc: 0.014
+Control: -0.57, Pos enc: -0.13 m, Vel enc: -0.014
+Control: -0.46, Pos enc: -0.13 m, Vel enc: 0.014
+Control: -0.35, Pos enc: -0.13 m, Vel enc: -0.014
+Control: -0.23, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -0.12, Pos enc: -0.13 m, Vel enc: 0.000
+Control: -0.01, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.10, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.21, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.32, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.43, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.54, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.65, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 0.75, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 0.86, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 0.96, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 1.08, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 1.22, Pos enc: -0.13 m, Vel enc: -0.029
+Control: 1.34, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 1.41, Pos enc: -0.13 m, Vel enc: 0.050
+Control: 1.51, Pos enc: -0.13 m, Vel enc: -0.021
+Control: 1.63, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 1.74, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 1.85, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 1.96, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 2.07, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 2.18, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 2.28, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 2.39, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 2.50, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 2.61, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 2.71, Pos enc: -0.13 m, Vel enc: 0.029
+Control: 2.82, Pos enc: -0.13 m, Vel enc: -0.029
+Control: 2.95, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 3.06, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 3.14, Pos enc: -0.13 m, Vel enc: 0.029
+Control: 3.25, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 3.38, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 3.50, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 3.61, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 3.72, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 3.83, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 3.94, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 4.04, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 4.15, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 4.25, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 4.37, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 4.47, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 4.57, Pos enc: -0.13 m, Vel enc: 0.007
+Control: 4.69, Pos enc: -0.13 m, Vel enc: -0.021
+Control: 4.81, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 4.95, Pos enc: -0.13 m, Vel enc: -0.029
+Control: 5.05, Pos enc: -0.13 m, Vel enc: 0.029
+Control: 5.14, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 5.24, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 5.34, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 5.45, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 5.57, Pos enc: -0.13 m, Vel enc: -0.014
+Control: 5.69, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 5.82, Pos enc: -0.13 m, Vel enc: -0.029
+Control: 5.92, Pos enc: -0.13 m, Vel enc: 0.029
+Control: 6.04, Pos enc: -0.13 m, Vel enc: -0.021
+Control: 6.14, Pos enc: -0.13 m, Vel enc: 0.021
+Control: 6.23, Pos enc: -0.13 m, Vel enc: 0.014
+Control: 3.22, Pos enc: -0.09 m, Vel enc: 3.827
+Control: 1.58, Pos enc: -0.09 m, Vel enc: -0.478
+Control: 1.44, Pos enc: -0.09 m, Vel enc: 0.643
+Control: 4.42, Pos enc: -0.13 m, Vel enc: -3.977
+Control: 3.81, Pos enc: -0.09 m, Vel enc: 3.620
+Control: 1.91, Pos enc: -0.09 m, Vel enc: -0.014
+Control: 1.87, Pos enc: -0.09 m, Vel enc: 0.193
+Control: 1.94, Pos enc: -0.09 m, Vel enc: -0.086
+Control: 1.98, Pos enc: -0.09 m, Vel enc: 0.150
+Control: 2.05, Pos enc: -0.09 m, Vel enc: -0.064
+Control: 2.28, Pos enc: -0.09 m, Vel enc: -0.093
+Control: 2.33, Pos enc: -0.09 m, Vel enc: 0.129
+Control: 2.36, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 2.43, Pos enc: -0.09 m, Vel enc: 0.050
+Control: 2.52, Pos enc: -0.09 m, Vel enc: -0.014
+Control: 2.62, Pos enc: -0.09 m, Vel enc: 0.021
+Control: 2.72, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 2.82, Pos enc: -0.09 m, Vel enc: 0.014
+Control: 2.91, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 3.03, Pos enc: -0.09 m, Vel enc: -0.007
+Control: 3.12, Pos enc: -0.09 m, Vel enc: 0.021
+Control: 3.21, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 3.33, Pos enc: -0.09 m, Vel enc: -0.007
+Control: 3.46, Pos enc: -0.09 m, Vel enc: -0.029
+Control: 3.58, Pos enc: -0.09 m, Vel enc: 0.014
+Control: 3.69, Pos enc: -0.09 m, Vel enc: -0.021
+Control: 3.81, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 3.92, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 4.03, Pos enc: -0.09 m, Vel enc: -0.007
+Control: 4.15, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 4.25, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 4.35, Pos enc: -0.09 m, Vel enc: 0.014
+Control: 4.46, Pos enc: -0.09 m, Vel enc: -0.007
+Control: 4.56, Pos enc: -0.09 m, Vel enc: 0.021
+Control: 4.65, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 4.79, Pos enc: -0.09 m, Vel enc: -0.043
+Control: 4.90, Pos enc: -0.09 m, Vel enc: 0.021
+Control: 4.99, Pos enc: -0.09 m, Vel enc: 0.014
+Control: 5.09, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 5.22, Pos enc: -0.09 m, Vel enc: -0.029
+Control: 5.34, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 5.44, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 5.54, Pos enc: -0.09 m, Vel enc: 0.014
+Control: 5.65, Pos enc: -0.09 m, Vel enc: -0.014
+Control: 5.77, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 5.87, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 5.97, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 6.11, Pos enc: -0.09 m, Vel enc: -0.036
+Control: 6.21, Pos enc: -0.09 m, Vel enc: 0.036
+Control: 6.32, Pos enc: -0.09 m, Vel enc: -0.021
+Control: 6.55, Pos enc: -0.09 m, Vel enc: -0.143
+Control: 7.28, Pos enc: -0.10 m, Vel enc: -0.664
+Control: 10.20, Pos enc: -0.13 m, Vel enc: -3.006
+Control: 12.01, Pos enc: -0.13 m, Vel enc: -0.021
+Control: 12.21, Pos enc: -0.13 m, Vel enc: -0.100
+Control: 12.37, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 12.40, Pos enc: -0.13 m, Vel enc: 0.100
+Control: 12.30, Pos enc: -0.12 m, Vel enc: 0.193
+Control: 10.27, Pos enc: -0.10 m, Vel enc: 2.506
+Control: 8.09, Pos enc: -0.09 m, Vel enc: 1.092
+Control: 7.59, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 7.69, Pos enc: -0.09 m, Vel enc: 0.007
+Control: 7.79, Pos enc: -0.09 m, Vel enc: 0.000
+Control: 10.38, Pos enc: -0.12 m, Vel enc: -3.056
+Control: 9.56, Pos enc: -0.09 m, Vel enc: 3.249
+Control: 11.18, Pos enc: -0.13 m, Vel enc: -4.098
+Control: 13.61, Pos enc: -0.13 m, Vel enc: -0.036
+Control: 10.36, Pos enc: -0.09 m, Vel enc: 4.155
+Control: 11.47, Pos enc: -0.13 m, Vel enc: -4.077
+Control: 13.84, Pos enc: -0.13 m, Vel enc: 0.007
+Control: 13.99, Pos enc: -0.13 m, Vel enc: -0.050
+Control: 14.11, Pos enc: -0.13 m, Vel enc: 0.029
+Control: 10.96, Pos enc: -0.09 m, Vel enc: 3.991
+Control: 8.85, Pos enc: -0.09 m, Vel enc: -0.014
+Control: 9.02, Pos enc: -0.09 m, Vel enc: -0.064
+Control: 9.28, Pos enc: -0.09 m, Vel enc: -0.136
+Control: 12.41, Pos enc: -0.12 m, Vel enc: -3.627
+Control: 14.51, Pos enc: -0.12 m, Vel enc: 0.036
+Control: 14.75, Pos enc: -0.13 m, Vel enc: -0.186
+Control: 14.89, Pos enc: -0.13 m, Vel enc: 0.093
+Control: 11.88, Pos enc: -0.09 m, Vel enc: 3.784
+Control: 9.83, Pos enc: -0.09 m, Vel enc: 0.057
+Control: 9.87, Pos enc: -0.09 m, Vel enc: 0.043
+Control: 9.83, Pos enc: -0.08 m, Vel enc: 0.150
+Control: 9.91, Pos enc: -0.09 m, Vel enc: -0.064
+Control: 10.35, Pos enc: -0.09 m, Vel enc: -0.357
+Control: 10.63, Pos enc: -0.09 m, Vel enc: 0.036
+Control: 13.76, Pos enc: -0.13 m, Vel enc: -3.741
+Control: 12.73, Pos enc: -0.09 m, Vel enc: 3.970
+Control: 10.91, Pos enc: -0.09 m, Vel enc: -0.350
+Control: 13.99, Pos enc: -0.12 m, Vel enc: -3.420
+Control: 13.00, Pos enc: -0.09 m, Vel enc: 3.706
+Control: 13.55, Pos enc: -0.12 m, Vel enc: -3.084
+Control: 12.80, Pos enc: -0.09 m, Vel enc: 3.170
+Control: 14.27, Pos enc: -0.12 m, Vel enc: -3.848
+Control: 16.62, Pos enc: -0.13 m, Vel enc: -0.121
+Control: 16.74, Pos enc: -0.13 m, Vel enc: 0.079
+Control: 16.64, Pos enc: -0.12 m, Vel enc: 0.200
+Control: 16.90, Pos enc: -0.13 m, Vel enc: -0.328
+Control: 17.38, Pos enc: -0.13 m, Vel enc: -0.221
+Control: 17.43, Pos enc: -0.13 m, Vel enc: 0.221
+Control: 16.05, Pos enc: -0.11 m, Vel enc: 1.685
+Control: 13.50, Pos enc: -0.09 m, Vel enc: 2.121
+Control: 15.54, Pos enc: -0.13 m, Vel enc: -3.834
+Control: 17.78, Pos enc: -0.13 m, Vel enc: 0.000
+Control: 17.73, Pos enc: -0.12 m, Vel enc: 0.207
+Control: 17.84, Pos enc: -0.13 m, Vel enc: -0.150
+Control: 18.13, Pos enc: -0.13 m, Vel enc: -0.114
+Control: 15.21, Pos enc: -0.09 m, Vel enc: 3.813
+Control: 15.74, Pos enc: -0.12 m, Vel enc: -3.142
+Control: 14.80, Pos enc: -0.09 m, Vel enc: 3.456
+Control: 16.23, Pos enc: -0.13 m, Vel enc: -4.013
+Control: 16.29, Pos enc: -0.10 m, Vel enc: 2.827
+Control: 17.03, Pos enc: -0.13 m, Vel enc: -2.727
+Control: 18.69, Pos enc: -0.13 m, Vel enc: -0.029
+Control: 15.71, Pos enc: -0.09 m, Vel enc: 3.820
+Control: 13.38, Pos enc: -0.08 m, Vel enc: 0.378
+Control: 13.96, Pos enc: -0.09 m, Vel enc: -0.835
+Control: 17.01, Pos enc: -0.12 m, Vel enc: -3.042
+Control: 15.30, Pos enc: -0.08 m, Vel enc: 4.320
+Control: 12.90, Pos enc: -0.08 m, Vel enc: 0.129
+Control: 16.56, Pos enc: -0.12 m, Vel enc: -4.455
+Control: 16.15, Pos enc: -0.09 m, Vel enc: 3.691
+Control: 14.05, Pos enc: -0.08 m, Vel enc: 0.193
+Control: 14.04, Pos enc: -0.08 m, Vel enc: 0.014
+Control: 17.30, Pos enc: -0.12 m, Vel enc: -3.898
+Control: 19.58, Pos enc: -0.12 m, Vel enc: 0.014
+Control: 19.60, Pos enc: -0.12 m, Vel enc: 0.100
+Control: 18.21, Pos enc: -0.10 m, Vel enc: 1.778
+Control: 18.70, Pos enc: -0.12 m, Vel enc: -1.692
+Control: 17.03, Pos enc: -0.09 m, Vel enc: 3.349
+Control: 17.88, Pos enc: -0.12 m, Vel enc: -3.213
+Control: 16.48, Pos enc: -0.08 m, Vel enc: 4.070
+Control: 17.19, Pos enc: -0.11 m, Vel enc: -3.534
+Control: 19.75, Pos enc: -0.12 m, Vel enc: -0.585
+Control: 16.76, Pos enc: -0.08 m, Vel enc: 4.213
+Control: 14.30, Pos enc: -0.07 m, Vel enc: 0.278
+Control: 14.01, Pos enc: -0.07 m, Vel enc: 0.293
+Control: 14.05, Pos enc: -0.07 m, Vel enc: -0.114
+Control: 17.39, Pos enc: -0.11 m, Vel enc: -3.891
+Control: 19.63, Pos enc: -0.11 m, Vel enc: 0.043
+Control: 19.72, Pos enc: -0.11 m, Vel enc: -0.007
+Control: 19.96, Pos enc: -0.11 m, Vel enc: -0.150
+Control: 17.04, Pos enc: -0.07 m, Vel enc: 3.827
+Control: 17.64, Pos enc: -0.11 m, Vel enc: -3.227
+Control: 19.94, Pos enc: -0.11 m, Vel enc: -0.478
+Control: 20.31, Pos enc: -0.11 m, Vel enc: 0.000
+Control: 20.59, Pos enc: -0.11 m, Vel enc: -0.200
+Control: 20.78, Pos enc: -0.11 m, Vel enc: 0.036
+Control: 20.83, Pos enc: -0.11 m, Vel enc: 0.050
+Control: 19.21, Pos enc: -0.09 m, Vel enc: 2.092
+Control: 19.80, Pos enc: -0.11 m, Vel enc: -2.028
+Control: 18.75, Pos enc: -0.08 m, Vel enc: 2.820
+Control: 19.57, Pos enc: -0.11 m, Vel enc: -2.813
+Control: 21.19, Pos enc: -0.11 m, Vel enc: 0.079
+Control: 18.74, Pos enc: -0.08 m, Vel enc: 3.092
+Control: 16.24, Pos enc: -0.07 m, Vel enc: 1.092
+Control: 15.74, Pos enc: -0.07 m, Vel enc: 0.000
+Control: 15.80, Pos enc: -0.07 m, Vel enc: 0.057
+Control: 15.88, Pos enc: -0.07 m, Vel enc: 0.000
+Control: 16.04, Pos enc: -0.07 m, Vel enc: -0.057
+Control: 16.18, Pos enc: -0.07 m, Vel enc: 0.000
+Control: 16.18, Pos enc: -0.07 m, Vel enc: 0.136
+Control: 16.07, Pos enc: -0.07 m, Vel enc: 0.171
+Control: 16.33, Pos enc: -0.07 m, Vel enc: -0.307
+Control: 16.62, Pos enc: -0.07 m, Vel enc: 0.000
+Control: 16.62, Pos enc: -0.07 m, Vel enc: 0.136
+Control: 16.74, Pos enc: -0.07 m, Vel enc: -0.107
+Control: 16.63, Pos enc: -0.07 m, Vel enc: 0.343
+Control: 16.56, Pos enc: -0.07 m, Vel enc: -0.021
+Control: 16.21, Pos enc: -0.06 m, Vel enc: 0.578
+Control: 15.76, Pos enc: -0.06 m, Vel enc: 0.300
+Control: 16.00, Pos enc: -0.06 m, Vel enc: -0.371
+Control: 16.29, Pos enc: -0.06 m, Vel enc: 0.036
+Control: 16.12, Pos enc: -0.06 m, Vel enc: 0.314
+Control: 15.60, Pos enc: -0.05 m, Vel enc: 0.564
+Control: 14.82, Pos enc: -0.04 m, Vel enc: 0.714
+Control: 13.88, Pos enc: -0.04 m, Vel enc: 0.800
+Control: 13.24, Pos enc: -0.03 m, Vel enc: 0.371
+Control: 13.22, Pos enc: -0.03 m, Vel enc: -0.093
+Control: 13.66, Pos enc: -0.04 m, Vel enc: -0.343
+Control: 13.78, Pos enc: -0.04 m, Vel enc: 0.214
+Control: 13.46, Pos enc: -0.03 m, Vel enc: 0.386
+Control: 12.13, Pos enc: -0.02 m, Vel enc: 1.507
+Control: 12.15, Pos enc: -0.03 m, Vel enc: -0.928
+Control: 12.45, Pos enc: -0.02 m, Vel enc: 0.414
+Control: 10.79, Pos enc: -0.00 m, Vel enc: 1.885
+Control task finished. Position: 0.52 m, Velocity: 1.88 m/s
+---- Sent utf8 encoded message: "set D10_8" ----
+I (298351) uart_task: UART_DATA
+I (298351) uart_task: cmd-> set
+I (298351) cmd: dir-> 1, dist-> 10, vel-> 8
+Setpoint: dir 1, dist 0.098 m, vel 0.080 m/s
+
+Control: 10.55, Pos enc: -0.01 m, Vel enc: -0.857
+Control: 11.14, Pos enc: -0.01 m, Vel enc: -0.007
+Control: 11.24, Pos enc: -0.01 m, Vel enc: 0.021
+Control: 11.33, Pos enc: -0.01 m, Vel enc: 0.000
+Control: 11.45, Pos enc: -0.01 m, Vel enc: -0.007
+Control: 11.57, Pos enc: -0.01 m, Vel enc: -0.007
+Control: 11.73, Pos enc: -0.01 m, Vel enc: -0.064
+Control: 11.83, Pos enc: -0.01 m, Vel enc: 0.064
+Control: 11.97, Pos enc: -0.01 m, Vel enc: -0.086
+Control: 12.05, Pos enc: -0.01 m, Vel enc: 0.100
+Control: 12.20, Pos enc: -0.01 m, Vel enc: -0.121
+Control: 10.62, Pos enc: 0.01 m, Vel enc: 2.171
+Control: 9.48, Pos enc: 0.01 m, Vel enc: 0.036
+Control: 9.49, Pos enc: 0.01 m, Vel enc: 0.100
+Control: 11.27, Pos enc: -0.01 m, Vel enc: -2.121
+Control: 12.60, Pos enc: -0.01 m, Vel enc: -0.050
+Control: 11.01, Pos enc: 0.01 m, Vel enc: 2.128
+Control: 9.85, Pos enc: 0.01 m, Vel enc: 0.107
+Control: 10.02, Pos enc: 0.01 m, Vel enc: -0.150
+Control: 10.08, Pos enc: 0.01 m, Vel enc: 0.157
+Control: 9.98, Pos enc: 0.01 m, Vel enc: 0.157
+Control: 11.77, Pos enc: -0.01 m, Vel enc: -2.178
+Control: 13.15, Pos enc: -0.01 m, Vel enc: -0.071
+Control: 13.23, Pos enc: -0.01 m, Vel enc: 0.086
+Control: 13.13, Pos enc: -0.01 m, Vel enc: 0.200
+Control: 12.17, Pos enc: 0.01 m, Vel enc: 1.178
+Control: 11.19, Pos enc: 0.01 m, Vel enc: 0.535
+Control: 12.49, Pos enc: -0.01 m, Vel enc: -1.835
+Control: 11.72, Pos enc: 0.02 m, Vel enc: 2.349
+Control: 10.41, Pos enc: 0.02 m, Vel enc: 0.129
+Control: 10.52, Pos enc: 0.02 m, Vel enc: -0.093
+Control: 12.46, Pos enc: -0.01 m, Vel enc: -2.185
+Control: 11.88, Pos enc: 0.02 m, Vel enc: 2.349
+Control: 12.51, Pos enc: -0.00 m, Vel enc: -2.256
+Control: 13.90, Pos enc: -0.00 m, Vel enc: -0.021
+Control: 13.14, Pos enc: 0.01 m, Vel enc: 1.078
+Control: 11.72, Pos enc: 0.02 m, Vel enc: 1.150
+Control: 11.12, Pos enc: 0.02 m, Vel enc: 0.079
+Control: 13.04, Pos enc: -0.00 m, Vel enc: -2.278
+Control: 14.45, Pos enc: -0.01 m, Vel enc: -0.043
+Control: 12.69, Pos enc: 0.02 m, Vel enc: 2.335
+Control: 13.37, Pos enc: -0.00 m, Vel enc: -2.299
+Control: 14.79, Pos enc: -0.01 m, Vel enc: -0.036
+Control: 14.89, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 15.01, Pos enc: -0.01 m, Vel enc: -0.036
+Control: 15.10, Pos enc: -0.00 m, Vel enc: 0.043
+Control: 15.19, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 15.30, Pos enc: -0.00 m, Vel enc: 0.007
+Control: 15.41, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 15.52, Pos enc: -0.00 m, Vel enc: -0.007
+Control: 13.76, Pos enc: 0.02 m, Vel enc: 2.313
+Control: 12.96, Pos enc: 0.01 m, Vel enc: -0.471
+Control: 13.18, Pos enc: 0.02 m, Vel enc: 0.186
+Control: 13.01, Pos enc: 0.02 m, Vel enc: 0.221
+Control: 14.05, Pos enc: 0.00 m, Vel enc: -1.307
+Control: 15.58, Pos enc: -0.00 m, Vel enc: -0.850
+Control: 16.24, Pos enc: -0.00 m, Vel enc: -0.093
+Control: 14.54, Pos enc: 0.02 m, Vel enc: 2.292
+Control: 13.41, Pos enc: 0.02 m, Vel enc: -0.043
+Control: 14.25, Pos enc: 0.01 m, Vel enc: -0.871
+Control: 14.96, Pos enc: 0.01 m, Vel enc: -0.143
+Control: 15.37, Pos enc: 0.00 m, Vel enc: -0.278
+Control: 14.47, Pos enc: 0.02 m, Vel enc: 1.442
+Control: 13.92, Pos enc: 0.02 m, Vel enc: -0.178
+Control: 15.80, Pos enc: -0.00 m, Vel enc: -2.063
+Control: 17.10, Pos enc: -0.00 m, Vel enc: -0.043
+Control: 15.50, Pos enc: 0.02 m, Vel enc: 2.135
+Control: 14.31, Pos enc: 0.02 m, Vel enc: 0.129
+Control: 14.30, Pos enc: 0.02 m, Vel enc: 0.057
+Control: 14.43, Pos enc: 0.02 m, Vel enc: -0.057
+Control: 14.56, Pos enc: 0.02 m, Vel enc: 0.007
+Control: 14.67, Pos enc: 0.02 m, Vel enc: -0.007
+Control: 14.74, Pos enc: 0.02 m, Vel enc: 0.057
+Control: 16.68, Pos enc: -0.00 m, Vel enc: -2.292
+Control: 18.08, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 18.19, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 16.52, Pos enc: 0.02 m, Vel enc: 2.178
+Control: 15.29, Pos enc: 0.02 m, Vel enc: 0.157
+Control: 17.16, Pos enc: -0.00 m, Vel enc: -2.278
+Control: 18.51, Pos enc: -0.00 m, Vel enc: 0.036
+Control: 16.81, Pos enc: 0.02 m, Vel enc: 2.199
+Control: 17.52, Pos enc: -0.00 m, Vel enc: -2.249
+Control: 18.89, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 19.02, Pos enc: -0.00 m, Vel enc: -0.029
+Control: 19.12, Pos enc: -0.00 m, Vel enc: 0.029
+Control: 19.27, Pos enc: -0.00 m, Vel enc: -0.071
+Control: 19.37, Pos enc: -0.00 m, Vel enc: 0.071
+Control: 19.50, Pos enc: -0.00 m, Vel enc: -0.079
+Control: 19.72, Pos enc: -0.00 m, Vel enc: -0.086
+Control: 19.89, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 18.97, Pos enc: 0.01 m, Vel enc: 1.278
+Control: 17.71, Pos enc: 0.02 m, Vel enc: 0.814
+Control: 18.50, Pos enc: 0.00 m, Vel enc: -1.407
+Control: 18.13, Pos enc: 0.02 m, Vel enc: 1.557
+Control: 19.24, Pos enc: -0.01 m, Vel enc: -2.292
+Control: 20.63, Pos enc: -0.01 m, Vel enc: 0.000
+Control: 20.73, Pos enc: -0.01 m, Vel enc: 0.000
+Control: 18.98, Pos enc: 0.02 m, Vel enc: 2.292
+Control: 18.40, Pos enc: 0.01 m, Vel enc: -0.721
+Control: 18.36, Pos enc: 0.02 m, Vel enc: 0.678
+Control: 18.05, Pos enc: 0.02 m, Vel enc: 0.050
+Control: 18.12, Pos enc: 0.02 m, Vel enc: 0.021
+Control: 18.29, Pos enc: 0.02 m, Vel enc: -0.093
+Control: 18.40, Pos enc: 0.02 m, Vel enc: 0.064
+Control: 19.66, Pos enc: 0.00 m, Vel enc: -1.464
+Control: 21.21, Pos enc: -0.00 m, Vel enc: -0.764
+Control: 20.83, Pos enc: 0.01 m, Vel enc: 1.128
+Control: 19.44, Pos enc: 0.02 m, Vel enc: 1.071
+Control: 18.93, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 20.78, Pos enc: -0.00 m, Vel enc: -2.171
+Control: 22.13, Pos enc: -0.00 m, Vel enc: -0.036
+Control: 20.47, Pos enc: 0.02 m, Vel enc: 2.206
+Control: 20.77, Pos enc: 0.00 m, Vel enc: -1.756
+Control: 20.80, Pos enc: 0.01 m, Vel enc: 1.307
+Control: 19.78, Pos enc: 0.02 m, Vel enc: 0.493
+Control: 19.65, Pos enc: 0.02 m, Vel enc: -0.043
+Control: 21.54, Pos enc: -0.00 m, Vel enc: -2.156
+Control: 21.15, Pos enc: 0.02 m, Vel enc: 2.092
+Control: 20.08, Pos enc: 0.02 m, Vel enc: 0.021
+Control: 20.14, Pos enc: 0.02 m, Vel enc: 0.043
+Control: 20.19, Pos enc: 0.02 m, Vel enc: 0.043
+Control: 20.90, Pos enc: 0.01 m, Vel enc: -0.771
+Control: 20.85, Pos enc: 0.02 m, Vel enc: 0.728
+Control: 20.92, Pos enc: 0.01 m, Vel enc: -0.450
+Control: 22.55, Pos enc: -0.00 m, Vel enc: -1.564
+Control: 21.87, Pos enc: 0.02 m, Vel enc: 2.049
+Control: 20.86, Pos enc: 0.02 m, Vel enc: -0.036
+Control: 20.99, Pos enc: 0.02 m, Vel enc: 0.007
+Control: 21.50, Pos enc: 0.01 m, Vel enc: -0.500
+Control: 21.51, Pos enc: 0.02 m, Vel enc: 0.464
+Control: 21.34, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 21.48, Pos enc: 0.02 m, Vel enc: -0.057
+Control: 22.17, Pos enc: 0.01 m, Vel enc: -0.685
+Control: 22.06, Pos enc: 0.02 m, Vel enc: 0.743
+Control: 21.72, Pos enc: 0.02 m, Vel enc: 0.043
+Control: 21.80, Pos enc: 0.02 m, Vel enc: 0.007
+Control: 23.81, Pos enc: -0.01 m, Vel enc: -2.335
+Control: 23.68, Pos enc: 0.01 m, Vel enc: 1.892
+Control: 22.86, Pos enc: 0.01 m, Vel enc: -0.157
+Control: 23.12, Pos enc: 0.01 m, Vel enc: -0.071
+Control: 22.95, Pos enc: 0.02 m, Vel enc: 0.386
+Control: 24.29, Pos enc: -0.00 m, Vel enc: -1.778
+Control: 24.88, Pos enc: 0.00 m, Vel enc: 0.635
+Control: 24.78, Pos enc: 0.00 m, Vel enc: -0.186
+Control: 25.53, Pos enc: -0.00 m, Vel enc: -0.650
+Control: 26.01, Pos enc: -0.00 m, Vel enc: -0.014
+Control: 24.31, Pos enc: 0.02 m, Vel enc: 2.235
+Control: 23.15, Pos enc: 0.02 m, Vel enc: 0.036
+Control: 23.17, Pos enc: 0.02 m, Vel enc: 0.086
+Control: 23.41, Pos enc: 0.02 m, Vel enc: -0.221
+Control: 23.59, Pos enc: 0.02 m, Vel enc: 0.064
+Control: 25.45, Pos enc: -0.00 m, Vel enc: -2.199
+Control: 24.94, Pos enc: 0.02 m, Vel enc: 2.271
+Control: 24.26, Pos enc: 0.01 m, Vel enc: -0.585
+Control: 25.54, Pos enc: 0.00 m, Vel enc: -1.042
+Control: 24.98, Pos enc: 0.02 m, Vel enc: 1.542
+Control: 25.99, Pos enc: -0.00 m, Vel enc: -2.171
+Control: 27.30, Pos enc: -0.00 m, Vel enc: 0.014
+Control: 25.56, Pos enc: 0.02 m, Vel enc: 2.263
+Control: 24.50, Pos enc: 0.02 m, Vel enc: -0.107
+Control: 25.03, Pos enc: 0.01 m, Vel enc: -0.450
+Control: 25.64, Pos enc: 0.01 m, Vel enc: -0.307
+Control: 25.25, Pos enc: 0.02 m, Vel enc: 0.828
+Control: 26.73, Pos enc: -0.00 m, Vel enc: -2.256
+Control: 26.29, Pos enc: 0.02 m, Vel enc: 2.228
+Control: 25.55, Pos enc: 0.01 m, Vel enc: -0.478
+Control: 27.34, Pos enc: -0.00 m, Vel enc: -1.749
+Control: 28.43, Pos enc: -0.00 m, Vel enc: 0.000
+Control: 28.14, Pos enc: 0.00 m, Vel enc: 0.493
+Control: 26.53, Pos enc: 0.02 m, Vel enc: 1.778
+Control: 25.69, Pos enc: 0.02 m, Vel enc: -0.057
+Control: 26.26, Pos enc: 0.01 m, Vel enc: -0.521
+Control: 27.97, Pos enc: -0.00 m, Vel enc: -1.614
+Control: 27.33, Pos enc: 0.02 m, Vel enc: 2.028
+Control: 26.22, Pos enc: 0.02 m, Vel enc: 0.107
+Control: 27.97, Pos enc: -0.00 m, Vel enc: -2.092
+Control: 27.57, Pos enc: 0.02 m, Vel enc: 2.071
+Control: 26.53, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 28.43, Pos enc: -0.00 m, Vel enc: -2.192
+Control: 28.20, Pos enc: 0.01 m, Vel enc: 1.928
+Control: 26.97, Pos enc: 0.02 m, Vel enc: 0.321
+Control: 26.87, Pos enc: 0.02 m, Vel enc: 0.043
+Control: 27.04, Pos enc: 0.02 m, Vel enc: -0.107
+Control: 28.96, Pos enc: -0.00 m, Vel enc: -2.156
+Control: 30.22, Pos enc: -0.00 m, Vel enc: 0.064
+Control: 28.55, Pos enc: 0.02 m, Vel enc: 2.149
+Control: 27.54, Pos enc: 0.02 m, Vel enc: -0.100
+Control: 28.20, Pos enc: 0.01 m, Vel enc: -0.607
+Control: 27.97, Pos enc: 0.02 m, Vel enc: 0.835
+Control: 27.69, Pos enc: 0.02 m, Vel enc: -0.100
+Control: 27.90, Pos enc: 0.02 m, Vel enc: -0.057
+Control: 28.02, Pos enc: 0.02 m, Vel enc: 0.029
+Control: 28.13, Pos enc: 0.02 m, Vel enc: -0.014
+Control: 28.27, Pos enc: 0.02 m, Vel enc: -0.036
+Control: 28.36, Pos enc: 0.02 m, Vel enc: 0.057
+Control: 29.80, Pos enc: 0.00 m, Vel enc: -1.685
+Control: 29.53, Pos enc: 0.02 m, Vel enc: 1.628
+Control: 28.69, Pos enc: 0.02 m, Vel enc: 0.057
+Control: 30.44, Pos enc: -0.00 m, Vel enc: -2.071
+Control: 30.36, Pos enc: 0.01 m, Vel enc: 1.656
+Control: 31.03, Pos enc: -0.00 m, Vel enc: -1.821
+Control: 31.38, Pos enc: 0.00 m, Vel enc: 0.950
+Control: 29.95, Pos enc: 0.02 m, Vel enc: 1.249
+Control: 29.58, Pos enc: 0.01 m, Vel enc: -0.271
+Control: 29.56, Pos enc: 0.02 m, Vel enc: 0.343
+Control: 31.30, Pos enc: -0.00 m, Vel enc: -2.242
+Control: 31.43, Pos enc: 0.01 m, Vel enc: 1.514
+Control: 32.01, Pos enc: -0.01 m, Vel enc: -1.621
+Control: 33.01, Pos enc: -0.01 m, Vel enc: 0.021
+Control: 33.21, Pos enc: -0.01 m, Vel enc: -0.121
+Control: 33.32, Pos enc: -0.01 m, Vel enc: 0.079
+Control: 33.38, Pos enc: -0.01 m, Vel enc: 0.007
+Control: 32.12, Pos enc: 0.01 m, Vel enc: 1.678
+Control: 31.33, Pos enc: 0.01 m, Vel enc: -0.043
+Control: 32.79, Pos enc: -0.01 m, Vel enc: -1.635
+Control: 33.82, Pos enc: -0.01 m, Vel enc: -0.007
+Control: 32.13, Pos enc: 0.02 m, Vel enc: 2.221
+Control: 32.82, Pos enc: -0.01 m, Vel enc: -2.235
+Control: 34.14, Pos enc: -0.01 m, Vel enc: 0.036
+Control: 34.22, Pos enc: -0.01 m, Vel enc: 0.021
+Control: 34.38, Pos enc: -0.01 m, Vel enc: -0.086
+Control: 34.53, Pos enc: -0.01 m, Vel enc: 0.014
+Control: 34.63, Pos enc: -0.01 m, Vel enc: 0.000
+Control: 34.76, Pos enc: -0.01 m, Vel enc: -0.029
+Control: 34.83, Pos enc: -0.01 m, Vel enc: 0.079
+Control: 34.93, Pos enc: -0.01 m, Vel enc: -0.050
+Control: 35.04, Pos enc: -0.01 m, Vel enc: 0.036
+Control: 35.19, Pos enc: -0.01 m, Vel enc: -0.071
+Control: 35.35, Pos enc: -0.01 m, Vel enc: -0.014
+Control: 33.65, Pos enc: 0.02 m, Vel enc: 2.235
+Control: 32.54, Pos enc: 0.02 m, Vel enc: -0.036
+Control: 34.45, Pos enc: -0.01 m, Vel enc: -2.192
+Control: 33.92, Pos enc: 0.02 m, Vel enc: 2.299
+Control: 34.48, Pos enc: -0.00 m, Vel enc: -2.135
+Control: 34.60, Pos enc: 0.01 m, Vel enc: 1.449
+Control: 34.69, Pos enc: 0.00 m, Vel enc: -0.964
+Control: 34.09, Pos enc: 0.02 m, Vel enc: 1.535
+Control: 26.87, Pos enc: 0.10 m, Vel enc: 7.968
+Control task finished. Position: 0.55 m, Velocity: 7.97 m/s
+---- Sent utf8 encoded message: "set D10_8" ----
+I (321641) uart_task: UART_DATA
+I (321641) uart_task: cmd-> set
+I (321641) cmd: dir-> 1, dist-> 10, vel-> 8
+Setpoint: dir 1, dist 0.195 m, vel 0.080 m/s
+
+Control: 24.12, Pos enc: 0.08 m, Vel enc: -1.956
+Control: 25.32, Pos enc: 0.08 m, Vel enc: 0.000
+Control: 25.43, Pos enc: 0.08 m, Vel enc: 0.000
+Control: 25.55, Pos enc: 0.08 m, Vel enc: -0.007
+Control: 25.66, Pos enc: 0.08 m, Vel enc: 0.007
+Control: 25.76, Pos enc: 0.08 m, Vel enc: 0.000
+Control: 25.89, Pos enc: 0.08 m, Vel enc: -0.021
+Control: 26.01, Pos enc: 0.08 m, Vel enc: 0.000
+Control: 26.10, Pos enc: 0.08 m, Vel enc: 0.021
+Control: 26.21, Pos enc: 0.08 m, Vel enc: -0.007
+Control: 26.31, Pos enc: 0.08 m, Vel enc: 0.007
+Control: 24.87, Pos enc: 0.09 m, Vel enc: 1.906
+Control: 22.10, Pos enc: 0.12 m, Vel enc: 2.235
+Control: 21.54, Pos enc: 0.11 m, Vel enc: -0.714
+Control: 21.43, Pos enc: 0.12 m, Vel enc: 0.771
+Control: 21.18, Pos enc: 0.12 m, Vel enc: -0.086
+Control: 23.15, Pos enc: 0.09 m, Vel enc: -2.235
+Control: 22.57, Pos enc: 0.12 m, Vel enc: 2.385
+Control: 21.45, Pos enc: 0.12 m, Vel enc: -0.121
+Control: 21.67, Pos enc: 0.12 m, Vel enc: -0.057
+Control: 21.71, Pos enc: 0.12 m, Vel enc: 0.129
+Control: 21.74, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 21.89, Pos enc: 0.12 m, Vel enc: -0.043
+Control: 22.00, Pos enc: 0.12 m, Vel enc: 0.029
+Control: 22.08, Pos enc: 0.12 m, Vel enc: 0.014
+Control: 22.22, Pos enc: 0.12 m, Vel enc: -0.043
+Control: 23.46, Pos enc: 0.10 m, Vel enc: -1.364
+Control: 23.15, Pos enc: 0.12 m, Vel enc: 1.449
+Control: 22.49, Pos enc: 0.12 m, Vel enc: -0.043
+Control: 23.21, Pos enc: 0.11 m, Vel enc: -0.721
+Control: 23.13, Pos enc: 0.12 m, Vel enc: 0.721
+Control: 22.85, Pos enc: 0.12 m, Vel enc: -0.007
+Control: 25.47, Pos enc: 0.09 m, Vel enc: -3.092
+Control: 24.78, Pos enc: 0.12 m, Vel enc: 3.113
+Control: 26.54, Pos enc: 0.08 m, Vel enc: -4.177
+Control: 28.98, Pos enc: 0.08 m, Vel enc: 0.000
+Control: 29.08, Pos enc: 0.08 m, Vel enc: 0.007
+Control: 28.33, Pos enc: 0.09 m, Vel enc: 1.057
+Control: 28.75, Pos enc: 0.08 m, Vel enc: -1.100
+Control: 29.40, Pos enc: 0.08 m, Vel enc: 0.079
+Control: 29.52, Pos enc: 0.08 m, Vel enc: -0.064
+Control: 29.64, Pos enc: 0.08 m, Vel enc: 0.029
+Control: 29.74, Pos enc: 0.08 m, Vel enc: 0.000
+Control: 29.87, Pos enc: 0.08 m, Vel enc: -0.021
+Control: 27.63, Pos enc: 0.11 m, Vel enc: 2.899
+Control: 27.96, Pos enc: 0.08 m, Vel enc: -2.256
+Control: 29.85, Pos enc: 0.08 m, Vel enc: -0.650
+Control: 30.28, Pos enc: 0.08 m, Vel enc: 0.050
+Control: 27.04, Pos enc: 0.12 m, Vel enc: 4.098
+Control: 24.87, Pos enc: 0.12 m, Vel enc: -0.007
+Control: 25.06, Pos enc: 0.12 m, Vel enc: -0.093
+Control: 28.45, Pos enc: 0.08 m, Vel enc: -3.984
+Control: 30.78, Pos enc: 0.08 m, Vel enc: 0.007
+Control: 30.89, Pos enc: 0.08 m, Vel enc: -0.007
+Control: 27.59, Pos enc: 0.12 m, Vel enc: 4.205
+Control: 25.34, Pos enc: 0.12 m, Vel enc: 0.014
+Control: 25.43, Pos enc: 0.12 m, Vel enc: 0.014
+Control: 28.93, Pos enc: 0.08 m, Vel enc: -4.184
+Control: 27.98, Pos enc: 0.12 m, Vel enc: 4.184
+Control: 29.13, Pos enc: 0.08 m, Vel enc: -4.155
+Control: 28.18, Pos enc: 0.12 m, Vel enc: 4.155
+Control: 25.97, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 26.12, Pos enc: 0.12 m, Vel enc: -0.043
+Control: 29.57, Pos enc: 0.08 m, Vel enc: -4.091
+Control: 28.62, Pos enc: 0.12 m, Vel enc: 4.120
+Control: 29.50, Pos enc: 0.08 m, Vel enc: -3.777
+Control: 28.63, Pos enc: 0.12 m, Vel enc: 3.791
+Control: 26.63, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 26.70, Pos enc: 0.12 m, Vel enc: 0.050
+Control: 26.82, Pos enc: 0.12 m, Vel enc: -0.050
+Control: 26.96, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 27.07, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 26.82, Pos enc: 0.12 m, Vel enc: 0.436
+Control: 26.71, Pos enc: 0.12 m, Vel enc: -0.021
+Control: 27.16, Pos enc: 0.12 m, Vel enc: -0.414
+Control: 27.21, Pos enc: 0.12 m, Vel enc: 0.357
+Control: 27.42, Pos enc: 0.12 m, Vel enc: -0.357
+Control: 27.72, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 27.83, Pos enc: 0.12 m, Vel enc: 0.000
+Control: 27.60, Pos enc: 0.12 m, Vel enc: 0.421
+Control: 27.28, Pos enc: 0.13 m, Vel enc: 0.243
+Control: 26.79, Pos enc: 0.13 m, Vel enc: 0.564
+Control: 27.29, Pos enc: 0.12 m, Vel enc: -0.864
+Control: 27.82, Pos enc: 0.12 m, Vel enc: 0.071
+Control: 27.77, Pos enc: 0.12 m, Vel enc: 0.157
+Control: 27.11, Pos enc: 0.13 m, Vel enc: 0.835
+Control: 27.16, Pos enc: 0.13 m, Vel enc: -0.500
+Control: 26.66, Pos enc: 0.14 m, Vel enc: 1.100
+Control: 25.93, Pos enc: 0.14 m, Vel enc: 0.271
+Control: 26.40, Pos enc: 0.14 m, Vel enc: -0.628
+Control: 26.70, Pos enc: 0.14 m, Vel enc: 0.200
+Control: 26.66, Pos enc: 0.14 m, Vel enc: 0.043
+Control: 25.72, Pos enc: 0.15 m, Vel enc: 1.264
+Control: 24.42, Pos enc: 0.16 m, Vel enc: 0.864
+Control: 23.76, Pos enc: 0.16 m, Vel enc: 0.357
+Control: 23.75, Pos enc: 0.16 m, Vel enc: -0.100
+Control: 22.59, Pos enc: 0.18 m, Vel enc: 1.635
+Control: 22.34, Pos enc: 0.17 m, Vel enc: -0.685
+Control: 22.90, Pos enc: 0.17 m, Vel enc: -0.079
+Control: 22.87, Pos enc: 0.17 m, Vel enc: 0.221
+Control: 22.81, Pos enc: 0.17 m, Vel enc: 0.064
+Control: 21.06, Pos enc: 0.20 m, Vel enc: 2.242
+Control task finished. Position: 0.67 m, Velocity: 2.24 m/s

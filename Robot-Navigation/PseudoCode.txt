@@ -1,0 +1,29 @@
+
+Init Objects(){
+    OmniRobot = OmniRobot_Init();
+    Ball = Ball_Init();
+    Obstacles = Obstacles_Init();
+    Vision_Data = Vision_Init();
+    return [OmniRobot, Obstacles, Vision_Data];
+}
+
+Start Peridic Thread: 
+
+    Vision_Data = Vision_Processing()
+    Update_OmniRobot(OmniRobot, Vision_Data)
+    Update_Obstacles(Obstacles, Vision_Data)
+    Update_Ball(Ball, Vision_Data)
+
+    [ is_obstacle_close, Obj_obstacle ] = check_obstacles(OmniRobot, Obstacles)
+    if (is_obstacle_close) {
+        Velocity_Body_Setpoints = Obstacle_Avoidance_Control(OmniRobot, Obj_obstacle)
+    }
+    else {
+        Velocity_Body_Setpoints = Trajectory_Control(desired_position_omnirobot, actual_position_omnirobot)
+    }
+    
+    OmniRobot_Send_Velocity_Setpoints(Velocity_Body_Setpoints)
+
+
+
+

@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 
 #include "sdkconfig.h"
 #include "esp_log.h"
